@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,7 +13,7 @@ namespace Websdepot
         static string logUrl = "./log/Log.txt";
         static string confUrl = "./Conf.cfg";
         static string todayDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
-        static void writeLog(string logMessage)
+        private static void writeLog(string logMessage)
         {
             //This will create a log if it doesn't exist
             StreamWriter sw = new StreamWriter(logUrl, true);
@@ -23,24 +24,36 @@ namespace Websdepot
             sw.Close();
 
         }
-        static void readConf()
+        private static void readConf()
         {
 
             //Check goes here
 
+
             if (!false) //Conf does not clear check
             {
 
-                writeLog("There is something wrong with the log file");
+                writeLog("There is something wrong with the conf file");
                 exit(1);
             }
             else //Conf clears check
             {
+                writeLog("Conf file is clear");
                 //Do hash configuration here
+                string hashedConf = createHash();
             }
         }
-
-        static void connectSql()
+        private static string createHash()
+        {
+            using (var md5 = MD5.Create())
+            {
+                using (var stream = File.OpenRead(confUrl))
+                {
+                    return Encoding.Default.GetString(md5.ComputeHash(stream));
+                }
+            }
+        }
+        private static void connectSql()
         {
             //attempt connection here
             writeLog("Attempting to connect to SQL");
@@ -53,7 +66,7 @@ namespace Websdepot
                 //Update SQL here
             }
         }
-        static void delayWait(int min)
+        private static void delayWait(int min) //Input will be in minutes
         {
             int minToSec = 1000 * 60 * min;
             System.Threading.Thread.Sleep(minToSec);
@@ -68,13 +81,13 @@ namespace Websdepot
             delayWait(5);
 
         }
-        static void exit(int code)
+        private static void exit(int code)
         {
             writeLog("Exitting program");
             System.Environment.Exit(code);
         }
 
-        static void readChunks()
+        private void readChunks()
         {
 
             List<string> sqlChunk = new List<string>();
@@ -148,13 +161,13 @@ namespace Websdepot
          */
 
         //rChunk == rawChunk
-        public void CleanIn(List<string> inChunk) {
+        public void CleanIn(List<string> rChunk) {
             string strUnIn;
             //clean and store the tag in the chunk
-            strUnIn = inChunk[0];
+            strUnIn = rChunk[0];
             strIn = strUnIn.Trim();
             //store the chunk to the object and remove the tag
-            lChunk = inChunk;
+            lChunk = rChunk;
             lChunk.RemoveAt(0);
         }
         //Spawn specific subparser
