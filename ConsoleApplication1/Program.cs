@@ -13,7 +13,7 @@ namespace Websdepot
         static string logUrl = "./log/Log.txt";
         static string confUrl = "./Conf.cfg";
         static string todayDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
-        static void writeLog(string logMessage)
+        private static void writeLog(string logMessage)
         {
             //This will create a log if it doesn't exist
             StreamWriter sw = new StreamWriter(logUrl, true);
@@ -24,10 +24,11 @@ namespace Websdepot
             sw.Close();
 
         }
-        static void readConf()
+        private static void readConf()
         {
 
             //Check goes here
+
 
             if (!false) //Conf does not clear check
             {
@@ -42,7 +43,7 @@ namespace Websdepot
                 string hashedConf = createHash();
             }
         }
-        static string createHash()
+        private static string createHash()
         {
             using (var md5 = MD5.Create())
             {
@@ -52,7 +53,7 @@ namespace Websdepot
                 }
             }
         }
-        static void connectSql()
+        private static void connectSql()
         {
             //attempt connection here
             writeLog("Attempting to connect to SQL");
@@ -65,7 +66,7 @@ namespace Websdepot
                 //Update SQL here
             }
         }
-        static void delayWait(int min) //Input will be in minutes
+        private static void delayWait(int min) //Input will be in minutes
         {
             int minToSec = 1000 * 60 * min;
             System.Threading.Thread.Sleep(minToSec);
@@ -80,13 +81,13 @@ namespace Websdepot
             delayWait(5);
 
         }
-        static void exit(int code)
+        private static void exit(int code)
         {
             writeLog("Exitting program");
             System.Environment.Exit(code);
         }
 
-        static void readChunks()
+        private void readChunks()
         {
 
             List<string> sqlChunk = new List<string>();
