@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -57,6 +58,16 @@ namespace Websdepot
         {
             //attempt connection here
             writeLog("Attempting to connect to SQL");
+
+
+            //find a way to get SQL connection credentials
+            SqlConnection myConnection = new SqlConnection("user id=username;" +
+                                       "password=password;server=serverurl;" +
+                                       "Trusted_Connection=yes;" +
+                                       "database=database; " +
+                                       "connection timeout=30");
+
+
             if (!false) //unable to connect
             {
                 writeLog("Connection to SQL failed");
