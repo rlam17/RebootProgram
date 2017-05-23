@@ -53,7 +53,7 @@ namespace Websdepot
                 //Update SQL here
             }
         }
-        static void delayWait(int min)
+        static void delayWait(int min) //Input will be in minutes
         {
             int minToSec = 1000 * 60 * min;
             System.Threading.Thread.Sleep(minToSec);
@@ -148,13 +148,13 @@ namespace Websdepot
          */
 
         //rChunk == rawChunk
-        public void CleanIn(List<string> inChunk) {
+        public void CleanIn(List<string> rChunk) {
             string strUnIn;
             //clean and store the tag in the chunk
-            strUnIn = inChunk[0];
+            strUnIn = rChunk[0];
             strIn = strUnIn.Trim();
             //store the chunk to the object and remove the tag
-            lChunk = inChunk;
+            lChunk = rChunk;
             lChunk.RemoveAt(0);
         }
         //Spawn specific subparser
