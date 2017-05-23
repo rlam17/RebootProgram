@@ -154,7 +154,7 @@ namespace Websdepot
             strUnIn = inChunk[0];
             strIn = strUnIn.Trim();
             //store the chunk to the object and remove the tag
-            lChunk = strUnIn;
+            lChunk = inChunk;
             lChunk.RemoveAt(0);
         }
         //Spawn specific subparser
