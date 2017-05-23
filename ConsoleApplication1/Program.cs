@@ -27,7 +27,7 @@ namespace Websdepot
         }
         private static void readConf()
         {
-
+            // TODO: Actually pass into the Parse classes
             //Check goes here
 
 
@@ -46,6 +46,9 @@ namespace Websdepot
         }
         private static string createHash()
         {
+
+            // TODO: Ask how to store the MD5
+
             using (var md5 = MD5.Create())
             {
                 using (var stream = File.OpenRead(confUrl))
@@ -60,7 +63,7 @@ namespace Websdepot
             writeLog("Attempting to connect to SQL");
 
 
-            //find a way to get SQL connection credentials
+            // TODO: find a way to get SQL connection credentials
             SqlConnection myConnection = new SqlConnection("user id=username;" +
                                        "password=password;server=serverurl;" +
                                        "Trusted_Connection=yes;" +
@@ -85,10 +88,12 @@ namespace Websdepot
         static void Main(string[] args)
         {
             writeLog("Starting program");
-            readConf();
+            //readConf();
 
-            connectSql();
-            delayWait(5);
+            //connectSql();
+            //delayWait(5);
+
+            readChunks();
 
         }
         private static void exit(int code)
@@ -97,7 +102,7 @@ namespace Websdepot
             System.Environment.Exit(code);
         }
 
-        private void readChunks()
+        private static void readChunks()
         {
 
             List<string> sqlChunk = new List<string>();
@@ -138,9 +143,11 @@ namespace Websdepot
                     if (line != "")
                     {
                         currentList.Add(line);
+                        //System.Console.WriteLine(line);
                     }
                     else
                     {
+                        //System.Console.WriteLine("This is a blank line!");
                         currentChunk++;
                     }
                 }
