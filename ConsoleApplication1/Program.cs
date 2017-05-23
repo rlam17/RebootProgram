@@ -159,6 +159,8 @@ namespace Websdepot
 
             //Send chunks to functions here
 
+            TagStartup ts = new TagStartup(startupChunk);
+
         }
     }
     /*Template method for 
@@ -198,6 +200,7 @@ namespace Websdepot
             //store the chunk to the object and remove the tag
             lChunk = inChunk;
             lChunk.RemoveAt(0);
+            stringParse();
         }
         //Spawn specific subparser
         public abstract void SpawnSub();
@@ -208,6 +211,7 @@ namespace Websdepot
         {
             if (strIn.Equals(strParse))
             {
+                System.Console.WriteLine(strIn + " this is chunk 1");
                 //spawn specific subprocess parser
                 SpawnSub();
             }
@@ -215,6 +219,7 @@ namespace Websdepot
             {
                 //Call next in chain
                 //Chain tail should ouput a log
+                System.Console.WriteLine(strIn + " this is chunk 2");
                 SpawnLog();
             }
         }
@@ -229,6 +234,7 @@ namespace Websdepot
         }
         public TagStartup(List<string> inChunk)
         {
+            //System.Console.WriteLine("I was here");
             strParse = "[startup]";
             CleanIn(inChunk);
         }
