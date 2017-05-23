@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,15 +32,26 @@ namespace Websdepot
             if (!false) //Conf does not clear check
             {
 
-                writeLog("There is something wrong with the log file");
+                writeLog("There is something wrong with the conf file");
                 exit(1);
             }
             else //Conf clears check
             {
+                writeLog("Conf file is clear");
                 //Do hash configuration here
+                string hashedConf = createHash();
             }
         }
-
+        static string createHash()
+        {
+            using (var md5 = MD5.Create())
+            {
+                using (var stream = File.OpenRead(confUrl))
+                {
+                    return Encoding.Default.GetString(md5.ComputeHash(stream));
+                }
+            }
+        }
         static void connectSql()
         {
             //attempt connection here
