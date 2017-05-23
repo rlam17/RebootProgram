@@ -90,9 +90,15 @@ namespace Websdepot
          *  - Check for input inconsistencies(extra whitespaces)
          */
 
-        //strUnIn == strUnprocessedInput
-        public void CleanIn(string strUnIn) {
+        //rChunk == rawChunk
+        public void CleanIn(List<string> rChunk) {
+            string strUnIn;
+            //clean and store the tag in the chunk
+            strUnIn = rChunk[0];
             strIn = strUnIn.Trim();
+            //store the chunk to the object and remove the tag
+            lChunk = rChunk;
+            lChunk.RemoveAt(0);
         }
         //Spawn specific subparser
         public abstract void SpawnSub();
@@ -103,6 +109,7 @@ namespace Websdepot
         {
             if (strIn.Equals(strParse))
             {
+
                 //spawn specific subprocess parser
                 SpawnSub();
             }else
