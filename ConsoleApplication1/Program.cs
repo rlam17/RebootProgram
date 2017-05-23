@@ -109,34 +109,17 @@ namespace Websdepot
             List<string> rebootConfigChunk = new List<string>();
             List<string> startupChunk = new List<string>();
             List<string> rebootChunk = new List<string>();
+            List<string> lastRebootChunk = new List<string>();
+            List<string> configuredRebootChunk = new List<string>();
 
             StreamReader sr = new StreamReader(confUrl);
 
             string line;
-            List<string> currentList = sqlChunk;
+            List<string> currentList = new List<string>();
             int currentChunk = 0;
             while((line = sr.ReadLine()) != null) //until EOF
             {
-                switch (currentChunk) //Check which chunk it is on
-                {
-                    case 0:
-                        currentList = sqlChunk;
-                        break;
-                    case 1:
-                        currentList = rebootConfigChunk;
-                        break;
-                    case 2:
-                        currentList = startupChunk;
-                        break;
-                    case 3:
-                        currentList = rebootChunk;
-                        break;
-                    default:
-                        currentList = null;
-                        break;
-                }
-
-                if (currentChunk < 4) 
+                if (currentChunk < 6) 
                     //If still working on a chunk, added to the list
                     //currentChunk == 4 means all chunks are done
                 {
@@ -148,6 +131,33 @@ namespace Websdepot
                     else
                     {
                         //System.Console.WriteLine("This is a blank line!");
+                        
+
+                        switch (currentChunk) //Check which chunk it is on
+                        {
+                            case 0:
+                                sqlChunk = currentList;
+                                break;
+                            case 1:
+                                rebootConfigChunk = currentList;
+                                break;
+                            case 2:
+                                startupChunk = currentList;
+                                break;
+                            case 3:
+                                rebootChunk = currentList;
+                                break;
+                            case 4:
+                                lastRebootChunk = currentList;
+                                break;
+                            case 5:
+                                configuredRebootChunk = currentList;
+                                break;
+                            default:
+                                currentList = null;
+                                break;
+                        }
+                        currentList = new List<string>();
                         currentChunk++;
                     }
                 }
@@ -159,8 +169,11 @@ namespace Websdepot
 
             //Send chunks to functions here
 
-            TagStartup ts = new TagStartup(startupChunk);
+            //TagStartup ts = new TagStartup(startupChunk);
 
+            foreach (string x in rebootChunk){
+                System.Console.WriteLine(x);
+            }
         }
     }
     /*Template method for 
