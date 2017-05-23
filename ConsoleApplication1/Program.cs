@@ -17,19 +17,27 @@ namespace Websdepot
             //This will create a log if it doesn't exist
             StreamWriter sw = new StreamWriter(logUrl, true);
 
+            logMessage = todayDate + "| " + logMessage;
+
             sw.WriteLine(logMessage);
             sw.Close();
-
 
         }
         static void readConf()
         {
-            System.Console.WriteLine("Hello world!");
+
+            if (false) //Conf does not clear check
+            {
+                writeLog("There is something wrong with the log file");
+                System.Environment.Exit(1);
+            }
         }
 
         static void Main(string[] args)
         {
-            System.Console.WriteLine(todayDate);
+            writeLog("Starting program");
+            readConf();
+
         }
     }
 }
