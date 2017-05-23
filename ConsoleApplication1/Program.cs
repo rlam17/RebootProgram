@@ -12,7 +12,7 @@ namespace Websdepot
         static string logUrl = "./log/Log.txt";
         static string confUrl = "./Conf.cfg";
         static string todayDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
-        static void writeLog(String logMessage)
+        static void writeLog(string logMessage)
         {
             //This will create a log if it doesn't exist
             StreamWriter sw = new StreamWriter(logUrl, true);
@@ -34,12 +34,38 @@ namespace Websdepot
                 writeLog("There is something wrong with the log file");
                 exit(1);
             }
+            else //Conf clears check
+            {
+                //Do hash configuration here
+            }
+        }
+
+        static void connectSql()
+        {
+            //attempt connection here
+            writeLog("Attempting to connect to SQL");
+            if (!false) //unable to connect
+            {
+                writeLog("Connection to SQL failed");
+            } else
+            {
+                writeLog("Connection to SQL successful");
+                //Update SQL here
+            }
+        }
+        static void delayWait(int min)
+        {
+            int minToSec = 1000 * 60 * min;
+            System.Threading.Thread.Sleep(minToSec);
         }
 
         static void Main(string[] args)
         {
             writeLog("Starting program");
             readConf();
+
+            connectSql();
+            delayWait(5);
 
         }
         static void exit(int code)
@@ -51,15 +77,15 @@ namespace Websdepot
         static void readChunks()
         {
 
-            List<String> sqlChunk = new List<String>();
-            List<String> rebootConfigChunk = new List<String>();
-            List<String> startupChunk = new List<String>();
-            List<String> rebootChunk = new List<String>();
+            List<string> sqlChunk = new List<string>();
+            List<string> rebootConfigChunk = new List<string>();
+            List<string> startupChunk = new List<string>();
+            List<string> rebootChunk = new List<string>();
 
             StreamReader sr = new StreamReader(confUrl);
 
-            String line;
-            List<String> currentList = sqlChunk;
+            string line;
+            List<string> currentList = sqlChunk;
             int currentChunk = 0;
             while((line = sr.ReadLine()) != null) //until EOF
             {
@@ -98,6 +124,9 @@ namespace Websdepot
                 
             }
 
+            sr.Close();
+
+
             //Send chunks to functions here
 
         }
@@ -127,7 +156,7 @@ namespace Websdepot
         //abstract base for spawning logs
         // -add error code int array(?) if needed in the future to spawn specific messages
         public abstract void SpawnLog();
-        public void StringParse()
+        public void stringParse()
         {
             if (strIn.Equals(strParse))
             {
