@@ -85,9 +85,17 @@ namespace Websdepot
         }
     }
 
-    class TagStartup
+    class TagStartup : TagParse
     {
+        public override void SpawnSub()
+        {
 
+            throw new NotImplementedException();
+        }
+        public override void SpawnLog()
+        {
+            throw new NotImplementedException();
+        }
     }
 
 }
