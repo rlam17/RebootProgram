@@ -74,18 +74,32 @@ namespace Websdepot
 
         }
     }
-    //Template method for parsing
+    /*Template method for 
+       - name scheme for all the concrete parsers will follow the Tag[tag-name] naming convention
+    */
     abstract class TagParse
     {
         //variable which stores the parse word
         string strParse;
-        //Set parse 
+        //Sanitized Tag Input
+        string strIn;
+        //Chunk storage
+        List<string> lChunk;
+        /*
+         * Input Sanitation
+         *  - Check for input inconsistencies(extra whitespaces)
+         */
+
+        //strUnIn == strUnprocessedInput
+        public void CleanIn(string strUnIn) {
+            strIn = strUnIn.Trim();
+        }
         //Spawn specific subparser
         public abstract void SpawnSub();
         //abstract base for spawning logs
-        // -add error code ints(?) if needed in the future to spawn specific messages
+        // -add error code int array(?) if needed in the future to spawn specific messages
         public abstract void SpawnLog();
-        public void StringParse(string strIn)
+        public void StringParse()
         {
             if (strIn.Equals(strParse))
             {
@@ -97,8 +111,11 @@ namespace Websdepot
                 SpawnLog();
             }
         }
-        
     }
 
+    class TagStartup
+    {
+
+    }
 
 }
