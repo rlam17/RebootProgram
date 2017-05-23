@@ -26,10 +26,11 @@ namespace Websdepot
         static void readConf()
         {
 
-            if (false) //Conf does not clear check
+            if (!false) //Conf does not clear check
             {
+
                 writeLog("There is something wrong with the log file");
-                System.Environment.Exit(1);
+                exit();
             }
         }
 
@@ -38,6 +39,11 @@ namespace Websdepot
             writeLog("Starting program");
             readConf();
 
+        }
+        static void exit()
+        {
+            writeLog("Exitting program");
+            System.Environment.Exit(1);
         }
     }
     /*Template method for 
