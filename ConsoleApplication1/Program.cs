@@ -63,14 +63,42 @@ namespace Websdepot
             int currentChunk = 0;
             while((line = sr.ReadLine()) != null) //until EOF
             {
-                if(currentChunk == 1)
+                switch (currentChunk) //Check which chunk it is on
                 {
-                    if(line != "")
+                    case 0:
+                        currentList = sqlChunk;
+                        break;
+                    case 1:
+                        currentList = rebootConfigChunk;
+                        break;
+                    case 2:
+                        currentList = startupChunk;
+                        break;
+                    case 3:
+                        currentList = rebootChunk;
+                        break;
+                    default:
+                        currentList = null;
+                        break;
+                }
+
+                if (currentChunk < 4) 
+                    //If still working on a chunk, added to the list
+                    //currentChunk == 4 means all chunks are done
+                {
+                    if (line != "")
                     {
+                        currentList.Add(line);
+                    }
+                    else
+                    {
+                        currentChunk++;
                     }
                 }
                 
             }
+
+            //Send chunks to functions here
 
         }
     }
