@@ -67,15 +67,14 @@ namespace Websdepot
                                        "database=database; " +
                                        "connection timeout=30");
 
-
-            if (!false) //unable to connect
+            try
             {
-                writeLog("Connection to SQL failed");
-            } else
+                myConnection.Open();
+            } catch(Exception e)
             {
-                writeLog("Connection to SQL successful");
-                //Update SQL here
+                writeLog("Connection to SQL failed " + e);
             }
+
         }
         private static void delayWait(int min) //Input will be in minutes
         {
