@@ -10,6 +10,8 @@ namespace Websdepot
     class Program
     {
         static string logUrl = "./log/Log.txt";
+        static string confUrl = "./Conf.cfg";
+        static string todayDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
         static void writeLog(String logMessage)
         {
             //This will create a log if it doesn't exist
@@ -27,7 +29,7 @@ namespace Websdepot
 
         static void Main(string[] args)
         {
-            writeLog("This is a test");
+            System.Console.WriteLine(todayDate);
         }
     }
 }
