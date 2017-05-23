@@ -40,4 +40,31 @@ namespace Websdepot
 
         }
     }
+    //Template method for parsing
+    abstract class TagParse
+    {
+        //variable which stores the parse word
+        string strParse;
+        //Set parse 
+        //Spawn specific subparser
+        public abstract void SpawnSub();
+        //abstract base for spawning logs
+        // -add error code ints(?) if needed in the future to spawn specific messages
+        public abstract void SpawnLog();
+        public void StringParse(string strIn)
+        {
+            if (strIn.Equals(strParse))
+            {
+                //spawn specific subprocess parser
+                SpawnSub();
+            }else
+            {
+                //spawn error/log message
+                SpawnLog();
+            }
+        }
+        
+    }
+
+
 }
