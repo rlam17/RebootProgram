@@ -148,13 +148,13 @@ namespace Websdepot
          */
 
         //rChunk == rawChunk
-        public void CleanIn(List<string> rChunk) {
+        public void CleanIn(List<string> inChunk) {
             string strUnIn;
             //clean and store the tag in the chunk
-            strUnIn = rChunk[0];
+            strUnIn = inChunk[0];
             strIn = strUnIn.Trim();
             //store the chunk to the object and remove the tag
-            lChunk = rChunk;
+            lChunk = strUnIn;
             lChunk.RemoveAt(0);
         }
         //Spawn specific subparser
@@ -166,7 +166,6 @@ namespace Websdepot
         {
             if (strIn.Equals(strParse))
             {
-
                 //spawn specific subprocess parser
                 SpawnSub();
             }else
