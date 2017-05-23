@@ -9,14 +9,14 @@ namespace ConsoleApplication1
 {
     class Program
     {
-        static void writeLog()
+        static string logUrl = "./log/Log.txt";
+        static void writeLog(String logMessage)
         {
-            string logUrl = "./log/Log.txt";
-            if (!File.Exists(logUrl))
-            {
-                System.Console.WriteLine("Log doesn't exists, creating...");
-                File.Create(logUrl);
-            }
+            //This will create a log if it doesn't exist
+            StreamWriter sw = new StreamWriter(logUrl, true);
+
+            sw.WriteLine(logMessage);
+            sw.Close();
 
 
         }
@@ -27,7 +27,7 @@ namespace ConsoleApplication1
 
         static void Main(string[] args)
         {
-            writeLog();
+            writeLog("This is a test");
         }
     }
 }
