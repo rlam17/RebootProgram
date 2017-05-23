@@ -26,11 +26,13 @@ namespace Websdepot
         static void readConf()
         {
 
+            //Check goes here
+
             if (!false) //Conf does not clear check
             {
 
                 writeLog("There is something wrong with the log file");
-                exit();
+                exit(1);
             }
         }
 
@@ -40,10 +42,36 @@ namespace Websdepot
             readConf();
 
         }
-        static void exit()
+        static void exit(int code)
         {
             writeLog("Exitting program");
-            System.Environment.Exit(1);
+            System.Environment.Exit(code);
+        }
+
+        static void readChunks()
+        {
+
+            List<String> sqlChunk = new List<String>();
+            List<String> rebootConfigChunk = new List<String>();
+            List<String> startupChunk = new List<String>();
+            List<String> rebootChunk = new List<String>();
+
+            StreamReader sr = new StreamReader(confUrl);
+
+            String line;
+            List<String> currentList = sqlChunk;
+            int currentChunk = 0;
+            while((line = sr.ReadLine()) != null) //until EOF
+            {
+                if(currentChunk == 1)
+                {
+                    if(line != "")
+                    {
+                    }
+                }
+                
+            }
+
         }
     }
     //Template method for parsing
