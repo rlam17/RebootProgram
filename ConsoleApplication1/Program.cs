@@ -133,13 +133,23 @@ namespace Websdepot
     }
     /*Template method for 
        - name scheme for all the concrete parsers will follow the Tag[tag-name] naming convention
+
+      Method operation chain:
+      1) Create parser object
+            - Object initiates tag keyword
+            - Passes tag chunk to input sanitation function
+      2) Input sanitation 
+            - Sanitizes and stores the tag
+            - Removes the tag from the chunk and stores it
+      3) Process the chunk
+            - Follow specific rules on a chunk specific basis
     */
     abstract class TagParse
     {
         //variable which stores the parse word
-        string strParse;
+        protected string strParse;
         //Sanitized Tag Input
-        string strIn;
+        protected string strIn;
         //Chunk storage
         List<string> lChunk;
         /*
@@ -152,7 +162,8 @@ namespace Websdepot
             string strUnIn;
             //clean and store the tag in the chunk
             strUnIn = inChunk[0];
-            strIn = strUnIn.Trim();
+            strUnIn = strUnIn.Trim();
+            strIn = strUnIn.ToLower();
             //store the chunk to the object and remove the tag
             lChunk = inChunk;
             lChunk.RemoveAt(0);
@@ -170,7 +181,8 @@ namespace Websdepot
                 SpawnSub();
             }else
             {
-                //spawn error/log message
+                //Call next in chain
+                //Chain tail should ouput a log
                 SpawnLog();
             }
         }
@@ -178,6 +190,16 @@ namespace Websdepot
 
     class TagStartup : TagParse
     {
+        //try to avoid (privated for safety)
+        private TagStartup()
+        {
+            strParse = "[startup]";
+        }
+        public TagStartup(List<string> inChunk)
+        {
+            strParse = "[startup]";
+            CleanIn(inChunk);
+        }
         public override void SpawnSub()
         {
 
