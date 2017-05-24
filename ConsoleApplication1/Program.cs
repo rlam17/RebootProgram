@@ -31,7 +31,6 @@ namespace Websdepot
         }
         private static void readConf()
         {
-            // TODO: Actually pass into the Parse classes
             //Check goes here
 
 
@@ -56,20 +55,27 @@ namespace Websdepot
             {
                 using (var stream = File.OpenRead(confUrl))
                 {
-                    updateRegistry(Encoding.Default.GetString(md5.ComputeHash(stream)));
+                    createHashFile(Encoding.Default.GetString(md5.ComputeHash(stream)));
                 }
             }
 
             
         }
 
-        private static void updateRegistry(string hash)
+        private static void createHashFile(string hash)
         {
-            // TODO: Get permissions ready
+            /*
             string root = "HKEY_LOCAL_MACHINE\\Software\\Websdepot Reboot\\";
             string valueName = "ConfigHash";
             string value = hash;
+            
             Registry.SetValue(root, valueName, hash);
+            */
+
+            StreamWriter sw = new StreamWriter("./md5", false);
+            sw.WriteLine(hash);
+            sw.Close();
+
         }
         private static void connectSql()
         {
