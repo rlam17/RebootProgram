@@ -349,9 +349,9 @@ namespace Websdepot
                     process.WaitForExit();
                 }
                 catch (Win32Exception e)
-                {
-                    Program.writeLog("Failed to open " + strChunk);
-                }
+                    {
+                        Program.writeLog("Failed to open " + strChunk);
+                    }
 
             }
         }
@@ -364,6 +364,7 @@ namespace Websdepot
         {
             strParse = "[startup]";
         }
+
         public ParserChain(List<string> inChunk, Toolbox tIn)
         {
             //toolbox in
@@ -380,6 +381,7 @@ namespace Websdepot
             Execute();
             //throw new NotImplementedException();
         }
+
         public override void NextLink()
         {
             RebootLink rlParse = new RebootLink(lChunk, tools);
@@ -417,7 +419,39 @@ namespace Websdepot
         }
     }
 
-    //end
+    //SQL Link
+    class SqlLink : TagParse
+    {
+        //try to avoid (privated for safety)
+        private SqlLink()
+        {
+            strParse = "[reboot]";
+        }
+        public SqlLink(List<string> inChunk, Toolbox tIn)
+        {
+            //toolbox in
+            tools = tIn;
+
+            //System.Console.WriteLine("SqlLink entered");
+            strParse = "[reboot]";
+            CleanIn(inChunk);
+        }
+
+        //Startup tag will run processes based off of the parsed string paths 
+        public override void SpawnSub()
+        {
+            Execute();
+
+            //throw new NotImplementedException();
+        }
+        public override void NextLink()
+        {
+            System.Console.WriteLine("In reboot chain link");
+            throw new NotImplementedException();
+        }
+    }
+
+    //end of parser family
     class Toolbox
     {
         string[] sqlInfo;
