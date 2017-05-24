@@ -12,12 +12,13 @@ using System.Threading.Tasks;
 
 namespace Websdepot
 {
+
     class Program
     {
-        static string logUrl = "./log/Log.txt";
-        static string confUrl = "./Conf.cfg";
-        static string todayDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
-        static string postUrl = "./post/post.csv";
+        static public string logUrl = "./log/Log.txt";
+        static public string confUrl = "./Conf.cfg";
+        static public string todayDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+        static public string postUrl = "./post/post.csv";
         public static void writeLog(string logMessage)
         {
             //This will create a log if it doesn't exist
@@ -342,7 +343,8 @@ namespace Websdepot
 
 
                     System.Console.WriteLine(strPath + " | " + strArgs);
-                    Process.Start(strPath, strArgs);
+                    var process = Process.Start(strPath, strArgs);
+                    process.WaitForExit();
                 }
                 catch (Win32Exception e)
                 {
@@ -405,6 +407,22 @@ namespace Websdepot
         {
             System.Console.WriteLine("In reboot chain link");
             throw new NotImplementedException();
+        }
+    }
+    class Toolbox
+    {
+        string[] sqlInfo;
+        public Toolbox()
+        {
+            sqlInfo = new string[] { "192.168.0.10", "1433", "SomeUser","SomePassword","SomeDatabase"};
+        }
+
+        private void clearCsv()
+        {
+            if (File.Exists(Program.postUrl))
+            {
+
+            }
         }
     }
 }
