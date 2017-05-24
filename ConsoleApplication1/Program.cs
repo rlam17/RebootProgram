@@ -93,7 +93,7 @@ namespace Websdepot
 
             //connectSql();
             //delayWait(5);
-            string strChunk = "C:'\'Program Files (x86)'\'Notepad++'\'notepad++.exe";
+            string strChunk = "C:\\Program Files (x86)\\Notepad++\\notepad++.exe";
             System.Console.WriteLine(strChunk);
             Process.Start(strChunk);
             readChunks();
