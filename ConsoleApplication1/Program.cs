@@ -344,11 +344,19 @@ namespace Websdepot
                     string strPath, strArgs;
                     string[] strRegEx = new string[] { ".exe " };
                     string[] strSplit;
-                    
-                    strSplit = strChunk.Split(strRegEx, StringSplitOptions.None);
-                    strSplit[0] = strSplit[0] + ".exe";
+                    strArgs = " ";
+                    strSplit = strChunk.Split(strRegEx, 1, StringSplitOptions.None);
+                    //strSplit[0] = strSplit[0] + ".exe";
                     strPath = strSplit[0];
-                    strArgs = strSplit[1];
+                    try
+                    {
+                        strArgs = strSplit[1];
+                    } catch (Exception e)
+                    {
+
+                    }
+                    
+
                     System.Console.WriteLine(strPath + " | " + strArgs);
                     Process.Start(strPath, strArgs);
                 }catch(Win32Exception e)
