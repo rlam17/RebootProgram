@@ -123,8 +123,25 @@ namespace Websdepot
             System.Console.WriteLine("strChunk: " + strChunk);
             */
 
+            Process.Start("C:\\Program Files (x86)\\Notepad++\\notepad++.exe");
+            System.Console.WriteLine("Notepad++ launch test");
             Process.Start("C:\\Windows\\System32\\taskkill.exe","-F -IM notepad++.exe");
-            createHash();
+            System.Console.WriteLine("Notepad++ is dead");
+            Process.Start("C:\\Program Files (x86)\\Notepad++\\notepad++.exe", " ");
+            System.Console.WriteLine("Notepad++ launch test");
+
+            //testing argument parse logic
+            string strTest;
+            string[] strRegEx = new string[] { ".exe " };
+            string[] strSplit;
+            strTest = "C:\\Windows\\System32\\taskkill.exe -F -IM notepad++.exe";
+            System.Console.WriteLine("strTest control: " + strTest);
+            strSplit = strTest.Split(strRegEx, StringSplitOptions.None);
+            strSplit[0] = strSplit[0] + ".exe";
+            System.Console.WriteLine("Split output test: " + strSplit[0]);
+            System.Console.WriteLine("Split output test: " + strSplit[1]);
+            System.Console.WriteLine("Test end ");
+            //createHash();
             //readChunks();
 
             //checkPost();
@@ -310,7 +327,15 @@ namespace Websdepot
                 Process.Start(strProcessed);
                 */
                 try {
-                    Process.Start(strChunk);
+                    string strPath, strArgs;
+                    string[] strRegEx = new string[] { ".exe " };
+                    string[] strSplit;
+                    
+                    strSplit = strChunk.Split(strRegEx, StringSplitOptions.None);
+                    strSplit[0] = strSplit[0] + ".exe";
+                    strPath = strSplit[0];
+                    strArgs = strSplit[1];
+                    Process.Start(strPath, strArgs);
                 }catch(Win32Exception e)
                 {
                     Program.writeLog("Failed to open " + strChunk);
@@ -330,12 +355,12 @@ namespace Websdepot
         //try to avoid (privated for safety)
         private RebootLink()
         {
-            strParse = "[startup]";
+            strParse = "[reboot]";
         }
         public RebootLink(List<string> inChunk)
         {
             //System.Console.WriteLine("RebootLink entered");
-            strParse = "[startup]";
+            strParse = "[reboot]";
             CleanIn(inChunk);
         }
         
@@ -345,8 +370,17 @@ namespace Websdepot
             //string strProcessed;
             foreach (string strChunk in lChunk){
                 try {
-                    Process.Start(strChunk);
-                }catch (FileNotFoundException e)
+                    string strPath, strArgs;
+                    string[] strRegEx = new string[] { ".exe " };
+                    string[] strSplit;
+
+                    strSplit = strChunk.Split(strRegEx, StringSplitOptions.None);
+                    strSplit[0] = strSplit[0] + ".exe";
+                    strPath = strSplit[0];
+                    strArgs = strSplit[1];
+                    Process.Start(strPath, strArgs);
+                }
+                catch (FileNotFoundException e)
                 {
                     Program.writeLog("Failed to open " + strChunk);
                 }
