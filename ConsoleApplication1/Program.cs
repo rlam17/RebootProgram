@@ -267,9 +267,13 @@ namespace Websdepot
         {
             string strProcessed;
             foreach (string strChunk in lChunk){
+                /*
+                //read takes in string literals, no need for extra processing
                 //chunks are super volitile right now needs further testing
                 strProcessed = strChunk.Replace("\\", "\\\\");
                 Process.Start(strProcessed);
+                */
+                Process.Start(strChunk);
             }
             throw new NotImplementedException();
         }
