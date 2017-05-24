@@ -395,26 +395,8 @@ namespace Websdepot
         //Startup tag will run processes based off of the parsed string paths 
         public override void SpawnSub()
         {
-            //string strProcessed;
-            foreach (string strChunk in lChunk){
-                try {
-                    string strPath, strArgs;
-                    string[] strRegEx = new string[] { ".exe " };
-                    string[] strSplit;
-
-                    strSplit = strChunk.Split(strRegEx, 2, StringSplitOptions.None);
-                    strSplit[0] = strSplit[0] + ".exe";
-                    strPath = strSplit[0];
-                    strArgs = strSplit[1];
-                    
-                    Process.Start(strPath, strArgs);
-                }
-                catch (FileNotFoundException e)
-                {
-                    Program.writeLog("Failed to open " + strChunk);
-                }
-                
-            }
+            Execute();
+           
             //throw new NotImplementedException();
         }
         public override void NextLink()
