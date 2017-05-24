@@ -465,6 +465,7 @@ namespace Websdepot
     class Toolbox
     {
         string[] sqlInfo;
+        StreamReader sr;
         public Toolbox()
         {
             sqlInfo = new string[5];
@@ -474,8 +475,23 @@ namespace Websdepot
         {
             if (File.Exists(Program.postUrl))
             {
-
+                File.Delete(Program.postUrl);
             }
+            StreamWriter sw = new StreamWriter(Program.postUrl);
+            sw.WriteLine("StartupTime,ServerName,Status,Service,Error,");
+            sw.Close();
+        }
+        public bool checkCsv()
+        {
+            bool result = true;
+            bool error = false;
+            sr = new StreamReader(Program.postUrl);
+            sr.ReadLine();
+            while (!error)
+            {
+                string subject = sr.ReadLine();
+            }
+            return result;
         }
     }
 
