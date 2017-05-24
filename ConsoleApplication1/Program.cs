@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
@@ -112,7 +113,15 @@ namespace Websdepot
         }
         private static void exit(int code)
         {
-            writeLog("Exitting program");
+            if(code > 0)
+            {
+                writeLog("Exitting program with error " + code);
+            }
+            else
+            {
+                writeLog("Exitting program");
+            }
+            
             System.Environment.Exit(code);
         }
 
@@ -284,7 +293,7 @@ namespace Websdepot
                 */
                 try {
                     Process.Start(strChunk);
-                }catch (FileNotFoundException e)
+                }catch(Win32Exception e)
                 {
                     Program.writeLog("Failed to open " + strChunk);
                 }
