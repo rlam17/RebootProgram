@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -93,7 +94,9 @@ namespace Websdepot
 
             //connectSql();
             //delayWait(5);
-
+            string strChunk = "C:\\Program Files (x86)\\Notepad++\\notepad++.exe";
+            System.Console.WriteLine(strChunk);
+            Process.Start(strChunk);
             readChunks();
 
         }
@@ -197,7 +200,7 @@ namespace Websdepot
         //Sanitized Tag Input
         protected string strIn;
         //Chunk storage
-        List<string> lChunk;
+        protected List<string> lChunk;
         /*
          * Input Sanitation
          *  - Check for input inconsistencies(extra whitespaces)
@@ -248,13 +251,17 @@ namespace Websdepot
         }
         public TagStartup(List<string> inChunk)
         {
-            //System.Console.WriteLine("I was here");
+            //System.Console.WriteLine("TagStartup entered");
             strParse = "[startup]";
             CleanIn(inChunk);
         }
+        
+        //Startup tag will run processes based off of the parsed string paths 
         public override void SpawnSub()
         {
-
+            foreach (string strChunk in lChunk){
+                Process.Start(strChunk);
+            }
             throw new NotImplementedException();
         }
         public override void SpawnLog()
