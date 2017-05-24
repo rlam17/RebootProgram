@@ -15,10 +15,11 @@ namespace Websdepot
 
     class Program
     {
-        static public string logUrl = "./log/Log.txt";
-        static public string confUrl = "./Conf.cfg";
+        public const string logUrl = "./log/Log.txt";
+        public const string confUrl = "./Conf.cfg";
         static public string todayDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
-        static public string postUrl = "./post/post.csv";
+        public const string postUrl = "./post/post.csv";
+        static List<confChunk> chunks = new List<confChunk>();
         public static void writeLog(string logMessage)
         {
             //This will create a log if it doesn't exist
@@ -177,13 +178,14 @@ namespace Websdepot
 
         private static void readChunks()
         {
-
+            /*
             List<string> sqlChunk = new List<string>();
             List<string> rebootConfigChunk = new List<string>();
             List<string> startupChunk = new List<string>();
             List<string> rebootChunk = new List<string>();
             List<string> lastRebootChunk = new List<string>();
             List<string> configuredRebootChunk = new List<string>();
+            */
 
             StreamReader sr = new StreamReader(confUrl);
 
@@ -209,22 +211,28 @@ namespace Websdepot
                         switch (currentChunk) //Check which chunk it is on
                         {
                             case 0:
-                                sqlChunk = currentList;
+                                //sqlChunk = currentList;
+                                chunks.Add(new confChunk(currentList));
                                 break;
                             case 1:
-                                rebootConfigChunk = currentList;
+                                //rebootConfigChunk = currentList;
+                                chunks.Add(new confChunk(currentList));
                                 break;
                             case 2:
-                                startupChunk = currentList;
+                                //startupChunk = currentList;
+                                chunks.Add(new confChunk(currentList));
                                 break;
                             case 3:
-                                rebootChunk = currentList;
+                                //rebootChunk = currentList;
+                                chunks.Add(new confChunk(currentList));
                                 break;
                             case 4:
-                                lastRebootChunk = currentList;
+                                //lastRebootChunk = currentList;
+                                chunks.Add(new confChunk(currentList));
                                 break;
                             case 5:
-                                configuredRebootChunk = currentList;
+                                //configuredRebootChunk = currentList;
+                                chunks.Add(new confChunk(currentList));
                                 break;
                             default:
                                 currentList = null;
@@ -344,7 +352,7 @@ namespace Websdepot
                     var process = Process.Start(strPath, strArgs);
                     process.WaitForExit();
                 }
-                catch (Win32Exception e)
+                catch (Win32Exception w32e)
                 {
                     Program.writeLog("Failed to open " + strChunk);
                 }
@@ -407,6 +415,20 @@ namespace Websdepot
             throw new NotImplementedException();
         }
     }
+
+    class confChunk
+    {
+        List<string> lines;
+
+        public confChunk(List<string> i)
+        {
+            lines = i;
+        }
+        public List<string> getChunk()
+        {
+            return lines;
+        }
+    }
     class Toolbox
     {
         string[] sqlInfo;
@@ -419,8 +441,15 @@ namespace Websdepot
         {
             if (File.Exists(Program.postUrl))
             {
-
+                File.Delete(Program.postUrl);
+                //File.Create(Program.postUrl).Close();
+                StreamWriter sw = new StreamWriter(Program.postUrl, true);
             }
+        }
+        private bool checkCsv()
+        {
+
+            return true;
         }
     }
 }
