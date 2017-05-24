@@ -350,12 +350,10 @@ namespace Websdepot
                     strSplit = strChunk.Split(strRegEx, 2, StringSplitOptions.None);
                     //strSplit[0] = strSplit[0] + ".exe";
                     strPath = strSplit[0];
-                    try
+                    if (!String.IsNullOrEmpty(strSplit[1]))
                     {
                         strArgs = strSplit[1];
                     }
-                    catch (Exception e) { }
-
 
                     System.Console.WriteLine(strPath + " | " + strArgs);
                     var process = Process.Start(strPath, strArgs);
@@ -439,7 +437,7 @@ namespace Websdepot
         //try to avoid (privated for safety)
         private SqlLink()
         {
-            strParse = "[reboot]";
+            strParse = "[SQL Config]";
         }
         public SqlLink(List<string> inChunk, Toolbox tIn)
         {
@@ -447,7 +445,7 @@ namespace Websdepot
             tools = tIn;
 
             //System.Console.WriteLine("SqlLink entered");
-            strParse = "[reboot]";
+            strParse = "[SQL Config]";
             CleanIn(inChunk);
         }
 
@@ -466,11 +464,12 @@ namespace Websdepot
     }
     //end of tag parser family
 
+    //beginning of sql parser chain family
     class SqlParseChain : Parser
     {
         private SqlParseChain()
         {
-            strParse = "name";
+            strParse = "";
         }
         public SqlParseChain(List<string> inChunk, Toolbox tIn)
         {
@@ -478,13 +477,14 @@ namespace Websdepot
             tools = tIn;
 
             //System.Console.WriteLine("SqlLink entered");
-            strParse = "[reboot]";
+            strParse = "Host=";
             //overriden string parse
 
         }
         public override void stringParse()
         {
             //base.stringParse();
+
         }
 
         //Startup tag will run processes based off of the parsed string paths 
