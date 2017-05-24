@@ -318,4 +318,44 @@ namespace Websdepot
         }
     }
 
+    class RebootLink : TagParse
+    {
+        //try to avoid (privated for safety)
+        private RebootLink()
+        {
+            strParse = "[startup]";
+        }
+        public RebootLink(List<string> inChunk)
+        {
+            //System.Console.WriteLine("RebootLink entered");
+            strParse = "[startup]";
+            CleanIn(inChunk);
+        }
+        
+        //Startup tag will run processes based off of the parsed string paths 
+        public override void SpawnSub()
+        {
+            //string strProcessed;
+            foreach (string strChunk in lChunk){
+                /*
+                //read takes in string literals, no need for extra processing
+                //chunks are super volitile right now needs further testing
+                strProcessed = strChunk.Replace("\\", "\\\\");
+                Process.Start(strProcessed);
+                */
+                try {
+                    Process.Start(strChunk);
+                }catch (FileNotFoundException e)
+                {
+                    Program.writeLog("Failed to open " + strChunk);
+                }
+                
+            }
+            //throw new NotImplementedException();
+        }
+        public override void NextLink()
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
