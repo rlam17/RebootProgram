@@ -159,7 +159,10 @@ namespace Websdepot
             System.Console.WriteLine("Test end ");
             */
             //createHash();
-            readChunks();
+            //readChunks();
+
+            Toolbox tlbx = new Toolbox();
+            tlbx.checkCsv();
 
             //checkPost();
         }
@@ -577,27 +580,30 @@ namespace Websdepot
         }
         public bool checkCsv()
         {
-            //The regex pattern is: ^"(.+)","(\w+)","([A-Z]+)","(.+)","(.*)"$
+            //The regex pattern is: ^"(.+)" ?,"(\w+)","([A-Z]+)","(.+)","(.*)"$
             bool result = true;
             bool error = false;
+            string subject;
             sr = new StreamReader(Program.postUrl);
-            sr.ReadLine(); //skips first line
-            string pattern = "^\"(.+)\",\"(\\w+)\",\"([A-Z]+)\",\"(.+)\",\"(.*)\"$";
+            subject = sr.ReadLine(); //skips first line
+            string pattern = "^\"(.+)\" ?,\"(\\w+)\",\"([A-Z]+)\",\"(.+)\",\"(.*)\"$";
             Regex rgx = new Regex(@pattern);
             
-            while (!error)
+            while (!error && subject != null)
             {
-                string subject = sr.ReadLine();
-                if (rgx.IsMatch(subject))
+                subject = sr.ReadLine();
+                if(subject != null)
                 {
-                    //do nothing
-                }
-                else
+                    if (rgx.IsMatch(subject))
                     {
-                        Program.writeLog("Error in the CSV file");
-                        Program.exit(2);
+                        //do nothing
                     }
-
+                    else
+                        {
+                            Program.writeLog("Error in the CSV file");
+                            Program.exit(2);
+                        }
+                }                
             }
             return result;
         }
