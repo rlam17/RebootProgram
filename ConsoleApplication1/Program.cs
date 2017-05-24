@@ -44,10 +44,10 @@ namespace Websdepot
             {
                 writeLog("Conf file is clear");
                 //Do hash configuration here
-                string hashedConf = createHash();
+                createHash();
             }
         }
-        private static string createHash()
+        private static void createHash()
         {
 
             // TODO: Ask how to store the MD5
@@ -56,9 +56,16 @@ namespace Websdepot
             {
                 using (var stream = File.OpenRead(confUrl))
                 {
-                    return Encoding.Default.GetString(md5.ComputeHash(stream));
+                    updateRegistry(Encoding.Default.GetString(md5.ComputeHash(stream)));
                 }
             }
+
+            
+        }
+
+        private static void updateRegistry(string hash)
+        {
+
         }
         private static void connectSql()
         {
@@ -116,11 +123,11 @@ namespace Websdepot
             System.Console.WriteLine("strChunk: " + strChunk);
             */
 
-            //Process.Start(strChunk);
-            string confHash = createHash();
-            readChunks();
+            Process.Start("C:\\Windows\\System32\\taskkill.exe","-F -IM notepad++.exe");
+            createHash();
+            //readChunks();
 
-            checkPost();
+            //checkPost();
         }
         private static void exit(int code)
         {
