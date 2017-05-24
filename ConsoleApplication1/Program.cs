@@ -313,6 +313,8 @@ namespace Websdepot
                 NextLink();
             }
         }
+
+        //Execute parsed functions
         public void Execute()
         {
             foreach (string strChunk in lChunk)
