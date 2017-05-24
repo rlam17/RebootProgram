@@ -93,8 +93,14 @@ namespace Websdepot
 
             //connectSql();
             //delayWait(5);
+            
+
+            //test replacement code
             string strChunk = "C:\\Program Files (x86)\\Notepad++\\notepad++.exe";
-            System.Console.WriteLine(strChunk);
+            string strReplace = "C:\\Program Files (x86)\\Notepad++\\notepad++.exe";
+            strReplace = strChunk.Replace("\\", "\\\\");
+            System.Console.WriteLine("strReplace " + strReplace);
+            System.Console.WriteLine("strChunk: " + strChunk);
             Process.Start(strChunk);
             readChunks();
 
@@ -258,8 +264,11 @@ namespace Websdepot
         //Startup tag will run processes based off of the parsed string paths 
         public override void SpawnSub()
         {
+            string strProcessed;
             foreach (string strChunk in lChunk){
-                Process.Start(strChunk);
+                //chunks are super volitile right now needs further testing
+                strProcessed = strChunk.Replace("\\", "\\\\");
+                Process.Start(strProcessed);
             }
             throw new NotImplementedException();
         }
