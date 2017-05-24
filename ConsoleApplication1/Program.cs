@@ -15,11 +15,10 @@ namespace Websdepot
 
     class Program
     {
-        public const string logUrl = "./log/Log.txt";
-        public const string confUrl = "./Conf.cfg";
+        static public string logUrl = "./log/Log.txt";
+        static public string confUrl = "./Conf.cfg";
         static public string todayDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
-        public const string postUrl = "./post/post.csv";
-        static List<confChunk> chunks = new List<confChunk>();
+        static public string postUrl = "./post/post.csv";
         public static void writeLog(string logMessage)
         {
             //This will create a log if it doesn't exist
@@ -178,14 +177,13 @@ namespace Websdepot
 
         private static void readChunks()
         {
-            /*
+
             List<string> sqlChunk = new List<string>();
             List<string> rebootConfigChunk = new List<string>();
             List<string> startupChunk = new List<string>();
             List<string> rebootChunk = new List<string>();
             List<string> lastRebootChunk = new List<string>();
             List<string> configuredRebootChunk = new List<string>();
-            */
 
             StreamReader sr = new StreamReader(confUrl);
 
@@ -211,28 +209,22 @@ namespace Websdepot
                         switch (currentChunk) //Check which chunk it is on
                         {
                             case 0:
-                                //sqlChunk = currentList;
-                                chunks.Add(new confChunk(currentList));
+                                sqlChunk = currentList;
                                 break;
                             case 1:
-                                //rebootConfigChunk = currentList;
-                                chunks.Add(new confChunk(currentList));
+                                rebootConfigChunk = currentList;
                                 break;
                             case 2:
-                                //startupChunk = currentList;
-                                chunks.Add(new confChunk(currentList));
+                                startupChunk = currentList;
                                 break;
                             case 3:
-                                //rebootChunk = currentList;
-                                chunks.Add(new confChunk(currentList));
+                                rebootChunk = currentList;
                                 break;
                             case 4:
-                                //lastRebootChunk = currentList;
-                                chunks.Add(new confChunk(currentList));
+                                lastRebootChunk = currentList;
                                 break;
                             case 5:
-                                //configuredRebootChunk = currentList;
-                                chunks.Add(new confChunk(currentList));
+                                configuredRebootChunk = currentList;
                                 break;
                             default:
                                 currentList = null;
@@ -277,6 +269,8 @@ namespace Websdepot
     */
     abstract class TagParse
     {
+        //toolbox variable
+        protected Toolbox tools;
         //variable which stores the parse word
         protected string strParse;
         //Sanitized Tag Input
@@ -322,6 +316,8 @@ namespace Websdepot
                 NextLink();
             }
         }
+
+        //Execute parsed functions
         public void Execute()
         {
             foreach (string strChunk in lChunk)
@@ -352,7 +348,7 @@ namespace Websdepot
                     var process = Process.Start(strPath, strArgs);
                     process.WaitForExit();
                 }
-                catch (Win32Exception w32e)
+                catch (Win32Exception e)
                 {
                     Program.writeLog("Failed to open " + strChunk);
                 }
@@ -368,8 +364,10 @@ namespace Websdepot
         {
             strParse = "[startup]";
         }
-        public ParserChain(List<string> inChunk)
+        public ParserChain(List<string> inChunk, Toolbox tIn)
         {
+            //toolbox in
+            tools = tIn;
             //System.Console.WriteLine("ParserChain entered");
             strParse = "[startup]";
             CleanIn(inChunk);
@@ -384,7 +382,7 @@ namespace Websdepot
         }
         public override void NextLink()
         {
-            RebootLink rlParse = new RebootLink(lChunk);
+            RebootLink rlParse = new RebootLink(lChunk, tools);
         }
     }
 
@@ -395,8 +393,11 @@ namespace Websdepot
         {
             strParse = "[reboot]";
         }
-        public RebootLink(List<string> inChunk)
+        public RebootLink(List<string> inChunk, Toolbox tIn)
         {
+            //toolbox in
+            tools = tIn;
+
             //System.Console.WriteLine("RebootLink entered");
             strParse = "[reboot]";
             CleanIn(inChunk);
@@ -416,40 +417,21 @@ namespace Websdepot
         }
     }
 
-    class confChunk
-    {
-        List<string> lines;
-
-        public confChunk(List<string> i)
-        {
-            lines = i;
-        }
-        public List<string> getChunk()
-        {
-            return lines;
-        }
-    }
+    //end
     class Toolbox
     {
         string[] sqlInfo;
         public Toolbox()
         {
-            sqlInfo = new string[] { "192.168.0.10", "1433", "SomeUser","SomePassword","SomeDatabase"};
+            sqlInfo = new string[5];
         }
 
         private void clearCsv()
         {
             if (File.Exists(Program.postUrl))
             {
-                File.Delete(Program.postUrl);
-                //File.Create(Program.postUrl).Close();
-                StreamWriter sw = new StreamWriter(Program.postUrl, true);
-            }
-        }
-        private bool checkCsv()
-        {
 
-            return true;
+            }
         }
     }
 }
