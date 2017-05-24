@@ -183,7 +183,7 @@ namespace Websdepot
 
             //Send chunks to functions here
 
-            //TagStartup ts = new TagStartup(startupChunk);
+            //ParserChain ts = new ParserChain(startupChunk);
             /*
             foreach (string x in rebootChunk){
                 System.Console.WriteLine(x);
@@ -192,7 +192,7 @@ namespace Websdepot
             //System.Console.WriteLine(startupChunk[1]);
             //Process.Start(startupChunk[1]);
 
-            TagStartup ts = new TagStartup(startupChunk);
+            ParserChain ts = new ParserChain(startupChunk);
         }
     }
     /*Template method for 
@@ -257,16 +257,16 @@ namespace Websdepot
         }
     }
 
-    class TagStartup : TagParse
+    class ParserChain : TagParse
     {
         //try to avoid (privated for safety)
-        private TagStartup()
+        private ParserChain()
         {
             strParse = "[startup]";
         }
-        public TagStartup(List<string> inChunk)
+        public ParserChain(List<string> inChunk)
         {
-            //System.Console.WriteLine("TagStartup entered");
+            //System.Console.WriteLine("ParserChain entered");
             strParse = "[startup]";
             CleanIn(inChunk);
         }
