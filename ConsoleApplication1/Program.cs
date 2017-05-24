@@ -576,6 +576,7 @@ namespace Websdepot
         }
         public bool checkCsv()
         {
+            //The regex pattern is: ^"(.+)","(\w+)","([A-Z]+)","(.+)","(.*)"$
             bool result = true;
             bool error = false;
             sr = new StreamReader(Program.postUrl);
