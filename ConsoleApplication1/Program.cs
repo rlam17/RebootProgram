@@ -73,6 +73,7 @@ namespace Websdepot
             try
             {
                 myConnection.Open();
+                writeLog("Connection to SQL success");
             } catch(Exception e)
             {
                 writeLog("Connection to SQL failed " + e);
