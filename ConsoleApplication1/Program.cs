@@ -19,6 +19,7 @@ namespace Websdepot
         static public string confUrl = "./Conf.cfg";
         static public string todayDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
         static public string postUrl = "./post/post.csv";
+        static List<confChunk> chunks = new List<confChunk>();
         public static void writeLog(string logMessage)
         {
             //This will create a log if it doesn't exist
@@ -209,22 +210,28 @@ namespace Websdepot
                         switch (currentChunk) //Check which chunk it is on
                         {
                             case 0:
-                                sqlChunk = currentList;
+                                //sqlChunk = currentList;
+                                chunks.Add(new confChunk(currentList));
                                 break;
                             case 1:
-                                rebootConfigChunk = currentList;
+                                //rebootConfigChunk = currentList;
+                                chunks.Add(new confChunk(currentList));
                                 break;
                             case 2:
-                                startupChunk = currentList;
+                                //startupChunk = currentList;
+                                chunks.Add(new confChunk(currentList));
                                 break;
                             case 3:
-                                rebootChunk = currentList;
+                                //rebootChunk = currentList;
+                                chunks.Add(new confChunk(currentList));
                                 break;
                             case 4:
-                                lastRebootChunk = currentList;
+                                //lastRebootChunk = currentList;
+                                chunks.Add(new confChunk(currentList));
                                 break;
                             case 5:
-                                configuredRebootChunk = currentList;
+                                //configuredRebootChunk = currentList;
+                                chunks.Add(new confChunk(currentList));
                                 break;
                             default:
                                 currentList = null;
@@ -251,7 +258,7 @@ namespace Websdepot
             //System.Console.WriteLine(startupChunk[1]);
             //Process.Start(startupChunk[1]);
 
-            ParserChain ts = new ParserChain(startupChunk);
+            ParserChain ts = new ParserChain(chunks, new Toolbox());
         }
     }
     /*Template method for 
@@ -466,6 +473,20 @@ namespace Websdepot
             {
 
             }
+        }
+    }
+
+    class confChunk
+    {
+        List<string> lines;
+        public confChunk(List<string> i)
+        {
+            lines = i;
+        }
+
+        public List<string> getChunk()
+        {
+            return lines;
         }
     }
 }
