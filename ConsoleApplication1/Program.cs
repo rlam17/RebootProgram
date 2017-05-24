@@ -284,7 +284,7 @@ namespace Websdepot
                 */
                 Process.Start(strChunk);
             }
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
         public override void NextLink()
         {
