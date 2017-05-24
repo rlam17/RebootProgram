@@ -321,7 +321,7 @@ namespace Websdepot
         }
         public override void NextLink()
         {
-            throw new NotImplementedException();
+            RebootLink rlParse = new RebootLink(lChunk);
         }
     }
 
@@ -344,12 +344,6 @@ namespace Websdepot
         {
             //string strProcessed;
             foreach (string strChunk in lChunk){
-                /*
-                //read takes in string literals, no need for extra processing
-                //chunks are super volitile right now needs further testing
-                strProcessed = strChunk.Replace("\\", "\\\\");
-                Process.Start(strProcessed);
-                */
                 try {
                     Process.Start(strChunk);
                 }catch (FileNotFoundException e)
@@ -362,6 +356,7 @@ namespace Websdepot
         }
         public override void NextLink()
         {
+            System.Console.WriteLine("In reboot chain link");
             throw new NotImplementedException();
         }
     }
