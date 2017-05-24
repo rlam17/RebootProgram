@@ -313,7 +313,7 @@ namespace Websdepot
         //abstract base for spawning logs
         // -add error code int array(?) if needed in the future to spawn specific messages
         public abstract void NextLink();
-        public void stringParse()
+        public virtual void stringParse()
         {
             if (strIn.Equals(strParse))
             {
@@ -331,7 +331,7 @@ namespace Websdepot
         }
 
         //Execute parsed functions
-        public void Execute()
+        public virtual void Execute()
         {
             foreach (string strChunk in lChunk)
             {
@@ -479,7 +479,12 @@ namespace Websdepot
 
             //System.Console.WriteLine("SqlLink entered");
             strParse = "[reboot]";
-            CleanIn(inChunk);
+            //overriden string parse
+
+        }
+        public override void stringParse()
+        {
+            //base.stringParse();
         }
 
         //Startup tag will run processes based off of the parsed string paths 
