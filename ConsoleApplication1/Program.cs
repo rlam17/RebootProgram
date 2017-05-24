@@ -269,6 +269,8 @@ namespace Websdepot
     */
     abstract class TagParse
     {
+        //toolbox variable
+        protected Toolbox tools;
         //variable which stores the parse word
         protected string strParse;
         //Sanitized Tag Input
@@ -362,8 +364,10 @@ namespace Websdepot
         {
             strParse = "[startup]";
         }
-        public ParserChain(List<string> inChunk)
+        public ParserChain(List<string> inChunk, Toolbox tIn)
         {
+            //toolbox in
+            tools = tIn;
             //System.Console.WriteLine("ParserChain entered");
             strParse = "[startup]";
             CleanIn(inChunk);
@@ -378,7 +382,7 @@ namespace Websdepot
         }
         public override void NextLink()
         {
-            RebootLink rlParse = new RebootLink(lChunk);
+            RebootLink rlParse = new RebootLink(lChunk, tools);
         }
     }
 
@@ -389,8 +393,11 @@ namespace Websdepot
         {
             strParse = "[reboot]";
         }
-        public RebootLink(List<string> inChunk)
+        public RebootLink(List<string> inChunk, Toolbox tIn)
         {
+            //toolbox in
+            tools = tIn;
+
             //System.Console.WriteLine("RebootLink entered");
             strParse = "[reboot]";
             CleanIn(inChunk);
@@ -409,12 +416,14 @@ namespace Websdepot
             throw new NotImplementedException();
         }
     }
+
+    //end
     class Toolbox
     {
         string[] sqlInfo;
         public Toolbox()
         {
-            sqlInfo = new string[] { "192.168.0.10", "1433", "SomeUser","SomePassword","SomeDatabase"};
+            sqlInfo = new string[5];
         }
 
         private void clearCsv()
