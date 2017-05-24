@@ -313,6 +313,42 @@ namespace Websdepot
                 NextLink();
             }
         }
+        public void Execute()
+        {
+            foreach (string strChunk in lChunk)
+            {
+                /*
+                //read takes in string literals, no need for extra processing
+                //chunks are super volitile right now needs further testing
+                strProcessed = strChunk.Replace("\\", "\\\\");
+                Process.Start(strProcessed);
+                */
+                try
+                {
+                    string strPath, strArgs;
+                    string[] strRegEx = new string[] { ".exe " };
+                    string[] strSplit;
+                    strArgs = " ";
+                    strSplit = strChunk.Split(strRegEx, 2, StringSplitOptions.None);
+                    //strSplit[0] = strSplit[0] + ".exe";
+                    strPath = strSplit[0];
+                    try
+                    {
+                        strArgs = strSplit[1];
+                    }
+                    catch (Exception e) { }
+
+
+                    System.Console.WriteLine(strPath + " | " + strArgs);
+                    Process.Start(strPath, strArgs);
+                }
+                catch (Win32Exception e)
+                {
+                    Program.writeLog("Failed to open " + strChunk);
+                }
+
+            }
+        }
     }
 
     class ParserChain : TagParse
@@ -333,38 +369,7 @@ namespace Websdepot
         public override void SpawnSub()
         {
             //string strProcessed;
-            foreach (string strChunk in lChunk){
-                /*
-                //read takes in string literals, no need for extra processing
-                //chunks are super volitile right now needs further testing
-                strProcessed = strChunk.Replace("\\", "\\\\");
-                Process.Start(strProcessed);
-                */
-                try {
-                    string strPath, strArgs;
-                    string[] strRegEx = new string[] { ".exe " };
-                    string[] strSplit;
-                    strArgs = " ";
-                    strSplit = strChunk.Split(strRegEx, 2, StringSplitOptions.None);
-                    //strSplit[0] = strSplit[0] + ".exe";
-                    strPath = strSplit[0];
-                    try
-                    {
-                        strArgs = strSplit[1];
-                    } catch (Exception e)
-                    {
-
-                    }
-                    
-
-                    System.Console.WriteLine(strPath + " | " + strArgs);
-                    Process.Start(strPath, strArgs);
-                }catch(Win32Exception e)
-                {
-                    Program.writeLog("Failed to open " + strChunk);
-                }
-                
-            }
+            Execute();
             //throw new NotImplementedException();
         }
         public override void NextLink()
