@@ -369,6 +369,10 @@ namespace Websdepot
 
             }
         }
+        //Run when end of chain is reached
+        public virtual void ChainEnd() {
+            Program.writeLog("Command not found, check configuration file formatting or check if specific command has been implemented.");
+        }
     }
     
     //concrete tag parser chain
@@ -474,20 +478,28 @@ namespace Websdepot
         {
             strParse = "";
         }
-        public SqlParseChain(List<string> inChunk, Toolbox tIn)
+        public SqlParseChain(string strLine, Toolbox tIn)
         {
             //toolbox in
             tools = tIn;
 
             //System.Console.WriteLine("SqlLink entered");
             strParse = "Host=";
+            strIn = strLine.Trim();
             //overriden string parse
-
+            stringParse();
         }
         public override void stringParse()
         {
-            //base.stringParse();
-
+            //Check if the line passed contains the token this link is responsible for...
+            if (strIn.Contains(strParse))
+            {
+                //if yes, process:
+                
+            }else
+            {
+                //go to next in chain
+            }
         }
 
         //Startup tag will run processes based off of the parsed string paths 
@@ -511,6 +523,22 @@ namespace Websdepot
         public Toolbox()
         {
             sqlInfo = new string[5];
+        }
+
+        //set the SQL property array (index, string)
+        public void SetSql(int intIndex, string strIn)
+        {
+           /*
+            * index for SQL info array:
+            * 
+            * 0: Host IP (eg: 192.168.0.10)
+            * 1: Port number (eg: 1433)
+            * 2: Username (eg: SomeUser)
+            * 3: Password (eg: SomePassword)
+            * 4: Database (eg: SomeDb)
+            * 5: CheckinTime (by minutes?) (eg: 2)
+            */
+            sqlInfo[intIndex] = strIn;
         }
 
         private void clearCsv()
