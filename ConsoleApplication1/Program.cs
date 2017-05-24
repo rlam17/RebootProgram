@@ -516,6 +516,8 @@ namespace Websdepot
         }
     }
     //end of parser family
+
+    //Toolbox holds information which main will used in a convenient bundle for methods to pass around
     class Toolbox
     {
         string[] sqlInfo;
