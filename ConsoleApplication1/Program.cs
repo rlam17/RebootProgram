@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Websdepot
@@ -563,10 +564,14 @@ namespace Websdepot
             bool result = true;
             bool error = false;
             sr = new StreamReader(Program.postUrl);
-            sr.ReadLine();
+            sr.ReadLine(); //skips first line
+            string pattern = "^\"(.+)\",\"(\\w+)\",\"([A-Z]+)\",\"(.+)\",\"(.*)\"$";
+            Regex rgx = new Regex(@pattern);
+            
             while (!error)
             {
                 string subject = sr.ReadLine();
+
             }
             return result;
         }
