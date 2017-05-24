@@ -540,7 +540,11 @@ namespace Websdepot
             */
             sqlInfo[intIndex] = strIn;
         }
-
+        
+        public string[] GetSql()
+        {
+            return sqlInfo;
+        }
         private void clearCsv()
         {
             if (File.Exists(Program.postUrl))
