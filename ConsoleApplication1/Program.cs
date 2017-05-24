@@ -257,8 +257,11 @@ namespace Websdepot
             */
             //System.Console.WriteLine(startupChunk[1]);
             //Process.Start(startupChunk[1]);
-
-            ParserChain ts = new ParserChain(chunks, new Toolbox());
+            for(int i = 0; i < chunks.Count; i++)
+            {
+                ParserChain ts = new ParserChain(chunks[i].getChunk(), new Toolbox());
+            }
+            
         }
     }
     /*Template method for 
