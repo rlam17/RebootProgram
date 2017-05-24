@@ -190,7 +190,9 @@ namespace Websdepot
             }
             */
             //System.Console.WriteLine(startupChunk[1]);
-            Process.Start(startupChunk[1]);
+            //Process.Start(startupChunk[1]);
+
+            TagStartup ts = new TagStartup(startupChunk);
         }
     }
     /*Template method for 
