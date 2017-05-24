@@ -15,7 +15,7 @@ namespace Websdepot
         static string logUrl = "./log/Log.txt";
         static string confUrl = "./Conf.cfg";
         static string todayDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
-        private static void writeLog(string logMessage)
+        public static void writeLog(string logMessage)
         {
             //This will create a log if it doesn't exist
             StreamWriter sw = new StreamWriter(logUrl, true);
@@ -282,7 +282,13 @@ namespace Websdepot
                 strProcessed = strChunk.Replace("\\", "\\\\");
                 Process.Start(strProcessed);
                 */
-                Process.Start(strChunk);
+                try {
+                    Process.Start(strChunk);
+                }catch (FileNotFoundException e)
+                {
+                    Program.writeLog("Failed to open " + strChunk);
+                }
+                
             }
             //throw new NotImplementedException();
         }
