@@ -276,8 +276,11 @@ namespace Websdepot
             - Removes the tag from the chunk and stores it
       3) Process the chunk
             - Follow specific rules on a chunk specific basis
+
+        ***NOTE TO PEOPLE ADDING LINKS***
+        * New end links to the chain 
     */
-    abstract class TagParse
+    abstract class Parser
     {
         //toolbox variable
         protected Toolbox tools;
@@ -366,8 +369,9 @@ namespace Websdepot
             }
         }
     }
-
-    class ParserChain : TagParse
+    
+    //concrete tag parser chain
+    class ParserChain : Parser
     {
         //try to avoid (privated for safety)
         private ParserChain()
@@ -398,7 +402,7 @@ namespace Websdepot
         }
     }
 
-    class RebootLink : TagParse
+    class RebootLink : Parser
     {
         //try to avoid (privated for safety)
         private RebootLink()
@@ -430,7 +434,7 @@ namespace Websdepot
     }
 
     //SQL Link
-    class SqlLink : TagParse
+    class SqlLink : Parser
     {
         //try to avoid (privated for safety)
         private SqlLink()
@@ -460,7 +464,37 @@ namespace Websdepot
             throw new NotImplementedException();
         }
     }
+    //end of tag parser family
 
+    class SqlParseChain : Parser
+    {
+        private SqlParseChain()
+        {
+            strParse = "name";
+        }
+        public SqlParseChain(List<string> inChunk, Toolbox tIn)
+        {
+            //toolbox in
+            tools = tIn;
+
+            //System.Console.WriteLine("SqlLink entered");
+            strParse = "[reboot]";
+            CleanIn(inChunk);
+        }
+
+        //Startup tag will run processes based off of the parsed string paths 
+        public override void SpawnSub()
+        {
+            Execute();
+
+            //throw new NotImplementedException();
+        }
+        public override void NextLink()
+        {
+            System.Console.WriteLine("In reboot chain link");
+            throw new NotImplementedException();
+        }
+    }
     //end of parser family
     class Toolbox
     {
