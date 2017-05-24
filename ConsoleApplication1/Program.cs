@@ -307,14 +307,14 @@ namespace Websdepot
             //store the chunk to the object and remove the tag
             lChunk = inChunk;
             lChunk.RemoveAt(0);
-            stringParse();
+            stringSwitch();
         }
         //Spawn specific subparser
         public abstract void SpawnSub();
         //abstract base for spawning logs
         // -add error code int array(?) if needed in the future to spawn specific messages
         public abstract void NextLink();
-        public virtual void stringParse()
+        public virtual void stringSwitch()
         {
             if (strIn.Equals(strParse))
             {
@@ -475,6 +475,8 @@ namespace Websdepot
     //beginning of sql parser chain family
     class SqlParseChain : Parser
     {
+        protected string strSqlIn;
+        protected string[] strRaw;
         private SqlParseChain()
         {
             strParse = "";
@@ -488,27 +490,41 @@ namespace Websdepot
             strParse = "Host=";
             strIn = strLine.Trim();
             //overriden string parse
-            stringParse();
+            stringSwitch();
         }
-        public override void stringParse()
+        public override void stringSwitch()
         {
             //Check if the line passed contains the token this link is responsible for...
             if (strIn.Contains(strParse))
             {
                 //if yes, process:
-                
+                StringParse();
             }else
             {
                 //go to next in chain
+                //TO:DO 
             }
+        }
+
+        public virtual void StringParse()
+        {
+            strRaw = strIn.Split('=');
+            try
+            {
+                strSqlIn = strRaw[1];
+            }
+            catch (Exception e)
+            {
+                System.Console.WriteLine("SQL data setting data missing.");
+            }
+
+            SpawnSub();
         }
 
         //Startup tag will run processes based off of the parsed string paths 
         public override void SpawnSub()
         {
-            Execute();
-
-            //throw new NotImplementedException();
+            tools.SetSql(0, strSqlIn);
         }
         public override void NextLink()
         {
