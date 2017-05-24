@@ -163,7 +163,7 @@ namespace Websdepot
 
             //checkPost();
         }
-        private static void exit(int code)
+        public static void exit(int code)
         {
             if(code > 0)
             {
@@ -588,6 +588,15 @@ namespace Websdepot
             while (!error)
             {
                 string subject = sr.ReadLine();
+                if (rgx.IsMatch(subject))
+                {
+                    //do nothing
+                }
+                else
+                    {
+                        Program.writeLog("Error in the CSV file");
+                        Program.exit(2);
+                    }
 
             }
             return result;
