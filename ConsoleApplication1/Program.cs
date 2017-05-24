@@ -463,7 +463,7 @@ namespace Websdepot
         //Startup tag will run processes based off of the parsed string paths 
         public override void SpawnSub()
         {
-            Execute();
+            SqlParseChain sqlParse = new SqlParseChain(strIn, tools);
 
             //throw new NotImplementedException();
         }
@@ -480,7 +480,7 @@ namespace Websdepot
     {
         protected string strSqlIn;
         protected string[] strRaw;
-        private SqlParseChain()
+        protected SqlParseChain()
         {
             strParse = "";
         }
@@ -504,12 +504,11 @@ namespace Websdepot
                 StringParse();
             }else
             {
-                //go to next in chain
-                //TO:DO 
+                NextLink();
             }
         }
 
-        public virtual void StringParse()
+        public void StringParse()
         {
             strRaw = strIn.Split('=');
             try
@@ -531,10 +530,140 @@ namespace Websdepot
         }
         public override void NextLink()
         {
-            System.Console.WriteLine("In reboot chain link");
-            throw new NotImplementedException();
+            SqlPortLink sqlPort = new SqlPortLink(strIn, tools);
         }
     }
+
+    //port line parser
+    class SqlPortLink : SqlParseChain
+    {
+
+        public SqlPortLink(string strLine, Toolbox tIn)
+        {
+            //toolbox in
+            tools = tIn;
+
+            //System.Console.WriteLine("SqlLink entered");
+            strParse = "Port=";
+            strIn = strLine.Trim();
+            //overriden string parse
+            stringSwitch();
+        }
+        //Startup tag will run processes based off of the parsed string paths 
+        public override void SpawnSub()
+        {
+            tools.SetSql(1, strSqlIn);
+        }
+        public override void NextLink()
+        {
+            SqlUnameLink sqlPort = new SqlUnameLink(strIn, tools);
+        }
+    }
+
+    //Username line parser
+    class SqlUnameLink : SqlParseChain
+    {
+
+        public SqlUnameLink(string strLine, Toolbox tIn)
+        {
+            //toolbox in
+            tools = tIn;
+
+            //System.Console.WriteLine("SqlLink entered");
+            strParse = "Username=";
+            strIn = strLine.Trim();
+            //overriden string parse
+            stringSwitch();
+        }
+        //Startup tag will run processes based off of the parsed string paths 
+        public override void SpawnSub()
+        {
+            tools.SetSql(2, strSqlIn);
+        }
+        public override void NextLink()
+        {
+            SqlPwordLink sqlPort = new SqlPwordLink(strIn, tools);
+        }
+    }
+
+    //Password line parser
+    class SqlPwordLink : SqlParseChain
+    {
+
+        public SqlPwordLink(string strLine, Toolbox tIn)
+        {
+            //toolbox in
+            tools = tIn;
+
+            //System.Console.WriteLine("SqlLink entered");
+            strParse = "Password=";
+            strIn = strLine.Trim();
+            //overriden string parse
+            stringSwitch();
+        }
+        //Startup tag will run processes based off of the parsed string paths 
+        public override void SpawnSub()
+        {
+            tools.SetSql(3, strSqlIn);
+        }
+        public override void NextLink()
+        {
+            SqlDbLink sqlPort = new SqlDbLink(strIn, tools);
+        }
+    }
+
+    //Database line parser
+    class SqlDbLink : SqlParseChain
+    {
+
+        public SqlDbLink(string strLine, Toolbox tIn)
+        {
+            //toolbox in
+            tools = tIn;
+
+            //System.Console.WriteLine("SqlLink entered");
+            strParse = "Database=";
+            strIn = strLine.Trim();
+            //overriden string parse
+            stringSwitch();
+        }
+        //Startup tag will run processes based off of the parsed string paths 
+        public override void SpawnSub()
+        {
+            tools.SetSql(4, strSqlIn);
+        }
+        public override void NextLink()
+        {
+            SqlCInLink sqlPort = new SqlCInLink(strIn, tools);
+        }
+    }
+
+    //CheckIn line parser
+    class SqlCInLink : SqlParseChain
+    {
+
+        public SqlCInLink(string strLine, Toolbox tIn)
+        {
+            //toolbox in
+            tools = tIn;
+
+            //System.Console.WriteLine("SqlLink entered");
+            strParse = "CheckinTime=";
+            strIn = strLine.Trim();
+            //overriden string parse
+            stringSwitch();
+        }
+        //Startup tag will run processes based off of the parsed string paths 
+        public override void SpawnSub()
+        {
+            tools.SetSql(5, strSqlIn);
+        }
+        public override void NextLink()
+        {
+            ChainEnd();
+        }
+    }
+
     //end of parser family
 
     //Toolbox holds information which main will used in a convenient bundle for methods to pass around
