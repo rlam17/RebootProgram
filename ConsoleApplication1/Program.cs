@@ -345,7 +345,7 @@ namespace Websdepot
                     string[] strRegEx = new string[] { ".exe " };
                     string[] strSplit;
                     strArgs = " ";
-                    strSplit = strChunk.Split(strRegEx, 1, StringSplitOptions.None);
+                    strSplit = strChunk.Split(strRegEx, 2, StringSplitOptions.None);
                     //strSplit[0] = strSplit[0] + ".exe";
                     strPath = strSplit[0];
                     try
@@ -397,10 +397,11 @@ namespace Websdepot
                     string[] strRegEx = new string[] { ".exe " };
                     string[] strSplit;
 
-                    strSplit = strChunk.Split(strRegEx, StringSplitOptions.None);
+                    strSplit = strChunk.Split(strRegEx, 2, StringSplitOptions.None);
                     strSplit[0] = strSplit[0] + ".exe";
                     strPath = strSplit[0];
                     strArgs = strSplit[1];
+                    
                     Process.Start(strPath, strArgs);
                 }
                 catch (FileNotFoundException e)
