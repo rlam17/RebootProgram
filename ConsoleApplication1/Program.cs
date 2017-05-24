@@ -547,6 +547,22 @@ namespace Websdepot
         {
             return sqlInfo;
         }
+
+        public bool CheckSql()
+        {
+            //attempt to loop through the entire sqlInfo array, if successful, return true
+            try
+            {
+                for(int i = 0; i<5; i++)
+                {
+                    sqlInfo[i].Contains("");
+                }
+                return true;
+            }catch(Exception e)
+            {
+                return false;
+            }
+        }
         private void clearCsv()
         {
             if (File.Exists(Program.postUrl))
