@@ -16,6 +16,7 @@ namespace Websdepot
         static string logUrl = "./log/Log.txt";
         static string confUrl = "./Conf.cfg";
         static string todayDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+        static string postUrl = "./post/post.csv";
         public static void writeLog(string logMessage)
         {
             //This will create a log if it doesn't exist
@@ -88,6 +89,15 @@ namespace Websdepot
             System.Threading.Thread.Sleep(minToSec);
         }
 
+        private static void checkPost()
+        {
+            if (File.Exists(postUrl))
+            {
+                File.Delete(postUrl);
+                File.Create(postUrl);
+            }
+        }
+
         static void Main(string[] args)
         {
             writeLog("Starting program");
@@ -107,9 +117,10 @@ namespace Websdepot
             */
 
             //Process.Start(strChunk);
-            
+            string confHash = createHash();
             readChunks();
 
+            checkPost();
         }
         private static void exit(int code)
         {
