@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.SqlClient;
@@ -50,7 +51,6 @@ namespace Websdepot
         private static void createHash()
         {
 
-            // TODO: Ask how to store the MD5
 
             using (var md5 = MD5.Create())
             {
@@ -65,7 +65,11 @@ namespace Websdepot
 
         private static void updateRegistry(string hash)
         {
-
+            // TODO: Get permissions ready
+            string root = "HKEY_LOCAL_MACHINE\\Software\\Websdepot Reboot\\";
+            string valueName = "ConfigHash";
+            string value = hash;
+            Registry.SetValue(root, valueName, hash);
         }
         private static void connectSql()
         {
