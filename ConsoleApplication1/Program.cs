@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.SqlClient;
@@ -65,7 +66,11 @@ namespace Websdepot
 
         private static void updateRegistry(string hash)
         {
-
+            // TODO: Needs testing
+            string root = "HKEY_LOCAL_MACHINE\\Software\\Websdepot Reboot\\";
+            string valueName = "ConfigHash";
+            string value = hash;
+            Registry.SetValue(root, valueName, hash);
         }
         private static void connectSql()
         {
