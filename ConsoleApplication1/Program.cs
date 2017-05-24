@@ -272,7 +272,7 @@ namespace Websdepot
         //Startup tag will run processes based off of the parsed string paths 
         public override void SpawnSub()
         {
-            string strProcessed;
+            //string strProcessed;
             foreach (string strChunk in lChunk){
                 /*
                 //read takes in string literals, no need for extra processing
