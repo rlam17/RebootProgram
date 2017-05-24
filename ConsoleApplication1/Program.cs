@@ -94,15 +94,19 @@ namespace Websdepot
 
             //connectSql();
             //delayWait(5);
-            
+
 
             //test replacement code
+            /*
             string strChunk = "C:\\Program Files (x86)\\Notepad++\\notepad++.exe";
             string strReplace = "C:\\Program Files (x86)\\Notepad++\\notepad++.exe";
             strReplace = strChunk.Replace("\\", "\\\\");
             System.Console.WriteLine("strReplace " + strReplace);
             System.Console.WriteLine("strChunk: " + strChunk);
-            Process.Start(strChunk);
+            */
+
+            //Process.Start(strChunk);
+            
             readChunks();
 
         }
@@ -180,10 +184,13 @@ namespace Websdepot
             //Send chunks to functions here
 
             //TagStartup ts = new TagStartup(startupChunk);
-
+            /*
             foreach (string x in rebootChunk){
                 System.Console.WriteLine(x);
             }
+            */
+            //System.Console.WriteLine(startupChunk[1]);
+            Process.Start(startupChunk[1]);
         }
     }
     /*Template method for 
