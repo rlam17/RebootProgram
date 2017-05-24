@@ -238,7 +238,7 @@ namespace Websdepot
         public abstract void SpawnSub();
         //abstract base for spawning logs
         // -add error code int array(?) if needed in the future to spawn specific messages
-        public abstract void SpawnLog();
+        public abstract void NextLink();
         public void stringParse()
         {
             if (strIn.Equals(strParse))
@@ -252,7 +252,7 @@ namespace Websdepot
                 //Call next in chain
                 //Chain tail should ouput a log
                 System.Console.WriteLine(strIn + " this is chunk 2");
-                SpawnLog();
+                NextLink();
             }
         }
     }
@@ -286,7 +286,7 @@ namespace Websdepot
             }
             throw new NotImplementedException();
         }
-        public override void SpawnLog()
+        public override void NextLink()
         {
             throw new NotImplementedException();
         }
