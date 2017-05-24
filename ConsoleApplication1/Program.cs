@@ -161,8 +161,7 @@ namespace Websdepot
             //createHash();
             //readChunks();
 
-            Toolbox tlbx = new Toolbox();
-            tlbx.checkCsv();
+            readChunks();
 
             //checkPost();
         }
@@ -261,10 +260,8 @@ namespace Websdepot
             */
             //System.Console.WriteLine(startupChunk[1]);
             //Process.Start(startupChunk[1]);
-            for(int i = 0; i < chunks.Count; i++)
-            {
-                ParserChain ts = new ParserChain(chunks[i].getChunk(), new Toolbox());
-            }
+            
+            ParserChain ts = new ParserChain(chunks[0].getChunk(), new Toolbox());
             
         }
     }
@@ -463,8 +460,10 @@ namespace Websdepot
         //Startup tag will run processes based off of the parsed string paths 
         public override void SpawnSub()
         {
-            SqlParseChain sqlParse = new SqlParseChain(strIn, tools);
-
+            foreach (string strIn in lChunk)
+            {
+                SqlParseChain sqlParse = new SqlParseChain(strIn, tools);
+            }
             //throw new NotImplementedException();
         }
         public override void NextLink()
