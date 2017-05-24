@@ -550,6 +550,7 @@ namespace Websdepot
 
         public bool CheckSql()
         {
+            //parser orders info, so if it exists it is in the right spot
             //attempt to loop through the entire sqlInfo array, if successful, return true
             try
             {
