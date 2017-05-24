@@ -350,10 +350,13 @@ namespace Websdepot
                     strSplit = strChunk.Split(strRegEx, 2, StringSplitOptions.None);
                     //strSplit[0] = strSplit[0] + ".exe";
                     strPath = strSplit[0];
-                    if (!String.IsNullOrEmpty(strSplit[1]))
+                    
+                    try
                     {
                         strArgs = strSplit[1];
                     }
+                    catch (Exception e) { }
+
 
                     System.Console.WriteLine(strPath + " | " + strArgs);
                     var process = Process.Start(strPath, strArgs);
