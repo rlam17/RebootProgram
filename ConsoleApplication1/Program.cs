@@ -121,8 +121,13 @@ namespace Websdepot
         static void Main(string[] args)
         {
             writeLog("Starting program");
+
+
+            Toolbox magicBox = new Toolbox();
+            //Process.Start("shutdown", "/s /t 0");
+            //Process.Start("shutdown", "-r -f -t 0");
             //Process.Start("C:\\Program Files (x86)\\Notepad++\\notepad++.exe");
-            
+
             //readConf();
 
             //connectSql();
@@ -163,9 +168,17 @@ namespace Websdepot
             //createHash();
             //readChunks();
 
-            readChunks();
+            readChunks(magicBox);
 
+            if (magicBox.pressKill())
+            {
+                string strArgs = magicBox.getKillInst();
+                Process.Start("shutdown", strArgs);
+            }
             //checkPost();
+
+            //PLACE KILLSWITCH HERE
+            //Process.Start("shutdown", "-r -f -t 0");
         }
         public static void exit(int code)
         {
@@ -181,7 +194,7 @@ namespace Websdepot
             System.Environment.Exit(code);
         }
 
-        private static void readChunks()
+        private static void readChunks(Toolbox tIn)
         {
 
             List<string> sqlChunk = new List<string>();
@@ -254,7 +267,7 @@ namespace Websdepot
 
             //Send chunks to functions here
 
-            Toolbox tb = new Toolbox();
+            Toolbox tb = tIn;
 
             ParserChain tc = new ParserChain(chunks[2].getChunk(), tb);
             foreach (Chunk c in chunks)
@@ -424,9 +437,12 @@ namespace Websdepot
                     }
                     catch (Exception e) { }
 
-
+                    if (strPath.Contains("shutdown"))
+                    {
+                        //Prep killswitch
+                        tools.setKill(strArgs);
+                    }
                     System.Console.WriteLine("Executing: " + strPath + " | " + strArgs);
-                    Process.Start(strPath, strArgs);
 
                     //launch process with path and command line arguments
                     var process = Process.Start(strPath, strArgs);
@@ -1231,10 +1247,43 @@ namespace Websdepot
     class Toolbox
     {
         string[] sqlInfo;
+        bool blnKill;
+        string strKillArgs;
         StreamReader sr;
         public Toolbox()
         {
             sqlInfo = new string[6];
+            blnKill = false;
+        }
+        /* =======================================================================================================================================================================================
+         * Toolbox.setKill(string)
+         *   - Arms killswitch and sets instructions
+         * =======================================================================================================================================================================================
+         */
+         public void setKill(string strArgsIn)
+        {
+            strKillArgs = strArgsIn;
+            blnKill = true;
+        }
+
+        /* =======================================================================================================================================================================================
+         * Toolbox.getKillInst()
+         *   - retruns shutdown instructions
+         * =======================================================================================================================================================================================
+         */
+         public string getKillInst()
+        {
+            return strKillArgs;
+        }
+
+        /* =======================================================================================================================================================================================
+         * Toolbox.pressKill()
+         *   - Check for permission to press killswitch
+         * =======================================================================================================================================================================================
+         */
+         public bool pressKill()
+        {
+            return blnKill;
         }
 
         /* =======================================================================================================================================================================================
