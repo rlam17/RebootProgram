@@ -267,64 +267,92 @@ namespace Websdepot
             
         }
     }
-    /*Template method for 
-       - name scheme for all the concrete parsers will follow the Tag[tag-name] naming convention
-    
-      Method operation chain:
-      1) Create parser object
-            - Object initiates tag keyword
-            - Passes tag chunk to input sanitation function
-      2) Input sanitation 
-            - Sanitizes and stores the tag
-            - Removes the tag from the chunk and stores it
-      3) Process the chunk
-            - Follow specific rules on a chunk specific basis
 
-        ***NOTE TO PEOPLE ADDING LINKS***
-        * New end links to the chain 
-    */
+    /* =======================================================================================================================================================================================
+     * Template method for 
+     *  - name scheme for all the concrete parsers will follow the Tag[tag-name] naming convention
+     *
+     * Method operation chain:
+     * 1) Create parser object
+     *      - Object initiates tag keyword
+     *      - Passes tag chunk to input sanitation function
+     * 2) Input sanitation 
+     *      - Sanitizes and stores the tag
+     *      - Removes the tag from the chunk and stores it
+     * 3) Process the chunk
+     *      - Follow specific rules on a chunk specific basis
+     *
+     *  ***NOTE TO PEOPLE ADDING LINKS***
+     *      - New end links should run the end of chain function which provides feedback if the code runs through the chain without finding the specific tag
+     *        - Last chain in parser chain always calls ChainEnd()
+     *      
+     * =======================================================================================================================================================================================
+     */
+
     abstract class Parser
     {
         //toolbox variable
         protected Toolbox tools;
+
         //variable which stores the parse word
         protected string strParse;
+
         //Sanitized Tag Input
         protected string strIn;
+
         //Raw chunk storage for when the tag isn't found
         protected List<string>rChunk;
+
         //Chunk storage
         protected List<string> lChunk;
-        /*
-         * Input Sanitation
-         *  - Check for input inconsistencies(extra whitespaces)
-         */
+        
 
-        //rChunk == rawChunk
+        /* =======================================================================================================================================================================================
+         * CleanIn(List<string> strInput)
+         *  Function:
+         *   -Cleans the chunk data and prepares it for processing
+         *   -Calls stringSwitch to decide whether this chain link performs the required actions for the settings
+         * 
+         * =======================================================================================================================================================================================
+         */
         public void CleanIn(List<string> inChunk)
         {
+            //preprocess the settings tag
             string strUnIn;
-            //clean and store the tag in the chunk
             strUnIn = inChunk[0];
             strUnIn = strUnIn.Trim();
             strIn = strUnIn.ToLower();
-            //store the chunk to the object and remove the tag
+
+            //store chunk
             lChunk = inChunk;
-            //lChunk.RemoveAt(0);
+
+            //call switch function
             stringSwitch();
         }
-        //Spawn specific subparser
+
+        //abstract function for performing settings actions
         public abstract void SpawnSub();
-        //abstract base for spawning logs
-        // -add error code int array(?) if needed in the future to spawn specific messages
+
+        //abstract base class for going to next link in chain if this link isn't responsible for the settings tag
         public abstract void NextLink();
+
+        /* =======================================================================================================================================================================================
+         * TagParse.stringSwitch()
+         *  - determines if the link handles this settings tag
+         *      - if yes then pop off the settings tag and redirect it to the subprocess handler
+         *      - if no then redirect it to the next link in the chain
+         * =======================================================================================================================================================================================
+         */
         public virtual void stringSwitch()
         {
             if (strIn.Equals(strParse))
             {
-                System.Console.WriteLine(strIn + " this is chunk 1");
                 //if the chunk belongs to this chain link then remove the tag and process it
+                System.Console.WriteLine(strIn + " found option handler link");
+
+                //pop off the options tag from the rest of the chunk
                 lChunk.RemoveAt(0);
+
                 //spawn specific subprocess parser
                 SpawnSub();
             }
@@ -332,22 +360,29 @@ namespace Websdepot
             {
                 //Call next in chain
                 //Chain tail should ouput a log
-                System.Console.WriteLine(strIn + " this is chunk 2");
+                System.Console.WriteLine(strIn + " link does not handle this option, going to next");
                 NextLink();
             }
         }
 
-        //Execute parsed functions
+        /* =======================================================================================================================================================================================
+         * TagParse.Execute()
+         *  - executes/launches programs based on input stored in the chunk
+         * =======================================================================================================================================================================================
+         */
         public virtual void Execute()
         {
             foreach (string strChunk in lChunk)
             {
                 /*
+                 * TEST CODE
                 //read takes in string literals, no need for extra processing
                 //chunks are super volitile right now needs further testing
                 strProcessed = strChunk.Replace("\\", "\\\\");
                 Process.Start(strProcessed);
                 */
+
+                //try to launch programs and catch if it fails
                 try
                 {
                     string strPath, strArgs;
@@ -369,7 +404,11 @@ namespace Websdepot
 
 
                     System.Console.WriteLine(strPath + " | " + strArgs);
+                    
+                    //launch process with path and command line arguments
                     var process = Process.Start(strPath, strArgs);
+                    
+                    //wait for process to end
                     process.WaitForExit();
                 }
                 catch (Win32Exception e)
@@ -379,38 +418,72 @@ namespace Websdepot
 
             }
         }
+
         //Run when end of chain is reached
         public virtual void ChainEnd() {
-            Program.writeLog("Command not found, check configuration file formatting or check if specific command has been implemented.");
+            Program.writeLog(strIn + "Command not found, check configuration file formatting or check if specific command has been implemented.");
         }
     }
-    
-    //concrete tag parser chain
+
+    /* =======================================================================================================================================================================================
+     * ParserChain
+     *  - Concrete implementation of Parser abstract class
+     *  - ParserChain parses and handles the settings tags in the config file
+     *  - ParserChain is the first in a chain of tag parsers which allows the script to handle settings tags regardless of order
+     *  
+     *  - Parser chain workflow:
+     *     - Upon creation preprocess settings tag
+     *     - Check if tag is handled by this particular parser
+     *          -If yes:
+     *              - Execute code based on settings
+     *          -If no:
+     *              - Pass the settings chunk onto the next parser in the chain
+     * =======================================================================================================================================================================================
+     */
     class ParserChain : Parser
     {
-        //try to avoid (privated for safety)
+        //Default constructor should never be used by user
         private ParserChain()
         {
             strParse = "[startup]";
         }
 
+        /* =======================================================================================================================================================================================
+         * ParserChain.ParserChain()
+         *   - The "default" constructor for ParserChain as Parsers always need a list of strings for commands and a toolbox for utilities
+         * =======================================================================================================================================================================================
+         */
         public ParserChain(List<string> inChunk, Toolbox tIn)
         {
-            //toolbox in
+            //Toolbox to use if the parser needs utilites implemented within it
             tools = tIn;
+
             //System.Console.WriteLine("ParserChain entered");
+
+            //set parser keyword/tag
             strParse = "[startup]";
+
+            //start tag preprocessing
             CleanIn(inChunk);
         }
-        
-        //Startup tag will run processes based off of the parsed string paths 
+
+        /* =======================================================================================================================================================================================
+         * ParserChain.SpawnSub()
+         *   - Run [startup] tag options
+         *     - Execute programs on startup (run Execute())
+         * =======================================================================================================================================================================================
+         */
         public override void SpawnSub()
         {
-            //string strProcessed;
+            //run execute function
             Execute();
-            //throw new NotImplementedException();
         }
 
+        /* =======================================================================================================================================================================================
+         * ParserChain.NextLink()
+         *   - Pass chunk onto the next parser in the chain
+         * =======================================================================================================================================================================================
+         */
         public override void NextLink()
         {
             System.Console.WriteLine("In startup chain link, going to next link");
@@ -418,30 +491,54 @@ namespace Websdepot
         }
     }
 
+    /* =======================================================================================================================================================================================
+     * RebootLink
+     *  - Concrete implementation of Parser abstract class
+     *  - RebootLink parses and handles the settings tags in the config file
+     *  - Is a Parser in the settings tag parser chain
+     * =======================================================================================================================================================================================
+     */
     class RebootLink : Parser
     {
-        //try to avoid (privated for safety)
+        //privated as the default constructor for Parsers should never be used
         private RebootLink()
         {
             strParse = "[reboot]";
         }
+
+        /* =======================================================================================================================================================================================
+         * RebootLink.RebootLink()
+         *   - The "default" constructor for RebootLink as Parsers always need a list of strings for commands and a toolbox for utilities
+         * =======================================================================================================================================================================================
+         */
         public RebootLink(List<string> inChunk, Toolbox tIn)
         {
             //toolbox in
             tools = tIn;
 
             //System.Console.WriteLine("RebootLink entered");
+
+            //set parser keyword/tag
             strParse = "[reboot]";
             CleanIn(inChunk);
         }
-        
-        //Startup tag will run processes based off of the parsed string paths 
+
+        /* =======================================================================================================================================================================================
+         * RebootLink.SpawnSub()
+         *   - Run [reboot] tag options
+         *     - Execute programs on reboot (run Execute())
+         * =======================================================================================================================================================================================
+         */
         public override void SpawnSub()
         {
             Execute();
-           
-            //throw new NotImplementedException();
         }
+
+        /* =======================================================================================================================================================================================
+         * RebootLink.NextLink()
+         *   - Pass chunk onto the next parser in the chain
+         * =======================================================================================================================================================================================
+         */
         public override void NextLink()
         {
             System.Console.WriteLine("In reboot chain link, going to next link");
@@ -450,7 +547,13 @@ namespace Websdepot
         }
     }
 
-    //SQL Link
+    /* =======================================================================================================================================================================================
+     * SqlLink
+     *  - Concrete implementation of Parser abstract class
+     *  - SqlLink parses and handles the settings tags in the config file
+     *  - Is a Parser in the settings tag parser chain
+     * =======================================================================================================================================================================================
+     */
     class SqlLink : Parser
     {
         //try to avoid (privated for safety)
@@ -458,6 +561,12 @@ namespace Websdepot
         {
             strParse = "[sql config]";
         }
+
+        /* =======================================================================================================================================================================================
+         * SqlLink.SqlLink()
+         *   - The "default" constructor for SqlLink as Parsers always need a list of strings for commands and a toolbox for utilities
+         * =======================================================================================================================================================================================
+         */
         public SqlLink(List<string> inChunk, Toolbox tIn)
         {
             //toolbox in
@@ -468,7 +577,13 @@ namespace Websdepot
             CleanIn(inChunk);
         }
 
-        //Startup tag will run processes based off of the parsed string paths 
+        /* =======================================================================================================================================================================================
+         * SqlLink.SpawnSub()
+         *   - Run [sql config] tag options
+         *     - Grabs all sql connection settings
+         *          - Achieve this by passing each settings line into a parser chain which parses the information and stores it into the passed in toolbox
+         * =======================================================================================================================================================================================
+         */
         public override void SpawnSub()
         {
             //go through each individual chunk line and pass it into the sql line parcer chain
@@ -476,8 +591,13 @@ namespace Websdepot
             {
                 SqlParseChain sqlParse = new SqlParseChain(strIn, tools);
             }
-            //throw new NotImplementedException();
         }
+
+        /* =======================================================================================================================================================================================
+         * SqlLink.NextLink()
+         *   - Pass chunk onto the next parser in the chain
+         * =======================================================================================================================================================================================
+         */
         public override void NextLink()
         {
             System.Console.WriteLine("In sql chain link");
@@ -690,16 +810,18 @@ namespace Websdepot
         //set the SQL property array (index, string)
         public void SetSql(int intIndex, string strIn)
         {
-           /*
-            * index for SQL info array:
-            * 
-            * 0: Host IP (eg: 192.168.0.10)
-            * 1: Port number (eg: 1433)
-            * 2: Username (eg: SomeUser)
-            * 3: Password (eg: SomePassword)
-            * 4: Database (eg: SomeDb)
-            * 5: CheckinTime (by minutes?) (eg: 2)
-            */
+            /*
+             * =======================================================================================================================================================================================
+             * index for SQL info array:
+             * 
+             * 0: Host IP (eg: 192.168.0.10)
+             * 1: Port number (eg: 1433)
+             * 2: Username (eg: SomeUser)
+             * 3: Password (eg: SomePassword)
+             * 4: Database (eg: SomeDb)
+             * 5: CheckinTime (by minutes?) (eg: 2)
+             * =======================================================================================================================================================================================
+             */
             sqlInfo[intIndex] = strIn;
         }
         
