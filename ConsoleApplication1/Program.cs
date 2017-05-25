@@ -20,7 +20,7 @@ namespace Websdepot
         static public string confUrl = "./Conf.cfg";
         static public string todayDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
         static public string postUrl = "./post/post.csv";
-        static List<confChunk> chunks = new List<confChunk>();
+        static List<Chunk> chunks = new List<Chunk>();
         public static void writeLog(string logMessage)
         {
             //This will create a log if it doesn't exist
@@ -214,27 +214,27 @@ namespace Websdepot
                         {
                             case 0:
                                 //sqlChunk = currentList;
-                                chunks.Add(new confChunk(currentList));
+                                chunks.Add(new Chunk(currentList));
                                 break;
                             case 1:
                                 //rebootConfigChunk = currentList;
-                                chunks.Add(new confChunk(currentList));
+                                chunks.Add(new Chunk(currentList));
                                 break;
                             case 2:
                                 //startupChunk = currentList;
-                                chunks.Add(new confChunk(currentList));
+                                chunks.Add(new Chunk(currentList));
                                 break;
                             case 3:
                                 //rebootChunk = currentList;
-                                chunks.Add(new confChunk(currentList));
+                                chunks.Add(new Chunk(currentList));
                                 break;
                             case 4:
                                 //lastRebootChunk = currentList;
-                                chunks.Add(new confChunk(currentList));
+                                chunks.Add(new Chunk(currentList));
                                 break;
                             case 5:
                                 //configuredRebootChunk = currentList;
-                                chunks.Add(new confChunk(currentList));
+                                chunks.Add(new Chunk(currentList));
                                 break;
                             default:
                                 currentList = null;
@@ -260,11 +260,12 @@ namespace Websdepot
             }
 
             string strTest = tb.ToString();
+            System.Console.WriteLine(tb.CheckSql());
             //System.Console.WriteLine(startupChunk[1]);
             //Process.Start(startupChunk[1]);
-            
+
             //ParserChain ts = new ParserChain(chunks[0].getChunk(), new Toolbox());
-            
+
         }
     }
 
@@ -284,7 +285,7 @@ namespace Websdepot
      *
      *  ***NOTE TO PEOPLE ADDING LINKS***
      *      - New end links should run the end of chain function which provides feedback if the code runs through the chain without finding the specific tag
-     *        - Last chain in parser chain always calls ChainEnd()
+     *        - Last chain in parser chain always calls chainEnd()
      *      
      * =======================================================================================================================================================================================
      */
@@ -308,14 +309,14 @@ namespace Websdepot
         
 
         /* =======================================================================================================================================================================================
-         * CleanIn(List<string> strInput)
+         * cleanIn(List<string> strInput)
          *  Function:
          *   -Cleans the chunk data and prepares it for processing
          *   -Calls stringSwitch to decide whether this chain link performs the required actions for the settings
          * 
          * =======================================================================================================================================================================================
          */
-        public void CleanIn(List<string> inChunk)
+        public void cleanIn(List<string> inChunk)
         {
             //preprocess the settings tag
             string strUnIn;
@@ -331,10 +332,10 @@ namespace Websdepot
         }
 
         //abstract function for performing settings actions
-        public abstract void SpawnSub();
+        public abstract void spawnSub();
 
         //abstract base class for going to next link in chain if this link isn't responsible for the settings tag
-        public abstract void NextLink();
+        public abstract void nextLink();
 
         /* =======================================================================================================================================================================================
          * TagParse.stringSwitch()
@@ -354,23 +355,23 @@ namespace Websdepot
                 lChunk.RemoveAt(0);
 
                 //spawn specific subprocess parser
-                SpawnSub();
+                spawnSub();
             }
             else
             {
                 //Call next in chain
                 //Chain tail should ouput a log
                 System.Console.WriteLine(strIn + " link does not handle this option, going to next");
-                NextLink();
+                nextLink();
             }
         }
 
         /* =======================================================================================================================================================================================
-         * TagParse.Execute()
+         * TagParse.execute()
          *  - executes/launches programs based on input stored in the chunk
          * =======================================================================================================================================================================================
          */
-        public virtual void Execute()
+        public virtual void execute()
         {
             foreach (string strChunk in lChunk)
             {
@@ -419,8 +420,12 @@ namespace Websdepot
             }
         }
 
-        //Run when end of chain is reached
-        public virtual void ChainEnd() {
+        /* =======================================================================================================================================================================================
+         * SqlParserChain.chainEnd()
+         *   - Run by the last parser in the chain to log that an unknown setting has not been processed by the script as it has not been implemented or incorrectly named
+         * =======================================================================================================================================================================================
+         */
+        public virtual void chainEnd() {
             Program.writeLog(strIn + "Command not found, check configuration file formatting or check if specific command has been implemented.");
         }
     }
@@ -435,22 +440,17 @@ namespace Websdepot
      *     - Upon creation preprocess settings tag
      *     - Check if tag is handled by this particular parser
      *          -If yes:
-     *              - Execute code based on settings
+     *              - execute code based on settings
      *          -If no:
      *              - Pass the settings chunk onto the next parser in the chain
      * =======================================================================================================================================================================================
      */
     class ParserChain : Parser
     {
-        //Default constructor should never be used by user
-        private ParserChain()
-        {
-            strParse = "[startup]";
-        }
-
         /* =======================================================================================================================================================================================
-         * ParserChain.ParserChain()
+         * ParserChain.ParserChain(List<string>, Toolbox)
          *   - The "default" constructor for ParserChain as Parsers always need a list of strings for commands and a toolbox for utilities
+         *      - Stores input and sends it to preprocessing
          * =======================================================================================================================================================================================
          */
         public ParserChain(List<string> inChunk, Toolbox tIn)
@@ -464,27 +464,27 @@ namespace Websdepot
             strParse = "[startup]";
 
             //start tag preprocessing
-            CleanIn(inChunk);
+            cleanIn(inChunk);
         }
 
         /* =======================================================================================================================================================================================
-         * ParserChain.SpawnSub()
+         * ParserChain.spawnSub()
          *   - Run [startup] tag options
-         *     - Execute programs on startup (run Execute())
+         *     - execute programs on startup (run execute())
          * =======================================================================================================================================================================================
          */
-        public override void SpawnSub()
+        public override void spawnSub()
         {
             //run execute function
-            Execute();
+            execute();
         }
 
         /* =======================================================================================================================================================================================
-         * ParserChain.NextLink()
+         * ParserChain.nextLink()
          *   - Pass chunk onto the next parser in the chain
          * =======================================================================================================================================================================================
          */
-        public override void NextLink()
+        public override void nextLink()
         {
             System.Console.WriteLine("In startup chain link, going to next link");
             RebootLink rlParse = new RebootLink(lChunk, tools);
@@ -500,15 +500,10 @@ namespace Websdepot
      */
     class RebootLink : Parser
     {
-        //privated as the default constructor for Parsers should never be used
-        private RebootLink()
-        {
-            strParse = "[reboot]";
-        }
-
         /* =======================================================================================================================================================================================
-         * RebootLink.RebootLink()
+         * RebootLink.RebootLink(List<string>, Toolbox)
          *   - The "default" constructor for RebootLink as Parsers always need a list of strings for commands and a toolbox for utilities
+         *      - Stores input and sends it to preprocessing
          * =======================================================================================================================================================================================
          */
         public RebootLink(List<string> inChunk, Toolbox tIn)
@@ -520,26 +515,26 @@ namespace Websdepot
 
             //set parser keyword/tag
             strParse = "[reboot]";
-            CleanIn(inChunk);
+            cleanIn(inChunk);
         }
 
         /* =======================================================================================================================================================================================
-         * RebootLink.SpawnSub()
+         * RebootLink.spawnSub()
          *   - Run [reboot] tag options
-         *     - Execute programs on reboot (run Execute())
+         *     - execute programs on reboot (run execute())
          * =======================================================================================================================================================================================
          */
-        public override void SpawnSub()
+        public override void spawnSub()
         {
-            Execute();
+            execute();
         }
 
         /* =======================================================================================================================================================================================
-         * RebootLink.NextLink()
+         * RebootLink.nextLink()
          *   - Pass chunk onto the next parser in the chain
          * =======================================================================================================================================================================================
          */
-        public override void NextLink()
+        public override void nextLink()
         {
             System.Console.WriteLine("In reboot chain link, going to next link");
             SqlLink sqlParse = new SqlLink(lChunk, tools);
@@ -556,15 +551,10 @@ namespace Websdepot
      */
     class SqlLink : Parser
     {
-        //try to avoid (privated for safety)
-        private SqlLink()
-        {
-            strParse = "[sql config]";
-        }
-
         /* =======================================================================================================================================================================================
-         * SqlLink.SqlLink()
+         * SqlLink.SqlLink(List<string>, Toolbox)
          *   - The "default" constructor for SqlLink as Parsers always need a list of strings for commands and a toolbox for utilities
+         *      - Stores input and sends it to preprocessing
          * =======================================================================================================================================================================================
          */
         public SqlLink(List<string> inChunk, Toolbox tIn)
@@ -574,31 +564,31 @@ namespace Websdepot
 
             //System.Console.WriteLine("SqlLink entered");
             strParse = "[sql config]";
-            CleanIn(inChunk);
+            cleanIn(inChunk);
         }
 
         /* =======================================================================================================================================================================================
-         * SqlLink.SpawnSub()
+         * SqlLink.spawnSub()
          *   - Run [sql config] tag options
          *     - Grabs all sql connection settings
          *          - Achieve this by passing each settings line into a parser chain which parses the information and stores it into the passed in toolbox
          * =======================================================================================================================================================================================
          */
-        public override void SpawnSub()
+        public override void spawnSub()
         {
             //go through each individual chunk line and pass it into the sql line parcer chain
             foreach (string strIn in lChunk)
             {
-                SqlParseChain sqlParse = new SqlParseChain(strIn, tools);
+                SqlParserChain sqlParse = new SqlParserChain(strIn, tools);
             }
         }
 
         /* =======================================================================================================================================================================================
-         * SqlLink.NextLink()
+         * SqlLink.nextLink()
          *   - Pass chunk onto the next parser in the chain
          * =======================================================================================================================================================================================
          */
-        public override void NextLink()
+        public override void nextLink()
         {
             System.Console.WriteLine("In sql chain link");
             throw new NotImplementedException();
@@ -607,15 +597,41 @@ namespace Websdepot
     //end of tag parser family
 
     //beginning of sql parser chain family
-    class SqlParseChain : Parser
+
+    /* =======================================================================================================================================================================================
+     * SqlParserChain
+     *  - Concrete implementation of Parser abstract class
+     *  - SqlParserChain parses and stores the SQL access information
+     *      -This initial link checks for and stores the host information
+     *  - SqlParserChain is the first in a chain of information parsres which allows the script to grab and store SQL data even if it isn't in the right order
+     *  
+     *  - Parser chain workflow:
+     *     - Upon creation preprocess data line
+     *     - Check if data is handled by this particular parser
+     *          -If yes:
+     *              - execute code based on settings
+     *          -If no:
+     *              - Pass the settings chunk onto the next parser in the chain
+     * =======================================================================================================================================================================================
+     */
+    class SqlParserChain : Parser
     {
         protected string strSqlIn;
         protected string[] strRaw;
-        protected SqlParseChain()
+
+        //default constructor should never be touched
+        protected SqlParserChain()
         {
             strParse = "";
         }
-        public SqlParseChain(string strLine, Toolbox tIn)
+
+        /* =======================================================================================================================================================================================
+         * SqlParserChain.SqlParserChain(string, Toolbox)
+         *   - The "default" constructor for SqlLink as Parsers always need a settings line for commands and a toolbox for utilities
+         *      - Stores input and sends it to the decision-making switch
+         * =======================================================================================================================================================================================
+         */
+        public SqlParserChain(string strLine, Toolbox tIn)
         {
             //toolbox in
             tools = tIn;
@@ -623,9 +639,16 @@ namespace Websdepot
             //System.Console.WriteLine("SqlLink entered");
             strParse = "Host=";
             strIn = strLine.Replace(" ", String.Empty);
+
             //overriden string parse
             stringSwitch();
         }
+
+        /* =======================================================================================================================================================================================
+         * SqlParserChain.stringSwitch()
+         *   - Decides if the line passed in is processed by this parser and redirects it to either parsing or the next parser in the chain
+         * =======================================================================================================================================================================================
+         */
         public override void stringSwitch()
         {
             //Check if the line passed contains the token this link is responsible for...
@@ -635,10 +658,15 @@ namespace Websdepot
                 StringParse();
             }else
             {
-                NextLink();
+                nextLink();
             }
         }
 
+        /* =======================================================================================================================================================================================
+         * SqlParserChain.StringParse()
+         *   - Splits the line
+         * =======================================================================================================================================================================================
+         */
         public void StringParse()
         {
             strRaw = strIn.Split('=');
@@ -651,24 +679,54 @@ namespace Websdepot
                 System.Console.WriteLine("SQL data setting data missing.");
             }
 
-            SpawnSub();
+            spawnSub();
         }
 
-        //Startup tag will run processes based off of the parsed string paths 
-        public override void SpawnSub()
+        /* =======================================================================================================================================================================================
+         * SqlParserChain.spawnSub()
+         *   - Stores the SQL info in its appropriate spot in the Toolbox object
+         * =======================================================================================================================================================================================
+         */
+        public override void spawnSub()
         {
             tools.SetSql(0, strSqlIn);
         }
-        public override void NextLink()
+
+        /* =======================================================================================================================================================================================
+         * SqlParserChain.nextLink()
+         *   - Redirects the line to the next parser in the parser chain
+         * =======================================================================================================================================================================================
+         */
+        public override void nextLink()
         {
             SqlPortLink sqlPort = new SqlPortLink(strIn, tools);
         }
+
+        /* =======================================================================================================================================================================================
+         * SqlParserChain.chainEnd()
+         *   - Run by the last parser in the chain to log that a line of supposed SQL creds have not been stored into the object
+         * =======================================================================================================================================================================================
+         */
+        public override void chainEnd()
+        {
+            Program.writeLog(strIn + "SQL connection data is invalid, check configuration file formatting or check if specific data piece is needed to connect to your SQL connection.");
+        }
     }
 
-    //port line parser
-    class SqlPortLink : SqlParseChain
+    /* =======================================================================================================================================================================================
+     * SqlPortLink
+     *  - SqlPortLink parses and stores the port information
+     *  - Is a Parser in the SQL info parser chain
+     * =======================================================================================================================================================================================
+     */
+    class SqlPortLink : SqlParserChain
     {
-
+        /* =======================================================================================================================================================================================
+         * SqlPortLink.SqlPortLink(string, Toolbox)
+         *   - The "default" constructor for SqlLink as Parsers always need a settings line for commands and a toolbox for utilities
+         *      - Stores input and sends it to the decision-making switch
+         * =======================================================================================================================================================================================
+         */
         public SqlPortLink(string strLine, Toolbox tIn)
         {
             //toolbox in
@@ -680,21 +738,42 @@ namespace Websdepot
             //overriden string parse
             stringSwitch();
         }
-        //Startup tag will run processes based off of the parsed string paths 
-        public override void SpawnSub()
+
+        /* =======================================================================================================================================================================================
+         * SqlPortLink.spawnSub()
+         *   - Stores the SQL info in its appropriate spot in the Toolbox object
+         * =======================================================================================================================================================================================
+         */
+        public override void spawnSub()
         {
             tools.SetSql(1, strSqlIn);
         }
-        public override void NextLink()
+
+        /* =======================================================================================================================================================================================
+         * SqlPortLink.nextLink()
+         *   - Redirects the line to the next parser in the parser chain
+         * =======================================================================================================================================================================================
+         */
+        public override void nextLink()
         {
             SqlUnameLink sqlPort = new SqlUnameLink(strIn, tools);
         }
     }
 
-    //Username line parser
-    class SqlUnameLink : SqlParseChain
+    /* =======================================================================================================================================================================================
+     * SqlUnameLink
+     *  - SqlUnameLink parses and stores the username information
+     *  - Is a Parser in the SQL info parser chain
+     * =======================================================================================================================================================================================
+     */
+    class SqlUnameLink : SqlParserChain
     {
-
+        /* =======================================================================================================================================================================================
+         * SqlUnameLink.SqlUnameLink(string, Toolbox)
+         *   - The "default" constructor for SqlUnameLink as Parsers always need settings line and a toolbox for utilities
+         *      - Stores input and sends it to the decision-making switch
+         * =======================================================================================================================================================================================
+         */
         public SqlUnameLink(string strLine, Toolbox tIn)
         {
             //toolbox in
@@ -706,21 +785,42 @@ namespace Websdepot
             //overriden string parse
             stringSwitch();
         }
-        //Startup tag will run processes based off of the parsed string paths 
-        public override void SpawnSub()
+
+        /* =======================================================================================================================================================================================
+         * SqlUnameLink.spawnSub()
+         *   - Stores the SQL info in its appropriate spot in the Toolbox object
+         * =======================================================================================================================================================================================
+         */
+        public override void spawnSub()
         {
             tools.SetSql(2, strSqlIn);
         }
-        public override void NextLink()
+
+        /* =======================================================================================================================================================================================
+         * SqlUnameLink.nextLink()
+         *   - Redirects the line to the next parser in the parser chain
+         * =======================================================================================================================================================================================
+         */
+        public override void nextLink()
         {
             SqlPwordLink sqlPort = new SqlPwordLink(strIn, tools);
         }
     }
 
-    //Password line parser
-    class SqlPwordLink : SqlParseChain
+    /* =======================================================================================================================================================================================
+     * SqlPwordLink
+     *  - SqlPwordLink parses and stores the password information
+     *  - Is a Parser in the SQL info parser chain
+     * =======================================================================================================================================================================================
+     */
+    class SqlPwordLink : SqlParserChain
     {
-
+        /* =======================================================================================================================================================================================
+         * SqlPwordLink.SqlPwordLink(string, Toolbox)
+         *   - The "default" constructor for SqlPwordLink as Parsers always need settings line and a toolbox for utilities
+         *      - Stores input and sends it to the decision-making switch
+         * =======================================================================================================================================================================================
+         */
         public SqlPwordLink(string strLine, Toolbox tIn)
         {
             //toolbox in
@@ -732,21 +832,42 @@ namespace Websdepot
             //overriden string parse
             stringSwitch();
         }
-        //Startup tag will run processes based off of the parsed string paths 
-        public override void SpawnSub()
+
+        /* =======================================================================================================================================================================================
+         * SqlPwordLink.spawnSub()
+         *   - Stores the SQL info in its appropriate spot in the Toolbox object
+         * =======================================================================================================================================================================================
+         */
+        public override void spawnSub()
         {
             tools.SetSql(3, strSqlIn);
         }
-        public override void NextLink()
+
+        /* =======================================================================================================================================================================================
+         * SqlPwordLink.nextLink()
+         *   - Redirects the line to the next parser in the parser chain
+         * =======================================================================================================================================================================================
+         */
+        public override void nextLink()
         {
             SqlDbLink sqlPort = new SqlDbLink(strIn, tools);
         }
     }
 
-    //Database line parser
-    class SqlDbLink : SqlParseChain
+    /* =======================================================================================================================================================================================
+     * SqlDbLink
+     *  - SqlDbLink parses and stores the database information
+     *  - Is a Parser in the SQL info parser chain
+     * =======================================================================================================================================================================================
+     */
+    class SqlDbLink : SqlParserChain
     {
-
+        /* =======================================================================================================================================================================================
+         * SqlDbLink.SqlDbLink(string, Toolbox)
+         *   - The "default" constructor for SqlDbLink as Parsers always need settings line and a toolbox for utilities
+         *      - Stores input and sends it to the decision-making switch
+         * =======================================================================================================================================================================================
+         */
         public SqlDbLink(string strLine, Toolbox tIn)
         {
             //toolbox in
@@ -758,21 +879,42 @@ namespace Websdepot
             //overriden string parse
             stringSwitch();
         }
-        //Startup tag will run processes based off of the parsed string paths 
-        public override void SpawnSub()
+
+        /* =======================================================================================================================================================================================
+         * SqlDbLink.spawnSub()
+         *   - Stores the SQL info in its appropriate spot in the Toolbox object
+         * =======================================================================================================================================================================================
+         */
+        public override void spawnSub()
         {
             tools.SetSql(4, strSqlIn);
         }
-        public override void NextLink()
+
+        /* =======================================================================================================================================================================================
+         * SqlDbLink.nextLink()
+         *   - Redirects the line to the next parser in the parser chain
+         * =======================================================================================================================================================================================
+         */
+        public override void nextLink()
         {
             SqlCInLink sqlPort = new SqlCInLink(strIn, tools);
         }
     }
 
-    //CheckIn line parser
-    class SqlCInLink : SqlParseChain
+    /* =======================================================================================================================================================================================
+     * SqlCInLink
+     *  - SqlCInLink parses and stores the check in time information
+     *  - Is a Parser in the SQL info parser chain
+     * =======================================================================================================================================================================================
+     */
+    class SqlCInLink : SqlParserChain
     {
-
+        /* =======================================================================================================================================================================================
+         * SqlCInLink.SqlDbLink(string, Toolbox)
+         *   - The "default" constructor for SqlCInLink as Parsers always need settings line and a toolbox for utilities
+         *      - Stores input and sends it to the decision-making switch
+         * =======================================================================================================================================================================================
+         */
         public SqlCInLink(string strLine, Toolbox tIn)
         {
             //toolbox in
@@ -784,20 +926,37 @@ namespace Websdepot
             //overriden string parse
             stringSwitch();
         }
-        //Startup tag will run processes based off of the parsed string paths 
-        public override void SpawnSub()
+
+        /* =======================================================================================================================================================================================
+         * SqlCInLink.spawnSub()
+         *   - Stores the SQL info in its appropriate spot in the Toolbox object
+         * =======================================================================================================================================================================================
+         */
+        public override void spawnSub()
         {
             tools.SetSql(5, strSqlIn);
         }
-        public override void NextLink()
+
+        /* =======================================================================================================================================================================================
+         * SqlCInLink.nextLink()
+         *   - Redirects the line to the next parser in the parser chain
+         * =======================================================================================================================================================================================
+         */
+        public override void nextLink()
         {
-            ChainEnd();
+            //currently the last chain in the link so this runs chainEnd()
+            chainEnd();
         }
     }
 
     //end of parser family
 
-    //Toolbox holds information which main will used in a convenient bundle for methods to pass around
+    /* =======================================================================================================================================================================================
+     * Toolbox
+     *   - Toolbox contains utilities to check information which will be used by the main program and also acts as a storage location 
+     *     for all the information which the parser stores for the main program to use
+     * =======================================================================================================================================================================================
+     */
     class Toolbox
     {
         string[] sqlInfo;
@@ -807,8 +966,15 @@ namespace Websdepot
             sqlInfo = new string[6];
         }
 
-        //set the SQL property array (index, string)
-        public void SetSql(int intIndex, string strIn)
+        /* =======================================================================================================================================================================================
+         * Toolbox.setSql(int, string)
+         *   - Set the SQL information into the storage fields of the program
+         *      - int argument is the index 
+         *      - string is the associated data/cred
+         *   - Note the function assumes developer knows the structure of the sqlInfo array
+         * =======================================================================================================================================================================================
+         */
+        public void setSql(int intIndex, string strIn)
         {
             /*
              * =======================================================================================================================================================================================
@@ -824,20 +990,32 @@ namespace Websdepot
              */
             sqlInfo[intIndex] = strIn;
         }
-        
-        public string[] GetSql()
+
+        /* =======================================================================================================================================================================================
+         * Toolbox.getSql()
+         *   - Returns the sqlInfo array so developer can use the SQL data
+         * =======================================================================================================================================================================================
+         */
+        public string[] getSql()
         {
             return sqlInfo;
         }
 
-        public bool CheckSql()
+        /* =======================================================================================================================================================================================
+         * Toolbox.checkSql()
+         *   - Verifies the sqlInfo array is fully populated
+         *      - Returns true or false depending on if all the data has been filled in
+         * =======================================================================================================================================================================================
+         */
+        public bool checkSql()
         {
             //parser orders info, so if it exists it is in the right spot
             //attempt to loop through the entire sqlInfo array, if successful, return true
             try
             {
-                for(int i = 0; i<5; i++)
+                for(int i = 0; i<6; i++)
                 {
+                    //dummy code to iterate through the array
                     sqlInfo[i].Contains("");
                 }
                 return true;
@@ -846,6 +1024,12 @@ namespace Websdepot
                 return false;
             }
         }
+
+        /* =======================================================================================================================================================================================
+         * Toolbox.clearCsv()
+         *   - Resets the CSV file
+         * =======================================================================================================================================================================================
+         */
         private void clearCsv()
         {
             if (File.Exists(Program.postUrl))
@@ -856,6 +1040,12 @@ namespace Websdepot
             sw.WriteLine("StartupTime,ServerName,Status,Service,Error,");
             sw.Close();
         }
+
+        /* =======================================================================================================================================================================================
+         * Toolbox.clearCsv()
+         *   - Vreifies the integrity of the CSV file
+         * =======================================================================================================================================================================================
+         */
         public bool checkCsv()
         {
             //The regex pattern is: ^"(.+)" ?,"(\w+)","([A-Z]+)","(.+)","(.*)"$
@@ -887,10 +1077,17 @@ namespace Websdepot
         }
     }
 
-    class confChunk
+    /* =======================================================================================================================================================================================
+     * Chunk
+     *   - List of strings
+     *      - A chunk holds a block of settings 
+     *          - A chunk starts from the settings tag and ends when a new line character is detected
+     * =======================================================================================================================================================================================
+     */
+    class Chunk
     {
         List<string> lines;
-        public confChunk(List<string> i)
+        public Chunk(List<string> i)
         {
             lines = i;
         }
