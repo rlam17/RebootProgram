@@ -121,6 +121,8 @@ namespace Websdepot
         static void Main(string[] args)
         {
             writeLog("Starting program");
+            //Process.Start("C:\\Program Files (x86)\\Notepad++\\notepad++.exe");
+            
             //readConf();
 
             //connectSql();
@@ -253,12 +255,19 @@ namespace Websdepot
             //Send chunks to functions here
 
             Toolbox tb = new Toolbox();
-            ParserChain ts = new ParserChain(chunks[0].getChunk(), tb);
+
+            ParserChain tc = new ParserChain(chunks[2].getChunk(), tb);
+            foreach (Chunk c in chunks)
+            {
+                ParserChain ts = new ParserChain(c.getChunk(), tb);
+            }
+            
             
             foreach (string x in rebootChunk){
                 System.Console.WriteLine(x);
             }
 
+            
             string strTest = tb.ToString();
             System.Console.WriteLine(tb.checkSql());
             //System.Console.WriteLine(startupChunk[1]);
@@ -399,7 +408,11 @@ namespace Websdepot
                     string[] strSplit;
                     strArgs = " ";
                     strSplit = strChunk.Split(strRegEx, 2, StringSplitOptions.None);
-                    //strSplit[0] = strSplit[0] + ".exe";
+
+                    if (!strSplit[0].Contains(".exe"))
+                    {
+                        strSplit[0] = strSplit[0] + ".exe";
+                    }
                     strPath = strSplit[0];
                     
                     //Grabs the command line arguments
@@ -412,8 +425,9 @@ namespace Websdepot
                     catch (Exception e) { }
 
 
-                    System.Console.WriteLine(strPath + " | " + strArgs);
-                    
+                    System.Console.WriteLine("Executing: " + strPath + " | " + strArgs);
+                    Process.Start(strPath, strArgs);
+
                     //launch process with path and command line arguments
                     var process = Process.Start(strPath, strArgs);
                     
@@ -785,7 +799,6 @@ namespace Websdepot
      */
     abstract class InfoParserChain : Parser
     {
-        protected string strIn;
         protected string[] strRaw;
 
         //default constructor should never be touched
