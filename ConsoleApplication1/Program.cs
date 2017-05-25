@@ -260,7 +260,7 @@ namespace Websdepot
             }
 
             string strTest = tb.ToString();
-            System.Console.WriteLine(tb.CheckSql());
+            System.Console.WriteLine(tb.checkSql());
             //System.Console.WriteLine(startupChunk[1]);
             //Process.Start(startupChunk[1]);
 
@@ -434,6 +434,7 @@ namespace Websdepot
      * ParserChain
      *  - Concrete implementation of Parser abstract class
      *  - ParserChain parses and handles the settings tags in the config file
+     *      - This initial chain handles the [startup] tag
      *  - ParserChain is the first in a chain of tag parsers which allows the script to handle settings tags regardless of order
      *  
      *  - Parser chain workflow:
@@ -494,7 +495,7 @@ namespace Websdepot
     /* =======================================================================================================================================================================================
      * RebootLink
      *  - Concrete implementation of Parser abstract class
-     *  - RebootLink parses and handles the settings tags in the config file
+     *  - RebootLink parses and handles the [reboot] in the config file
      *  - Is a Parser in the settings tag parser chain
      * =======================================================================================================================================================================================
      */
@@ -545,7 +546,7 @@ namespace Websdepot
     /* =======================================================================================================================================================================================
      * SqlLink
      *  - Concrete implementation of Parser abstract class
-     *  - SqlLink parses and handles the settings tags in the config file
+     *  - SqlLink parses and handles the [sql config] tag in the config file
      *  - Is a Parser in the settings tag parser chain
      * =======================================================================================================================================================================================
      */
@@ -594,6 +595,60 @@ namespace Websdepot
             throw new NotImplementedException();
         }
     }
+
+    /* =======================================================================================================================================================================================
+     * ConfRebLink
+     *  - Concrete implementation of Parser abstract class
+     *  - ConfRebLink parses and handles the [reboot config] tag in the config file
+     *  - Is a Parser in the settings tag parser chain
+     * =======================================================================================================================================================================================
+     */
+    class ConfRebLink : Parser
+    {
+        /* =======================================================================================================================================================================================
+         * ConfRebLink.ConfRebLink(List<string>, Toolbox)
+         *   - The "default" constructor for ConfRebLink as Parsers always need a list of strings for commands and a toolbox for utilities
+         *      - Stores input and sends it to preprocessing
+         * =======================================================================================================================================================================================
+         */
+        public ConfRebLink(List<string> inChunk, Toolbox tIn)
+        {
+            //toolbox in
+            tools = tIn;
+
+            //System.Console.WriteLine("ConfRebLink entered");
+
+            //set parser keyword/tag
+            strParse = "[reboot config]";
+            cleanIn(inChunk);
+        }
+
+        /* =======================================================================================================================================================================================
+         * ConfRebLink.spawnSub()
+         *   - Run [reboot] tag options
+         *     - Process reboot configurations
+         * =======================================================================================================================================================================================
+         */
+        public override void spawnSub()
+        {
+            //reboot configurations go here
+
+        }
+
+        /* =======================================================================================================================================================================================
+         * ConfRebLink.nextLink()
+         *   - Pass chunk onto the next parser in the chain
+         * =======================================================================================================================================================================================
+         */
+        public override void nextLink()
+        {
+            System.Console.WriteLine("In reboot config chain link, going to next link");
+            SqlLink sqlParse = new SqlLink(lChunk, tools);
+            //throw new NotImplementedException();
+        }
+    }
+
+
     //end of tag parser family
 
     //beginning of sql parser chain family
@@ -689,7 +744,7 @@ namespace Websdepot
          */
         public override void spawnSub()
         {
-            tools.SetSql(0, strSqlIn);
+            tools.setSql(0, strSqlIn);
         }
 
         /* =======================================================================================================================================================================================
@@ -746,7 +801,7 @@ namespace Websdepot
          */
         public override void spawnSub()
         {
-            tools.SetSql(1, strSqlIn);
+            tools.setSql(1, strSqlIn);
         }
 
         /* =======================================================================================================================================================================================
@@ -793,7 +848,7 @@ namespace Websdepot
          */
         public override void spawnSub()
         {
-            tools.SetSql(2, strSqlIn);
+            tools.setSql(2, strSqlIn);
         }
 
         /* =======================================================================================================================================================================================
@@ -840,7 +895,7 @@ namespace Websdepot
          */
         public override void spawnSub()
         {
-            tools.SetSql(3, strSqlIn);
+            tools.setSql(3, strSqlIn);
         }
 
         /* =======================================================================================================================================================================================
@@ -887,7 +942,7 @@ namespace Websdepot
          */
         public override void spawnSub()
         {
-            tools.SetSql(4, strSqlIn);
+            tools.setSql(4, strSqlIn);
         }
 
         /* =======================================================================================================================================================================================
@@ -934,7 +989,7 @@ namespace Websdepot
          */
         public override void spawnSub()
         {
-            tools.SetSql(5, strSqlIn);
+            tools.setSql(5, strSqlIn);
         }
 
         /* =======================================================================================================================================================================================
