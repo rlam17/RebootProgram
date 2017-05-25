@@ -290,6 +290,14 @@ namespace Websdepot
      * =======================================================================================================================================================================================
      */
 
+     /*
+      * 2 types of parsers will need to be made:
+      *   1) settings tags parsers
+      *         - these will deal with main settings tags and redirect action requests ex. [startup]\
+      *   2) settings info parsers
+      *         - these grab information from the config file and store it in the Toolbox object
+      */
+
     abstract class Parser
     {
         //toolbox variable
@@ -430,6 +438,8 @@ namespace Websdepot
         }
     }
 
+//********************************************************************************************************************************************************************************************
+//settings tag parser chain begins
     /* =======================================================================================================================================================================================
      * ParserChain
      *  - Concrete implementation of Parser abstract class
@@ -753,8 +763,95 @@ namespace Websdepot
 
     //end of tag parser family
 
-    //beginning of sql parser chain family
+    //********************************************************************************************************************************************************************************************
 
+    //beginning of info parser chain family
+
+    //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+    /* =======================================================================================================================================================================================
+     * InfoParserChain
+     *  - Abstract implementation of Parser abstract class
+     *  - Acts as the base for all info parsers
+     *  
+     *  - Parser chain workflow:
+     *     - Upon creation preprocess data line
+     *     - Check if data is handled by this particular parser
+     *          -If yes:
+     *              - execute code based on settings
+     *          -If no:
+     *              - Pass the settings chunk onto the next parser in the chain
+     * =======================================================================================================================================================================================
+     */
+    abstract class InfoParserChain : Parser
+    {
+        protected string strIn;
+        protected string[] strRaw;
+
+        //default constructor should never be touched
+        protected InfoParserChain()
+        {
+            strParse = "";
+        }
+
+        /* =======================================================================================================================================================================================
+         * InfoParserChain.InfoParserChain(string, Toolbox)
+         *   - The "default" constructor for SqlLink as Parsers always need a settings line for commands and a toolbox for utilities
+         *      - Stores input and sends it to the decision-making switch
+         * =======================================================================================================================================================================================
+         */
+
+        /* =======================================================================================================================================================================================
+         * InfoParserChain.stringSwitch()
+         *   - Decides if the line passed in is processed by this parser and redirects it to either parsing or the next parser in the chain
+         * =======================================================================================================================================================================================
+         */
+        public override void stringSwitch()
+        {
+            //Check if the line passed contains the token this link is responsible for...
+            if (strIn.Contains(strParse))
+            {
+                //if yes, process:
+                StringParse();
+            }
+            else
+            {
+                nextLink();
+            }
+        }
+
+        /* =======================================================================================================================================================================================
+         * InfoParserChain.StringParse()
+         *   - Splits the line
+         * =======================================================================================================================================================================================
+         */
+        public void StringParse()
+        {
+            strRaw = strIn.Split('=');
+            try
+            {
+                strIn = strRaw[1];
+            }
+            catch (Exception e)
+            {
+                System.Console.WriteLine("Setting data missing");
+            }
+
+            spawnSub();
+        }
+
+        /* =======================================================================================================================================================================================
+         * InfoParserChain.chainEnd()
+         *   - Run by the last parser in the chain to log that a line of supposed SQL creds have not been stored into the object
+         * =======================================================================================================================================================================================
+         */
+        public override void chainEnd()
+        {
+            Program.writeLog(strIn + "Invalid data");
+        }
+    }
+    
+    //SQL info parser chain begins
     /* =======================================================================================================================================================================================
      * SqlParserChain
      *  - Concrete implementation of Parser abstract class
@@ -771,16 +868,13 @@ namespace Websdepot
      *              - Pass the settings chunk onto the next parser in the chain
      * =======================================================================================================================================================================================
      */
-    class SqlParserChain : Parser
+    class SqlParserChain : InfoParserChain
     {
-        protected string strSqlIn;
+        protected string strIn;
         protected string[] strRaw;
 
         //default constructor should never be touched
-        protected SqlParserChain()
-        {
-            strParse = "";
-        }
+        
 
         /* =======================================================================================================================================================================================
          * SqlParserChain.SqlParserChain(string, Toolbox)
@@ -829,7 +923,7 @@ namespace Websdepot
             strRaw = strIn.Split('=');
             try
             {
-                strSqlIn = strRaw[1];
+                strIn = strRaw[1];
             }
             catch (Exception e)
             {
@@ -846,7 +940,7 @@ namespace Websdepot
          */
         public override void spawnSub()
         {
-            tools.setSql(0, strSqlIn);
+            tools.setSql(0, strIn);
         }
 
         /* =======================================================================================================================================================================================
@@ -876,7 +970,7 @@ namespace Websdepot
      *  - Is a Parser in the SQL info parser chain
      * =======================================================================================================================================================================================
      */
-    class SqlPortLink : SqlParserChain
+    class SqlPortLink : InfoParserChain
     {
         /* =======================================================================================================================================================================================
          * SqlPortLink.SqlPortLink(string, Toolbox)
@@ -903,7 +997,7 @@ namespace Websdepot
          */
         public override void spawnSub()
         {
-            tools.setSql(1, strSqlIn);
+            tools.setSql(1, strIn);
         }
 
         /* =======================================================================================================================================================================================
@@ -923,7 +1017,7 @@ namespace Websdepot
      *  - Is a Parser in the SQL info parser chain
      * =======================================================================================================================================================================================
      */
-    class SqlUnameLink : SqlParserChain
+    class SqlUnameLink : InfoParserChain
     {
         /* =======================================================================================================================================================================================
          * SqlUnameLink.SqlUnameLink(string, Toolbox)
@@ -950,7 +1044,7 @@ namespace Websdepot
          */
         public override void spawnSub()
         {
-            tools.setSql(2, strSqlIn);
+            tools.setSql(2, strIn);
         }
 
         /* =======================================================================================================================================================================================
@@ -970,7 +1064,7 @@ namespace Websdepot
      *  - Is a Parser in the SQL info parser chain
      * =======================================================================================================================================================================================
      */
-    class SqlPwordLink : SqlParserChain
+    class SqlPwordLink : InfoParserChain
     {
         /* =======================================================================================================================================================================================
          * SqlPwordLink.SqlPwordLink(string, Toolbox)
@@ -997,7 +1091,7 @@ namespace Websdepot
          */
         public override void spawnSub()
         {
-            tools.setSql(3, strSqlIn);
+            tools.setSql(3, strIn);
         }
 
         /* =======================================================================================================================================================================================
@@ -1017,7 +1111,7 @@ namespace Websdepot
      *  - Is a Parser in the SQL info parser chain
      * =======================================================================================================================================================================================
      */
-    class SqlDbLink : SqlParserChain
+    class SqlDbLink : InfoParserChain
     {
         /* =======================================================================================================================================================================================
          * SqlDbLink.SqlDbLink(string, Toolbox)
@@ -1044,7 +1138,7 @@ namespace Websdepot
          */
         public override void spawnSub()
         {
-            tools.setSql(4, strSqlIn);
+            tools.setSql(4, strIn);
         }
 
         /* =======================================================================================================================================================================================
@@ -1064,7 +1158,7 @@ namespace Websdepot
      *  - Is a Parser in the SQL info parser chain
      * =======================================================================================================================================================================================
      */
-    class SqlCInLink : SqlParserChain
+    class SqlCInLink : InfoParserChain
     {
         /* =======================================================================================================================================================================================
          * SqlCInLink.SqlDbLink(string, Toolbox)
@@ -1091,7 +1185,7 @@ namespace Websdepot
          */
         public override void spawnSub()
         {
-            tools.setSql(5, strSqlIn);
+            tools.setSql(5, strIn);
         }
 
         /* =======================================================================================================================================================================================
@@ -1105,6 +1199,13 @@ namespace Websdepot
             chainEnd();
         }
     }
+
+    //SQL info parser chain ends
+
+//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    //Reboot Configuration parser chain begins
+
+ //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
     //end of parser family
 
