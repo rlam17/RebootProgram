@@ -252,16 +252,18 @@ namespace Websdepot
 
             //Send chunks to functions here
 
-            //ParserChain ts = new ParserChain(startupChunk);
-            /*
+            Toolbox tb = new Toolbox();
+            ParserChain ts = new ParserChain(chunks[0].getChunk(), tb);
+            
             foreach (string x in rebootChunk){
                 System.Console.WriteLine(x);
             }
-            */
+
+            string strTest = tb.ToString();
             //System.Console.WriteLine(startupChunk[1]);
             //Process.Start(startupChunk[1]);
             
-            ParserChain ts = new ParserChain(chunks[0].getChunk(), new Toolbox());
+            //ParserChain ts = new ParserChain(chunks[0].getChunk(), new Toolbox());
             
         }
     }
@@ -289,6 +291,8 @@ namespace Websdepot
         protected string strParse;
         //Sanitized Tag Input
         protected string strIn;
+        //Raw chunk storage for when the tag isn't found
+        protected List<string>rChunk;
         //Chunk storage
         protected List<string> lChunk;
         /*
@@ -306,7 +310,7 @@ namespace Websdepot
             strIn = strUnIn.ToLower();
             //store the chunk to the object and remove the tag
             lChunk = inChunk;
-            lChunk.RemoveAt(0);
+            //lChunk.RemoveAt(0);
             stringSwitch();
         }
         //Spawn specific subparser
@@ -319,6 +323,8 @@ namespace Websdepot
             if (strIn.Equals(strParse))
             {
                 System.Console.WriteLine(strIn + " this is chunk 1");
+                //if the chunk belongs to this chain link then remove the tag and process it
+                lChunk.RemoveAt(0);
                 //spawn specific subprocess parser
                 SpawnSub();
             }
@@ -352,6 +358,9 @@ namespace Websdepot
                     //strSplit[0] = strSplit[0] + ".exe";
                     strPath = strSplit[0];
                     
+                    //Grabs the command line arguments
+                    // - try/catch block used because command line arguments might not be there and the strSplit[1] index might not exist
+                    // - it is normal for the code to continue even after the exception is caught (cmd args not found)
                     try
                     {
                         strArgs = strSplit[1];
@@ -404,6 +413,7 @@ namespace Websdepot
 
         public override void NextLink()
         {
+            System.Console.WriteLine("In startup chain link, going to next link");
             RebootLink rlParse = new RebootLink(lChunk, tools);
         }
     }
@@ -434,8 +444,9 @@ namespace Websdepot
         }
         public override void NextLink()
         {
-            System.Console.WriteLine("In reboot chain link");
-            throw new NotImplementedException();
+            System.Console.WriteLine("In reboot chain link, going to next link");
+            SqlLink sqlParse = new SqlLink(lChunk, tools);
+            //throw new NotImplementedException();
         }
     }
 
@@ -445,7 +456,7 @@ namespace Websdepot
         //try to avoid (privated for safety)
         private SqlLink()
         {
-            strParse = "[SQL Config]";
+            strParse = "[sql config]";
         }
         public SqlLink(List<string> inChunk, Toolbox tIn)
         {
@@ -453,13 +464,14 @@ namespace Websdepot
             tools = tIn;
 
             //System.Console.WriteLine("SqlLink entered");
-            strParse = "[SQL Config]";
+            strParse = "[sql config]";
             CleanIn(inChunk);
         }
 
         //Startup tag will run processes based off of the parsed string paths 
         public override void SpawnSub()
         {
+            //go through each individual chunk line and pass it into the sql line parcer chain
             foreach (string strIn in lChunk)
             {
                 SqlParseChain sqlParse = new SqlParseChain(strIn, tools);
@@ -468,7 +480,7 @@ namespace Websdepot
         }
         public override void NextLink()
         {
-            System.Console.WriteLine("In reboot chain link");
+            System.Console.WriteLine("In sql chain link");
             throw new NotImplementedException();
         }
     }
@@ -490,7 +502,7 @@ namespace Websdepot
 
             //System.Console.WriteLine("SqlLink entered");
             strParse = "Host=";
-            strIn = strLine.Trim();
+            strIn = strLine.Replace(" ", String.Empty);
             //overriden string parse
             stringSwitch();
         }
@@ -544,7 +556,7 @@ namespace Websdepot
 
             //System.Console.WriteLine("SqlLink entered");
             strParse = "Port=";
-            strIn = strLine.Trim();
+            strIn = strLine.Replace(" ", String.Empty);
             //overriden string parse
             stringSwitch();
         }
@@ -570,7 +582,7 @@ namespace Websdepot
 
             //System.Console.WriteLine("SqlLink entered");
             strParse = "Username=";
-            strIn = strLine.Trim();
+            strIn = strLine.Replace(" ", String.Empty);
             //overriden string parse
             stringSwitch();
         }
@@ -596,7 +608,7 @@ namespace Websdepot
 
             //System.Console.WriteLine("SqlLink entered");
             strParse = "Password=";
-            strIn = strLine.Trim();
+            strIn = strLine.Replace(" ", String.Empty);
             //overriden string parse
             stringSwitch();
         }
@@ -648,7 +660,7 @@ namespace Websdepot
 
             //System.Console.WriteLine("SqlLink entered");
             strParse = "CheckinTime=";
-            strIn = strLine.Trim();
+            strIn = strLine.Replace(" ", String.Empty);
             //overriden string parse
             stringSwitch();
         }
@@ -672,7 +684,7 @@ namespace Websdepot
         StreamReader sr;
         public Toolbox()
         {
-            sqlInfo = new string[5];
+            sqlInfo = new string[6];
         }
 
         //set the SQL property array (index, string)
