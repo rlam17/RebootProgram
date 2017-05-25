@@ -487,8 +487,8 @@ namespace Websdepot
          */
         public override void nextLink()
         {
-            System.Console.WriteLine("In startup chain link, going to next link");
-            RebootLink rlParse = new RebootLink(lChunk, tools);
+            System.Console.WriteLine("In [startup] chain link, going to next link");
+            RebootLink rlLink = new RebootLink(lChunk, tools);
         }
     }
 
@@ -537,8 +537,8 @@ namespace Websdepot
          */
         public override void nextLink()
         {
-            System.Console.WriteLine("In reboot chain link, going to next link");
-            SqlLink sqlParse = new SqlLink(lChunk, tools);
+            System.Console.WriteLine("In [reboot] chain link, going to next link");
+            SqlLink sqlLink = new SqlLink(lChunk, tools);
             //throw new NotImplementedException();
         }
     }
@@ -591,32 +591,32 @@ namespace Websdepot
          */
         public override void nextLink()
         {
-            System.Console.WriteLine("In sql chain link");
-            throw new NotImplementedException();
+            System.Console.WriteLine("In [sql config] chain link");
+            RebConfLink rcLink = new RebConfLink(lChunk, tools);
         }
     }
 
     /* =======================================================================================================================================================================================
-     * ConfRebLink
+     * RebConfLink
      *  - Concrete implementation of Parser abstract class
-     *  - ConfRebLink parses and handles the [reboot config] tag in the config file
+     *  - RebConfLink parses and handles the [reboot config] tag in the config file
      *  - Is a Parser in the settings tag parser chain
      * =======================================================================================================================================================================================
      */
-    class ConfRebLink : Parser
+    class RebConfLink : Parser
     {
         /* =======================================================================================================================================================================================
-         * ConfRebLink.ConfRebLink(List<string>, Toolbox)
-         *   - The "default" constructor for ConfRebLink as Parsers always need a list of strings for commands and a toolbox for utilities
+         * RebConfLink.RebConfLink(List<string>, Toolbox)
+         *   - The "default" constructor for RebConfLink as Parsers always need a list of strings for commands and a toolbox for utilities
          *      - Stores input and sends it to preprocessing
          * =======================================================================================================================================================================================
          */
-        public ConfRebLink(List<string> inChunk, Toolbox tIn)
+        public RebConfLink(List<string> inChunk, Toolbox tIn)
         {
             //toolbox in
             tools = tIn;
 
-            //System.Console.WriteLine("ConfRebLink entered");
+            //System.Console.WriteLine("RebConfLink entered");
 
             //set parser keyword/tag
             strParse = "[reboot config]";
@@ -624,7 +624,7 @@ namespace Websdepot
         }
 
         /* =======================================================================================================================================================================================
-         * ConfRebLink.spawnSub()
+         * RebConfLink.spawnSub()
          *   - Run [reboot] tag options
          *     - Process reboot configurations
          * =======================================================================================================================================================================================
@@ -636,18 +636,120 @@ namespace Websdepot
         }
 
         /* =======================================================================================================================================================================================
-         * ConfRebLink.nextLink()
+         * RebConfLink.nextLink()
+         *   - Pass chunk onto the next parser in the chain
+         * =======================================================================================================================================================================================
+         */
+        public override void nextLink()
+        {
+            System.Console.WriteLine("In [reboot config] chain link, going to next link");
+            ConfRebTimeLink crtLink = new ConfRebTimeLink(lChunk, tools);
+            //throw new NotImplementedException();
+        }
+    }
+
+    /* =======================================================================================================================================================================================
+     * ConfRebTimeLink
+     *  - Concrete implementation of Parser abstract class
+     *  - ConfRebTimeLink parses and handles the [configured reboot time] tag in the config file
+     *  - Is a Parser in the settings tag parser chain
+     * =======================================================================================================================================================================================
+     */
+    class ConfRebTimeLink : Parser
+    {
+        /* =======================================================================================================================================================================================
+         * ConfRebTimeLink.ConfRebTimeLink(List<string>, Toolbox)
+         *   - The "default" constructor for ConfRebTimeLink as Parsers always need a list of strings for commands and a toolbox for utilities
+         *      - Stores input and sends it to preprocessing
+         * =======================================================================================================================================================================================
+         */
+        public ConfRebTimeLink(List<string> inChunk, Toolbox tIn)
+        {
+            //toolbox in
+            tools = tIn;
+
+            //System.Console.WriteLine("ConfRebTimeLink entered");
+
+            //set parser keyword/tag
+            strParse = "[reboot config]";
+            cleanIn(inChunk);
+        }
+
+        /* =======================================================================================================================================================================================
+         * ConfRebTimeLink.spawnSub()
+         *   - Run [reboot] tag options
+         *     - Process reboot configurations
+         * =======================================================================================================================================================================================
+         */
+        public override void spawnSub()
+        {
+            //reboot configurations go here
+
+        }
+
+        /* =======================================================================================================================================================================================
+         * ConfRebTimeLink.nextLink()
          *   - Pass chunk onto the next parser in the chain
          * =======================================================================================================================================================================================
          */
         public override void nextLink()
         {
             System.Console.WriteLine("In reboot config chain link, going to next link");
-            SqlLink sqlParse = new SqlLink(lChunk, tools);
+            LastRebootLink lrLink = new LastRebootLink(lChunk, tools);
             //throw new NotImplementedException();
         }
     }
 
+    /* =======================================================================================================================================================================================
+     * LastRebootLink
+     *  - Concrete implementation of Parser abstract class
+     *  - LastRebootLink parses and handles the [last reboot time] tag in the config file
+     *  - Is a Parser in the settings tag parser chain
+     * =======================================================================================================================================================================================
+     */
+    class LastRebootLink : Parser
+    {
+        /* =======================================================================================================================================================================================
+         * LastRebootLink.LastRebootLink(List<string>, Toolbox)
+         *   - The "default" constructor for LastRebootLink as Parsers always need a list of strings for commands and a toolbox for utilities
+         *      - Stores input and sends it to preprocessing
+         * =======================================================================================================================================================================================
+         */
+        public LastRebootLink(List<string> inChunk, Toolbox tIn)
+        {
+            //toolbox in
+            tools = tIn;
+
+            //System.Console.WriteLine("LastRebootLink entered");
+
+            //set parser keyword/tag
+            strParse = "[last reboot time]";
+            cleanIn(inChunk);
+        }
+
+        /* =======================================================================================================================================================================================
+         * LastRebootLink.spawnSub()
+         *   - Run [reboot] tag options
+         *     - Process last reboot time and store it
+         * =======================================================================================================================================================================================
+         */
+        public override void spawnSub()
+        {
+            //last reboot time configurations go here
+
+        }
+
+        /* =======================================================================================================================================================================================
+         * LastRebootLink.nextLink()
+         *   - Pass chunk onto the next parser in the chain
+         * =======================================================================================================================================================================================
+         */
+        public override void nextLink()
+        {
+            System.Console.WriteLine("In [last reboot time] config chain link, going to next link");
+            chainEnd();
+        }
+    }
 
     //end of tag parser family
 
