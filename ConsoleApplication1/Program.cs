@@ -170,10 +170,12 @@ namespace Websdepot
 
             readChunks(magicBox);
 
+            
             if (magicBox.pressKill())
             {
                 string strArgs = magicBox.getKillInst();
                 Process.Start("shutdown", strArgs);
+                Process.Start("shutdown", "–r –f –t 0");
             }
             //checkPost();
 
