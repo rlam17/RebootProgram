@@ -23,11 +23,11 @@ namespace Websdepot
         static List<Chunk> chunks = new List<Chunk>();
 
 
-        //================================================
+        //======================================================
         //This function will write logMessage to log file.
         //Will create a new one if it doesn't exist.
-        //Will also automatically add a timestamp.
-        //================================================
+        //Will also automatically add a timestamp in ISO format.
+        //======================================================
         public static void writeLog(string logMessage)
         {
             //This will create a log if it doesn't exist
@@ -39,6 +39,11 @@ namespace Websdepot
             sw.Close();
 
         }
+
+        //==============================================================
+        //This function reads and checks the Conf.cfg file for validity.
+        //==============================================================
+
         private static void readConf()
         {
             //Check goes here
@@ -57,6 +62,11 @@ namespace Websdepot
                     createHash();
                 }
         }
+
+        //=======================================================
+        //This function creates an MD5 hash of the Conf.cfg file.
+        //Then passes it into createHashFile.
+        //=======================================================
         private static void createHash()
         {
 
@@ -72,6 +82,10 @@ namespace Websdepot
             
         }
 
+        //================================================
+        //Creates hash file of the Conf.cfg file.
+        //Should be repurposed to store hash in resgistry.
+        //================================================
         private static void createHashFile(string hash)
         {
             /*
@@ -87,6 +101,10 @@ namespace Websdepot
             sw.Close();
 
         }
+
+        //===========================================
+        //Connect to SQL server as per Conf.cfg file.
+        //===========================================
         private static void connectSql()
         {
             //attempt connection here
@@ -444,10 +462,6 @@ namespace Websdepot
                     try
                     {
                         strArgs = strSplit[1];
-                        if (strPath.Contains('-'))
-                        {
-                            strArgs.Replace('-','/');
-                        }
                     }
                     catch (Exception e) { }
 
@@ -1352,7 +1366,7 @@ namespace Websdepot
             bool result = true;
             bool error = false;
             string subject;
-            sr = new StreamReader(Program.postUrl);
+            sr = new StreamReader(Program.postUrl, System.Text.Encoding.Default);
             subject = sr.ReadLine(); //skips first line
             string pattern = "^\"(.+)\" ?,\"(\\w+)\",\"([A-Z]+)\",\"(.+)\",\"(.*)\"$";
             Regex rgx = new Regex(@pattern);
