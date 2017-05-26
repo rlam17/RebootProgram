@@ -200,10 +200,12 @@ namespace Websdepot
             //readChunks();
 
             //run full battery of tests
-            
-            readChunks(magicBox);
 
-            
+            //readChunks(magicBox);
+
+            string test = "bo";
+            string[] testSplit = test.Split('-');
+            System.Console.WriteLine(testSplit.Length);
             
             //checkPost();
 
@@ -1503,12 +1505,11 @@ namespace Websdepot
         string timeX;
         string timeY;
 
-        public DayRange(int x, int y, string a, string b)
+        public DayRange(string i)
         {
-            dayX = x;
-            dayY = y;
-            timeX = a;
-            timeY = b;
+            string[] splitA = i.Split('|');
+
+            string[] splitDayh = splitA[0].Split('-');
         }
 
         public bool inDayRange(int i)
@@ -1553,7 +1554,7 @@ namespace Websdepot
 
         public bool inTimeRange()
         {
-
+            return true;
         }
 
         //=================================================
