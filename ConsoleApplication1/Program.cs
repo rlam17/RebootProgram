@@ -43,7 +43,6 @@ namespace Websdepot
         //==============================================================
         //This function reads and checks the Conf.cfg file for validity.
         //==============================================================
-
         private static void readConf()
         {
             //Check goes here
@@ -139,6 +138,10 @@ namespace Websdepot
             System.Threading.Thread.Sleep(minToSec);
         }
 
+        //=====================================================
+        //Check if Post.csv exists.  If yes, delete.
+        //Then create a new one
+        //=====================================================
         private static void checkPost()
         {
             if (File.Exists(postUrl))
@@ -207,6 +210,11 @@ namespace Websdepot
             //PLACE KILLSWITCH HERE
             //Process.Start("shutdown", "-r -f -t 0");
         }
+
+        //=========================================================
+        //Exits the program.
+        //This should only occur if a problem has been encountered.
+        //=========================================================
         public static void exit(int code)
         {
             if(code > 0)
@@ -221,16 +229,12 @@ namespace Websdepot
             System.Environment.Exit(code);
         }
 
+        //=========================================
+        //Read the Conf.cfg file
+        //Chunks refers to each field in the file.
+        //=========================================
         private static void readChunks(Toolbox tIn)
         {
-
-            List<string> sqlChunk = new List<string>();
-            List<string> rebootConfigChunk = new List<string>();
-            List<string> startupChunk = new List<string>();
-            List<string> rebootChunk = new List<string>();
-            List<string> lastRebootChunk = new List<string>();
-            List<string> configuredRebootChunk = new List<string>();
-
             StreamReader sr = new StreamReader(confUrl, System.Text.Encoding.Default);
 
             string line;
@@ -248,7 +252,7 @@ namespace Websdepot
                         //System.Console.WriteLine(line);
                     }
                     else
-                    {
+                        {
                         //System.Console.WriteLine("This is a blank line!");
                         
 
@@ -284,7 +288,7 @@ namespace Websdepot
                         }
                         currentList = new List<string>();
                         currentChunk++;
-                    }
+                        }
                 }
                 
             }
@@ -301,13 +305,7 @@ namespace Websdepot
             {
                 ParserChain ts = new ParserChain(c.getChunk(), tb);
             }
-            
-            
-            foreach (string x in rebootChunk)
-            {
-                System.Console.WriteLine(x);
-            }
-
+                        
             
             string strTest = tb.ToString();
             System.Console.WriteLine(tb.checkSql());
