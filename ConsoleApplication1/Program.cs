@@ -201,12 +201,8 @@ namespace Websdepot
 
             //run full battery of tests
 
-            //readChunks(magicBox);
+            readChunks(magicBox);
 
-            string test = "02:00";
-            DateTime testDate = Convert.ToDateTime(test);
-            System.Console.WriteLine(testDate);
-            
             //checkPost();
 
             //PLACE KILLSWITCH HERE
@@ -313,7 +309,7 @@ namespace Websdepot
 
             Toolbox tb = tIn;
 
-            ParserChain tc = new ParserChain(chunks[2].getChunk(), tb);
+            ParserChain tc = new ParserChain(chunks[1].getChunk(), tb);
             foreach (Chunk c in chunks)
             {
                 ParserChain ts = new ParserChain(c.getChunk(), tb);
@@ -1060,6 +1056,26 @@ namespace Websdepot
         }
 
         /* =======================================================================================================================================================================================
+         * SqlParserChain.StringParse()
+         *   - Splits the line
+         * =======================================================================================================================================================================================
+         */
+        public void StringParse()
+        {
+            strRaw = strIn.Split('=');
+            try
+            {
+                strIn = strRaw[1];
+            }
+            catch (Exception e)
+            {
+                System.Console.WriteLine("SQL data setting data missing.");
+            }
+
+            spawnSub();
+        }
+
+        /* =======================================================================================================================================================================================
          * SqlParserChain.spawnSub()
          *   - Stores the SQL info in its appropriate spot in the Toolbox object
          * =======================================================================================================================================================================================
@@ -1350,7 +1366,7 @@ namespace Websdepot
         int intRebDelay, intRebInterval, intSqlInterval;
         List<DayRange> allowedRebootTimes;
 
-        StreamReader sr;
+        
 
         /*=======================================================================================================================================================================================
          * Toolbox.Toolbox()
@@ -1361,12 +1377,12 @@ namespace Websdepot
         public Toolbox()
         {
             sqlInfo = new string[6];
-            
+            allowedRebootTimes = new List<DayRange>();
         }
 
         public void setRebootTimes(DayRange i)
         {
-            allowedRebootTimes = new List<DayRange>();
+            
             allowedRebootTimes.Add(i);
         }
         /*=======================================================================================================================================================================================
@@ -1381,12 +1397,12 @@ namespace Websdepot
          public int intervalMath(string strTime, string strInterval)
         {
             int intMs = 0;
-            string[] strSplit;
+            //string[] strInterval;
             int intT;
 
-            strSplit = strInterval.Split(',');
+            //strInterval = strInterval.Split(',');
 
-            intT = int.Parse(strSplit[0]);
+            intT = int.Parse(strTime);
 
             //if tree for intervals
 
@@ -1394,7 +1410,7 @@ namespace Websdepot
             intMs = intT*1000;
 
             //check if seconds is needed conversion
-            if (strSplit[1].Equals("s") || strSplit[1].Equals("second")) {
+            if (strInterval.Equals("s") || strInterval.Equals("second")) {
                 //if yes return
                 return intMs;
             } else {
@@ -1402,7 +1418,7 @@ namespace Websdepot
                 intMs = intMs * 60;
             }
 
-            if (strSplit[1].Equals("min") || strSplit[1].Equals("minute"))
+            if (strInterval.Equals("min") || strInterval.Equals("minute"))
             {
                 //if yes return
                 return intMs;
@@ -1413,7 +1429,7 @@ namespace Websdepot
                 intMs = intMs * 60;
             }
 
-            if (strSplit[1].Equals("h") || strSplit[1].Equals("hour"))
+            if (strInterval.Equals("h") || strInterval.Equals("hour"))
             {
                 //if yes return
                 return intMs;
@@ -1423,7 +1439,7 @@ namespace Websdepot
                 intMs = intMs * 24;
             }
 
-            if (strSplit[1].Equals("d") || strSplit[1].Equals("day"))
+            if (strInterval.Equals("d") || strInterval.Equals("day"))
             {
                 //if yes return
                 return intMs;
@@ -1432,7 +1448,7 @@ namespace Websdepot
             {
                 intMs = intMs * 7;
             }
-            if (strSplit[1].Equals("w") || strSplit[1].Equals("week"))
+            if (strInterval.Equals("w") || strInterval.Equals("week"))
             {
                 //if yes return
                 return intMs;
@@ -1440,7 +1456,7 @@ namespace Websdepot
             else {
                 intMs = intMs * 30;
             }
-            if (strSplit[1].Equals("month") || strSplit[1].Equals("mon")) {
+            if (strInterval.Equals("month") || strInterval.Equals("mon")) {
                 //month is the largest
                 return intMs;
             }else
@@ -1574,6 +1590,7 @@ namespace Websdepot
         public bool checkCsv()
         {
             //The regex pattern is: ^"(.+)" ?,"(\w+)","(.+)","([A-Z]+)","(.+)","(.*)"$
+            StreamReader sr;
             bool result = true;
             bool error = false;
             string subject;
@@ -1598,6 +1615,7 @@ namespace Websdepot
                         }
                 }                
             }
+            sr.Close();
             return result;
         }
 
@@ -1713,31 +1731,31 @@ namespace Websdepot
         //=================================================
         public int twoLetterDay(string i)
         {
-            if (i.CompareTo("su") == 1)
+            if (String.Compare("su",i) == 0)
             {
                 return 0;
             }
-            else if (i.CompareTo("mo") == 1)
+            else if (String.Compare("mo", i) == 0)
             {
                 return 1;
             }
-            else if (i.CompareTo("tu") == 1)
+            else if (String.Compare("tu", i) == 0)
             {
                 return 2;
             }
-            else if (i.CompareTo("we") == 1)
+            else if (String.Compare("we", i) == 0)
             {
                 return 3;
             }
-            else if (i.CompareTo("th") == 1)
+            else if (String.Compare("th", i) == 0)
             {
                 return 4;
             }
-            else if (i.CompareTo("fr") == 1)
+            else if (String.Compare("fr", i) == 0)
             {
                 return 5;
             }
-            else if (i.CompareTo("sa") == 1)
+            else if (String.Compare("sa", i) == 0)
             {
                 return 6;
             }
