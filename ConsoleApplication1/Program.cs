@@ -591,20 +591,29 @@ namespace Websdepot
          */
         public override void spawnSub()
         {
-            System.Console.WriteLine("Now rebooting...");
-            StreamWriter sw = new StreamWriter("./lastreboottime.txt", false);
-            
+            foreach (string strChunk in lChunk)
+            {
+                if (strChunk.Contains("shutdown"))
+                {
+                    if (strChunk.Contains("-r") || strChunk.Contains("/r"))
+                    {
+                        System.Console.WriteLine("Now rebooting...");
+                        StreamWriter sw = new StreamWriter("./lastreboottime.txt", false);
 
-            var uptime = new PerformanceCounter("System", "System Up Time");
-            uptime.NextValue();
-            var t = TimeSpan.FromSeconds(uptime.NextValue());
-            var final = DateTime.Now.Subtract(t);
-            System.Console.WriteLine(final);
-            sw.WriteLine(final);
-            sw.Close();
 
-            
+                        var uptime = new PerformanceCounter("System", "System Up Time");
+                        uptime.NextValue();
+                        var t = TimeSpan.FromSeconds(uptime.NextValue());
+                        var final = DateTime.Now.Subtract(t);
+                        System.Console.WriteLine(final);
+                        sw.WriteLine(final);
+                        sw.Close();
+                    }
+                }
+                
+            }
             execute();
+
         }
 
         /* =======================================================================================================================================================================================
