@@ -170,14 +170,6 @@ namespace Websdepot
 
             readChunks(magicBox);
 
-            
-            if (magicBox.pressKill())
-            {
-                string strArgs = magicBox.getKillInst();
-                Process.Start("shutdown", strArgs);
-                Process.Start("shutdown", "–r –f –t 0");
-            }
-            //checkPost();
 
             //PLACE KILLSWITCH HERE
             //Process.Start("shutdown", "-r -f -t 0");
@@ -436,14 +428,21 @@ namespace Websdepot
                     try
                     {
                         strArgs = strSplit[1];
+                        if (strArgs.Contains('-'))
+                        {
+                            strArgs.Replace('-', '/');
+                        }
                     }
                     catch (Exception e) { }
 
+                    /*
                     if (strPath.Contains("shutdown"))
                     {
                         //Prep killswitch
                         tools.setKill(strArgs);
                     }
+                    */
+
                     System.Console.WriteLine("Executing: " + strPath + " | " + strArgs);
 
                     //launch process with path and command line arguments
@@ -1255,39 +1254,8 @@ namespace Websdepot
         public Toolbox()
         {
             sqlInfo = new string[6];
-            blnKill = false;
         }
-        /* =======================================================================================================================================================================================
-         * Toolbox.setKill(string)
-         *   - Arms killswitch and sets instructions
-         * =======================================================================================================================================================================================
-         */
-         public void setKill(string strArgsIn)
-        {
-            strKillArgs = strArgsIn;
-            blnKill = true;
-        }
-
-        /* =======================================================================================================================================================================================
-         * Toolbox.getKillInst()
-         *   - retruns shutdown instructions
-         * =======================================================================================================================================================================================
-         */
-         public string getKillInst()
-        {
-            return strKillArgs;
-        }
-
-        /* =======================================================================================================================================================================================
-         * Toolbox.pressKill()
-         *   - Check for permission to press killswitch
-         * =======================================================================================================================================================================================
-         */
-         public bool pressKill()
-        {
-            return blnKill;
-        }
-
+        
         /* =======================================================================================================================================================================================
          * Toolbox.setSql(int, string)
          *   - Set the SQL information into the storage fields of the program
