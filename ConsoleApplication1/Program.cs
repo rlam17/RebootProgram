@@ -1521,14 +1521,27 @@ namespace Websdepot
     {
         int dayX;
         int dayY;
-        string timeX;
-        string timeY;
+        DateTime timeX;
+        DateTime timeY;
 
         public DayRange(string i)
         {
             string[] splitA = i.Split('|');
 
-            string[] splitDayh = splitA[0].Split('-');
+            string[] splitDay = splitA[0].Split('-');
+            if (splitDay.Length == 1)
+            {
+                dayX = twoLetterDay(splitDay[0]);
+                dayY = dayX;
+            }
+            else
+            {
+                dayX = twoLetterDay(splitDay[0]);
+                dayY = twoLetterDay(splitDay[1]);
+            }
+            string[] splitTime = splitA[1].Split('-');
+            timeX = Convert.ToDateTime(splitTime[0]);
+            timeY = Convert.ToDateTime(splitTime[1]);
         }
 
         public bool inDayRange(int i)
