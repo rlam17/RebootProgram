@@ -1357,7 +1357,7 @@ namespace Websdepot
                 intMs = intMs * 60;
             }
 
-            if (strSplit[1].Equals("h") || strSplit[1].Equals("hour"))
+            if (strSplit[1].Equals("min") || strSplit[1].Equals("minute"))
             {
                 return intMs;
             }
@@ -1366,7 +1366,7 @@ namespace Websdepot
                 intMs = intMs * 60;
             }
 
-            if (strSplit[1].Equals("min") || strSplit[1].Equals("minute"))
+            if (strSplit[1].Equals("h") || strSplit[1].Equals("hour"))
             {
                 return intMs;
             }else
