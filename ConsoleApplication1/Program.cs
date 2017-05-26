@@ -730,7 +730,10 @@ namespace Websdepot
         public override void spawnSub()
         {
             //reboot configurations go here
-
+            foreach (string strIn in lChunk)
+            {
+                RebConfParserChain sqlParse = new RebConfParserChain(strIn, tools);
+            }
         }
 
         /* =======================================================================================================================================================================================
@@ -769,7 +772,7 @@ namespace Websdepot
             //System.Console.WriteLine("ConfRebTimeLink entered");
 
             //set parser keyword/tag
-            strParse = "[reboot config]";
+            strParse = "[configured reboot times]";
             cleanIn(inChunk);
         }
 
@@ -782,7 +785,6 @@ namespace Websdepot
         public override void spawnSub()
         {
             //reboot configurations go here
-
         }
 
         /* =======================================================================================================================================================================================
@@ -792,7 +794,7 @@ namespace Websdepot
          */
         public override void nextLink()
         {
-            System.Console.WriteLine("In reboot config chain link, going to next link");
+            System.Console.WriteLine("In configured reboot times chain link, going to next link");
             LastRebootLink lrLink = new LastRebootLink(lChunk, tools);
             //throw new NotImplementedException();
         }
@@ -945,9 +947,9 @@ namespace Websdepot
         }
     }
 
-    class RebootConfigParserChain : InfoParserChain
+    class RebConfParserChain : InfoParserChain
     {
-        public RebootConfigParserChain(string strLine, Toolbox tIn)
+        public RebConfParserChain(string strLine, Toolbox tIn)
         {
             //toolbox in
             tools = tIn;
@@ -978,21 +980,6 @@ namespace Websdepot
         {
             // TODO: Implement CheckDelayLink
             //SqlPortLink sqlPort = new SqlPortLink(strIn, tools);
-        }
-
-        public void StringParse()
-        {
-            strRaw = strIn.Split('=');
-            try
-            {
-                strIn = strRaw[1];
-            }
-            catch (Exception e)
-            {
-                System.Console.WriteLine("SQL data setting data missing.");
-            }
-
-            spawnSub();
         }
 
         public override void spawnSub()
@@ -1070,26 +1057,6 @@ namespace Websdepot
             {
                 nextLink();
             }
-        }
-
-        /* =======================================================================================================================================================================================
-         * SqlParserChain.StringParse()
-         *   - Splits the line
-         * =======================================================================================================================================================================================
-         */
-        public void StringParse()
-        {
-            strRaw = strIn.Split('=');
-            try
-            {
-                strIn = strRaw[1];
-            }
-            catch (Exception e)
-            {
-                System.Console.WriteLine("SQL data setting data missing.");
-            }
-
-            spawnSub();
         }
 
         /* =======================================================================================================================================================================================
