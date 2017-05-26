@@ -300,9 +300,11 @@ namespace Websdepot
             List<string> external = new List<string>();
             if (File.Exists("./lastreboottime.txt"))
             {
-                StreamReader sr_b = new StreamReader(confUrl, System.Text.Encoding.Default);                
+                StreamReader sr_b = new StreamReader("./lastreboottime.txt", System.Text.Encoding.Default);                
                 external.Add(sr_b.ReadLine());
                 external.Add(sr_b.ReadLine());
+
+                sr_b.Close();
             }
 
             //Send chunks to functions here
@@ -830,9 +832,14 @@ namespace Websdepot
         public override void spawnSub()
         {
             //last reboot time configurations go here
-            DateTime dt = Convert.ToDateTime(lChunk);
-            tools.setLastReboot(dt);
-            System.Console.WriteLine(dt);
+            foreach(string x in lChunk)
+            {
+                DateTime dt = Convert.ToDateTime(x);
+                tools.setLastReboot(dt);
+                System.Console.WriteLine(dt);
+            }
+            
+            
         }
 
         /* =======================================================================================================================================================================================
