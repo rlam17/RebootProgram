@@ -201,7 +201,7 @@ namespace Websdepot
 
             //run full battery of tests
             
-            //readChunks(magicBox);
+            readChunks(magicBox);
 
             
             
@@ -209,6 +209,7 @@ namespace Websdepot
 
             //PLACE KILLSWITCH HERE
             //Process.Start("shutdown", "-r -f -t 0");
+
         }
 
         //=========================================================
@@ -242,7 +243,7 @@ namespace Websdepot
             int currentChunk = 0;
             while((line = sr.ReadLine()) != null) //until EOF
             {
-                if (currentChunk < 6) 
+                if (currentChunk < 5) 
                     //If still working on a chunk, added to the list
                     //currentChunk == 4 means all chunks are done
                 {
@@ -274,11 +275,13 @@ namespace Websdepot
                                 //rebootChunk = currentList;
                                 chunks.Add(new Chunk(currentList));
                                 break;
+                            /*
                             case 4:
                                 //lastRebootChunk = currentList;
                                 chunks.Add(new Chunk(currentList));
                                 break;
-                            case 5:
+                            */
+                            case 4:
                                 //configuredRebootChunk = currentList;
                                 chunks.Add(new Chunk(currentList));
                                 break;
@@ -294,7 +297,13 @@ namespace Websdepot
             }
 
             sr.Close();
-
+            List<string> external = new List<string>();
+            if (File.Exists("./lastreboottime.txt"))
+            {
+                StreamReader sr_b = new StreamReader(confUrl, System.Text.Encoding.Default);                
+                external.Add(sr_b.ReadLine());
+                external.Add(sr_b.ReadLine());
+            }
 
             //Send chunks to functions here
 
@@ -305,8 +314,8 @@ namespace Websdepot
             {
                 ParserChain ts = new ParserChain(c.getChunk(), tb);
             }
-                        
-            
+
+            tc = new ParserChain(external, tb);
             string strTest = tb.ToString();
             System.Console.WriteLine(tb.checkSql());
             //System.Console.WriteLine(startupChunk[1]);
