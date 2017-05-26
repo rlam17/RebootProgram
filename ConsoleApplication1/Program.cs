@@ -1280,6 +1280,8 @@ namespace Websdepot
         public override void spawnSub()
         {
             tools.setSql(5, strIn);
+            string[] strSplit = strIn.Split(',');
+            tools.setSqlInterval(strSplit[0], strSplit[1]);
         }
 
         /* =======================================================================================================================================================================================
@@ -1408,11 +1410,6 @@ namespace Websdepot
                 System.Console.WriteLine("Conversion unit does not exist");
                 return -1;
             }
-
-
-
-
-            return intMs;
         }
 
         /*=======================================================================================================================================================================================
