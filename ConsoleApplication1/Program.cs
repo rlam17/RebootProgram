@@ -1472,45 +1472,7 @@ namespace Websdepot
             return result;
         }
 
-        //=================================================
-        //Returns two letter weekday format as int.
-        //Follows the same format the DateTime object uses.
-        //=================================================
-        public int twoLetterDay(string i)
-        {
-            if (i.CompareTo("su") == 1)
-            {
-                return 0;
-            }
-            else if(i.CompareTo("mo") == 1)
-            {
-                return 1;
-            }
-            else if (i.CompareTo("tu") == 1)
-            {
-                return 2;
-            }
-            else if (i.CompareTo("we") == 1)
-            {
-                return 3;
-            }
-            else if (i.CompareTo("th") == 1)
-            {
-                return 4;
-            }
-            else if (i.CompareTo("fr") == 1)
-            {
-                return 5;
-            }
-            else if (i.CompareTo("sa") == 1)
-            {
-                return 6;
-            }
-            else //In case of invalid input
-                {
-                    return -1;
-                }
-        }
+        
 
     }
 
@@ -1592,6 +1554,46 @@ namespace Websdepot
         public bool inTimeRange()
         {
 
+        }
+
+        //=================================================
+        //Returns two letter weekday format as int.
+        //Follows the same format the DateTime object uses.
+        //=================================================
+        public int twoLetterDay(string i)
+        {
+            if (i.CompareTo("su") == 1)
+            {
+                return 0;
+            }
+            else if (i.CompareTo("mo") == 1)
+            {
+                return 1;
+            }
+            else if (i.CompareTo("tu") == 1)
+            {
+                return 2;
+            }
+            else if (i.CompareTo("we") == 1)
+            {
+                return 3;
+            }
+            else if (i.CompareTo("th") == 1)
+            {
+                return 4;
+            }
+            else if (i.CompareTo("fr") == 1)
+            {
+                return 5;
+            }
+            else if (i.CompareTo("sa") == 1)
+            {
+                return 6;
+            }
+            else //In case of invalid input
+            {
+                return -1;
+            }
         }
     }
 }
