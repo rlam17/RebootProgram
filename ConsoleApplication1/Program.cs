@@ -1423,31 +1423,40 @@ namespace Websdepot
 
             //convert from seconds
             intMs = intT*1000;
+
+            //check if seconds is needed conversion
             if (strSplit[1].Equals("s") || strSplit[1].Equals("second")) {
+                //if yes return
                 return intMs;
             } else {
+                //convert to minutes
                 intMs = intMs * 60;
             }
 
             if (strSplit[1].Equals("min") || strSplit[1].Equals("minute"))
             {
+                //if yes return
                 return intMs;
             }
             else
             {
+                //if yes return
                 intMs = intMs * 60;
             }
 
             if (strSplit[1].Equals("h") || strSplit[1].Equals("hour"))
             {
+                //if yes return
                 return intMs;
-            }else
+            }
+            else
             {
                 intMs = intMs * 24;
             }
 
             if (strSplit[1].Equals("d") || strSplit[1].Equals("day"))
             {
+                //if yes return
                 return intMs;
             }
             else
@@ -1456,13 +1465,20 @@ namespace Websdepot
             }
             if (strSplit[1].Equals("w") || strSplit[1].Equals("week"))
             {
+                //if yes return
                 return intMs;
             }
             else {
                 intMs = intMs * 30;
             }
             if (strSplit[1].Equals("month") || strSplit[1].Equals("mon")) {
+                //month is the largest
                 return intMs;
+            }else
+            {
+                //conversion tag invalid
+                System.Console.WriteLine("Conversion unit does not exist");
+                return -1;
             }
 
 
