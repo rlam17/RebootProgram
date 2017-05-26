@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Websdepot
 {
-
+    
     class Program
     {
         static public string logUrl = "./log/Log.txt";
@@ -1437,6 +1437,47 @@ namespace Websdepot
             }
             return result;
         }
+
+        //=================================================
+        //Returns two letter weekday format as int.
+        //Follows the same format the DateTime object uses.
+        //=================================================
+        public int twoLetterDay(string i)
+        {
+            if (i.CompareTo("su") == 1)
+            {
+                return 0;
+            }
+            else if(i.CompareTo("mo") == 1)
+            {
+                return 1;
+            }
+            else if (i.CompareTo("tu") == 1)
+            {
+                return 2;
+            }
+            else if (i.CompareTo("we") == 1)
+            {
+                return 3;
+            }
+            else if (i.CompareTo("th") == 1)
+            {
+                return 4;
+            }
+            else if (i.CompareTo("fr") == 1)
+            {
+                return 5;
+            }
+            else if (i.CompareTo("sa") == 1)
+            {
+                return 6;
+            }
+            else //In case of invalid input
+                {
+                    return -1;
+                }
+        }
+
     }
 
     /* =======================================================================================================================================================================================
@@ -1457,6 +1498,62 @@ namespace Websdepot
         public List<string> getChunk()
         {
             return lines;
+        }
+    }
+
+    class DayRange
+    {
+        int dayX;
+        int dayY;
+        string timeX;
+        string timeY;
+
+        public DayRange(int x, int y, string a, string b)
+        {
+            dayX = x;
+            dayY = y;
+            timeX = a;
+            timeY = b;
+        }
+        
+        public bool inDayRange(int i)
+        {
+            if(dayX < dayY)
+            {
+                if(i >= dayX && i <= dayY)
+                {
+                    return true;
+                }else
+                    {
+                        return false;
+                    }
+            } else
+                {
+                    if(dayX == dayY)
+                    {
+                        if(i == dayX)
+                        {
+                            return true;
+                        }else
+                            {
+                                return false;
+                            }
+                    }else
+                        {
+                            if(i >= dayY || i <= dayX)
+                            {
+                                return true;
+                            }else
+                                {
+                                    return false;
+                                }
+                        }
+                }
+        }
+
+        public bool inTimeRange()
+        {
+
         }
     }
 }
