@@ -1418,7 +1418,7 @@ namespace Websdepot
                 intMs = intMs * 60;
             }
 
-            if (strInterval.Equals("min") || strInterval.Equals("minute"))
+            if (strInterval.Equals("m") || strInterval.Equals("min") || strInterval.Equals("minute"))
             {
                 //if yes return
                 return intMs;
