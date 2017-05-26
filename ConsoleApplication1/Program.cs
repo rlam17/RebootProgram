@@ -153,6 +153,11 @@ namespace Websdepot
 
         static void Main(string[] args)
         {
+            StreamReader sr = new StreamReader("./testDate.txt");
+            string test = sr.ReadLine();
+            DateTime dt = Convert.ToDateTime(test);
+            System.Console.WriteLine(dt);
+            sr.Close();
             writeLog("Starting program");
 
 
@@ -202,8 +207,10 @@ namespace Websdepot
             //readChunks();
 
             //run full battery of tests
-            readChunks(magicBox);
+            
+            //readChunks(magicBox);
 
+            
             
             //checkPost();
 
