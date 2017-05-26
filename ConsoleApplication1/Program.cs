@@ -606,6 +606,7 @@ namespace Websdepot
                         TimeSpan t = TimeSpan.FromSeconds(uptime.NextValue());
                         DateTime final = DateTime.Now.Subtract(t);
                         System.Console.WriteLine(final);
+                        tools.setLastReboot(final);
                         sw.WriteLine(final);
                         sw.Close();
                     }
@@ -1293,13 +1294,12 @@ namespace Websdepot
     class Toolbox
     {
         string[] sqlInfo;
-        bool blnKill;
-        string strKillArgs;
+        DateTime dtLastReb;
+
         StreamReader sr;
         public Toolbox()
         {
             sqlInfo = new string[6];
-            blnKill = false;
         }
 
         /* =======================================================================================================================================================================================
@@ -1335,6 +1335,16 @@ namespace Websdepot
         public string[] getSql()
         {
             return sqlInfo;
+        }
+
+        /* =======================================================================================================================================================================================
+         * Toolbox.setLastReboot()
+         *   - Set last reboot time
+         * =======================================================================================================================================================================================
+         */
+        public void setLastReboot(DateTime dtIn)
+        {
+            dtLastReb = dtIn;
         }
 
         /* =======================================================================================================================================================================================
