@@ -784,7 +784,8 @@ namespace Websdepot
          */
         public override void spawnSub()
         {
-            //reboot configurations go here
+            //configured reboot times go here
+            //call configured reboot times
         }
 
         /* =======================================================================================================================================================================================
