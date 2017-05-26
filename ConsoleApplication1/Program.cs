@@ -200,10 +200,12 @@ namespace Websdepot
             //readChunks();
 
             //run full battery of tests
-            
-            readChunks(magicBox);
 
-            
+            //readChunks(magicBox);
+
+            string test = "02:00";
+            DateTime testDate = Convert.ToDateTime(test);
+            System.Console.WriteLine(testDate);
             
             //checkPost();
 
@@ -1566,19 +1568,36 @@ namespace Websdepot
     {
         int dayX;
         int dayY;
-        string timeX;
-        string timeY;
+        DateTime timeX;
+        DateTime timeY;
 
-        public DayRange(int x, int y, string a, string b)
+        public DayRange(string i)
         {
-            dayX = x;
-            dayY = y;
-            timeX = a;
-            timeY = b;
+            string[] splitA = i.Split('|');
+
+            string[] splitDay = splitA[0].Split('-');
+            if (splitDay.Length == 1)
+            {
+                dayX = twoLetterDay(splitDay[0]);
+                dayY = dayX;
+            }
+            else
+            {
+                dayX = twoLetterDay(splitDay[0]);
+                dayY = twoLetterDay(splitDay[1]);
+            }
+            string[] splitTime = splitA[1].Split('-');
+            timeX = Convert.ToDateTime(splitTime[0]);
+            timeY = Convert.ToDateTime(splitTime[1]);
         }
 
-        public bool inDayRange(int i)
+        //=====================================================
+        // Check to see if today's day of week is within range
+        // of the days of weeks outlined in parameters
+        //=====================================================
+        public bool inDayRange()
         {
+            int i = (int)DateTime.Today.DayOfWeek;
             if (dayX < dayY)
             {
                 if (i >= dayX && i <= dayY)
@@ -1617,9 +1636,14 @@ namespace Websdepot
             }
         }
 
+        //=============================================================
+        // Check if current time is in the range of the times outlined
+        // in parameters
+        //=============================================================
         public bool inTimeRange()
         {
-
+            return (DateTime.Now >= timeX && DateTime.Now <= timeY);
+            
         }
 
         //=================================================
