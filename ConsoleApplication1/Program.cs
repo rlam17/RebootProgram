@@ -177,8 +177,11 @@ namespace Websdepot
             //createHash();
             //readChunks();
 
+            //run full battery of tests
             readChunks(magicBox);
 
+            
+            //checkPost();
 
             //PLACE KILLSWITCH HERE
             //Process.Start("shutdown", "-r -f -t 0");
@@ -438,21 +441,14 @@ namespace Websdepot
                     try
                     {
                         strArgs = strSplit[1];
-                        if (strArgs.Contains('-'))
+                        if (strPath.Contains('-'))
                         {
-                            strArgs.Replace('-', '/');
+                            strArgs.Replace('-','/');
                         }
                     }
                     catch (Exception e) { }
 
-                    /*
-                    if (strPath.Contains("shutdown"))
-                    {
-                        //Prep killswitch
-                        tools.setKill(strArgs);
-                    }
-                    */
-
+                    
                     System.Console.WriteLine("Executing: " + strPath + " | " + strArgs);
 
                     //launch process with path and command line arguments
@@ -1264,8 +1260,9 @@ namespace Websdepot
         public Toolbox()
         {
             sqlInfo = new string[6];
+            blnKill = false;
         }
-        
+
         /* =======================================================================================================================================================================================
          * Toolbox.setSql(int, string)
          *   - Set the SQL information into the storage fields of the program
