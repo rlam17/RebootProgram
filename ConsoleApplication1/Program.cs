@@ -944,6 +944,71 @@ namespace Websdepot
             Program.writeLog(strIn + "Invalid data");
         }
     }
+
+    class RebootConfigParserChain : InfoParserChain
+    {
+        public RebootConfigParserChain(string strLine, Toolbox tIn)
+        {
+            //toolbox in
+            tools = tIn;
+
+            //System.Console.WriteLine("SqlLink entered");
+            strParse = "AllowedTime=";
+            strIn = strLine.Replace(" ", String.Empty);
+
+            //overriden string parse
+            stringSwitch();
+        }
+
+        public override void stringSwitch()
+        {
+            //Check if the line passed contains the token this link is responsible for...
+            if (strIn.Contains(strParse))
+            {
+                //if yes, process:
+                StringParse();
+            }
+            else
+            {
+                nextLink();
+            }
+        }
+
+        public override void nextLink()
+        {
+            // TODO: Implement CheckDelayLink
+            //SqlPortLink sqlPort = new SqlPortLink(strIn, tools);
+        }
+
+        public void StringParse()
+        {
+            strRaw = strIn.Split('=');
+            try
+            {
+                strIn = strRaw[1];
+            }
+            catch (Exception e)
+            {
+                System.Console.WriteLine("SQL data setting data missing.");
+            }
+
+            spawnSub();
+        }
+
+        public override void spawnSub()
+        {
+            //tools.setRebootConfig(0, strIn);
+
+            string[] splitA = strIn.Split(',');
+
+            foreach(string x in splitA)
+            {
+                tools.setRebootTimes(new DayRange(x));
+            }
+
+
+        }
+    }
     
     //SQL info parser chain begins
     /* =======================================================================================================================================================================================
@@ -1314,6 +1379,7 @@ namespace Websdepot
         string[] sqlInfo;
         DateTime dtLastReb;
         int intRebDelay, intRebInterval, intSqlInterval;
+        List<DayRange> allowedRebootTimes;
 
         StreamReader sr;
 
@@ -1326,8 +1392,14 @@ namespace Websdepot
         public Toolbox()
         {
             sqlInfo = new string[6];
+            
         }
 
+        public void setRebootTimes(DayRange i)
+        {
+            allowedRebootTimes = new List<DayRange>();
+            allowedRebootTimes.Add(i);
+        }
         /*=======================================================================================================================================================================================
          * Toolbox.intervalMath(string, string)
          *      - Takes in 2 strings
