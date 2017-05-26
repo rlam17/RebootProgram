@@ -203,9 +203,9 @@ namespace Websdepot
 
             //readChunks(magicBox);
 
-            string test = "bo";
-            string[] testSplit = test.Split('-');
-            System.Console.WriteLine(testSplit.Length);
+            string test = "02:00";
+            DateTime testDate = Convert.ToDateTime(test);
+            System.Console.WriteLine(testDate);
             
             //checkPost();
 
@@ -1544,8 +1544,13 @@ namespace Websdepot
             timeY = Convert.ToDateTime(splitTime[1]);
         }
 
-        public bool inDayRange(int i)
+        //=====================================================
+        // Check to see if today's day of week is within range
+        // of the days of weeks outlined in parameters
+        //=====================================================
+        public bool inDayRange()
         {
+            int i = (int)DateTime.Today.DayOfWeek;
             if (dayX < dayY)
             {
                 if (i >= dayX && i <= dayY)
@@ -1584,9 +1589,14 @@ namespace Websdepot
             }
         }
 
+        //=============================================================
+        // Check if current time is in the range of the times outlined
+        // in parameters
+        //=============================================================
         public bool inTimeRange()
         {
-            return true;
+            return (DateTime.Now >= timeX && DateTime.Now <= timeY);
+            
         }
 
         //=================================================
