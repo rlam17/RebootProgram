@@ -601,10 +601,10 @@ namespace Websdepot
                         StreamWriter sw = new StreamWriter("./lastreboottime.txt", false);
                         sw.WriteLine("[LastRebootTime]");
 
-                        var uptime = new PerformanceCounter("System", "System Up Time");
+                        PerformanceCounter uptime = new PerformanceCounter("System", "System Up Time");
                         uptime.NextValue();
-                        var t = TimeSpan.FromSeconds(uptime.NextValue());
-                        var final = DateTime.Now.Subtract(t);
+                        TimeSpan t = TimeSpan.FromSeconds(uptime.NextValue());
+                        DateTime final = DateTime.Now.Subtract(t);
                         System.Console.WriteLine(final);
                         sw.WriteLine(final);
                         sw.Close();
@@ -1373,7 +1373,7 @@ namespace Websdepot
                 File.Delete(Program.postUrl);
             }
             StreamWriter sw = new StreamWriter(Program.postUrl);
-            sw.WriteLine("StartupTime,ServerName,Status,Service,Error,");
+            sw.WriteLine("StartupTime,ServerName,Subcategory,Status,Service,Error,");
             sw.Close();
         }
 
@@ -1384,13 +1384,13 @@ namespace Websdepot
          */
         public bool checkCsv()
         {
-            //The regex pattern is: ^"(.+)" ?,"(\w+)","([A-Z]+)","(.+)","(.*)"$
+            //The regex pattern is: ^"(.+)" ?,"(\w+)","(.+)","([A-Z]+)","(.+)","(.*)"$
             bool result = true;
             bool error = false;
             string subject;
             sr = new StreamReader(Program.postUrl, System.Text.Encoding.Default);
             subject = sr.ReadLine(); //skips first line
-            string pattern = "^\"(.+)\" ?,\"(\\w+)\",\"([A-Z]+)\",\"(.+)\",\"(.*)\"$";
+            string pattern = "^\"(.+)\" ?,\"(\\w+)\",\"(.+)\",\"([A-Z]+)\",\"(.+)\",\"(.*)\"$";
             Regex rgx = new Regex(@pattern);
             
             while (!error && subject != null)
