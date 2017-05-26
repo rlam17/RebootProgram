@@ -597,7 +597,7 @@ namespace Websdepot
                     {
                         System.Console.WriteLine("Now rebooting...");
                         StreamWriter sw = new StreamWriter("./lastreboottime.txt", false);
-                        sw.WriteLine("[LastRebootTime]");
+                        sw.WriteLine("[Last Reboot Time]");
 
                         PerformanceCounter uptime = new PerformanceCounter("System", "System Up Time");
                         uptime.NextValue();
