@@ -821,12 +821,9 @@ namespace Websdepot
         public override void spawnSub()
         {
             //last reboot time configurations go here
-            StreamReader sr = new StreamReader("./lastreboottime.txt");
-            string test = sr.ReadLine();
-            DateTime dt = Convert.ToDateTime(test);
+            DateTime dt = Convert.ToDateTime(lChunk);
             tools.setLastReboot(dt);
             System.Console.WriteLine(dt);
-            sr.Close();
         }
 
         /* =======================================================================================================================================================================================
