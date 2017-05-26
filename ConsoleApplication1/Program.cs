@@ -1337,8 +1337,55 @@ namespace Websdepot
          */
          public int intervalMath(string strTime, string strInterval)
         {
-            int intSeconds = 0;
-            return intSeconds;
+            int intMs = 0;
+            string[] strSplit;
+            int intT;
+
+            strSplit = strInterval.Split(',');
+
+            intT = int.Parse(strSplit[0]);
+
+            //if tree for intervals
+
+            //convert from seconds
+            intMs = intT*1000;
+            if (strSplit[1].Equals("s") || strSplit[1].Equals("second")) {
+                return intMs;
+            } else {
+                intMs = intMs * 60;
+            }
+
+            if (strSplit[1].Equals("min") || strSplit[1].Equals("minute"))
+            {
+                return intMs;
+            }else
+            {
+                intMs = intMs * 24;
+            }
+
+            if (strSplit[1].Equals("d") || strSplit[1].Equals("day"))
+            {
+                return intMs;
+            }
+            else
+            {
+                intMs = intMs * 7;
+            }
+            if (strSplit[1].Equals("w") || strSplit[1].Equals("week"))
+            {
+                return intMs;
+            }
+            else {
+                intMs = intMs * 30;
+            }
+            if (strSplit[1].Equals("month") || strSplit[1].Equals("mon")) {
+                return intMs;
+            }
+
+
+
+
+            return intMs;
         }
 
         /*=======================================================================================================================================================================================
