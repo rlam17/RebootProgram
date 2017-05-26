@@ -23,8 +23,11 @@ namespace Websdepot
         static List<Chunk> chunks = new List<Chunk>();
 
 
-        //=============
-        //This function will write to log
+        //================================================
+        //This function will write logMessage to log file.
+        //Will create a new one if it doesn't exist.
+        //Will also automatically add a timestamp.
+        //================================================
         public static void writeLog(string logMessage)
         {
             //This will create a log if it doesn't exist
@@ -210,7 +213,7 @@ namespace Websdepot
             List<string> lastRebootChunk = new List<string>();
             List<string> configuredRebootChunk = new List<string>();
 
-            StreamReader sr = new StreamReader(confUrl);
+            StreamReader sr = new StreamReader(confUrl, System.Text.Encoding.Default);
 
             string line;
             List<string> currentList = new List<string>();
