@@ -1534,4 +1534,64 @@ namespace Websdepot
             return lines;
         }
     }
+    class DayRange
+    {
+        int dayX;
+        int dayY;
+        string timeX;
+        string timeY;
+
+        public DayRange(int x, int y, string a, string b)
+        {
+            dayX = x;
+            dayY = y;
+            timeX = a;
+            timeY = b;
+        }
+
+        public bool inDayRange(int i)
+        {
+            if (dayX < dayY)
+            {
+                if (i >= dayX && i <= dayY)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (dayX == dayY)
+                {
+                    if (i == dayX)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    if (i >= dayY || i <= dayX)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        public bool inTimeRange()
+        {
+
+        }
+    }
 }
