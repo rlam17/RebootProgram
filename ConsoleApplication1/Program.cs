@@ -611,7 +611,7 @@ namespace Websdepot
                         TimeSpan t = TimeSpan.FromSeconds(uptime.NextValue());
                         DateTime final = DateTime.Now.Subtract(t);
                         System.Console.WriteLine(final);
-                        tools.setLastReboot(final);
+                        //tools.setLastReboot(final);
                         sw.WriteLine(final);
                         sw.Close();
                     }
@@ -828,7 +828,12 @@ namespace Websdepot
         public override void spawnSub()
         {
             //last reboot time configurations go here
-
+            StreamReader sr = new StreamReader("./testDate.txt");
+            string test = sr.ReadLine();
+            DateTime dt = Convert.ToDateTime(test);
+            tools.setLastReboot(dt);
+            System.Console.WriteLine(dt);
+            sr.Close();
         }
 
         /* =======================================================================================================================================================================================
