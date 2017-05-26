@@ -1311,11 +1311,44 @@ namespace Websdepot
     {
         string[] sqlInfo;
         DateTime dtLastReb;
+        int intRebDelay, intRebInterval, intSqlInterval;
 
         StreamReader sr;
+
+        /*=======================================================================================================================================================================================
+         * Toolbox.Toolbox()
+         *      - Default constructor for Toolbox
+         *          - Initiates the empty sqlInfo array
+         * =======================================================================================================================================================================================
+         */
         public Toolbox()
         {
             sqlInfo = new string[6];
+        }
+
+        /*=======================================================================================================================================================================================
+         * Toolbox.intervalMath(string, string)
+         *      - Takes in 2 strings
+         *          - string1 contains the time which will be parsed
+         *          - string2 contains the measurement
+         *      - Returns an int in milliseconds
+         *      
+         * =======================================================================================================================================================================================
+         */
+         public int intervalMath(string strTime, string strInterval)
+        {
+            int intSeconds = 0;
+            return intSeconds;
+        }
+
+        /*=======================================================================================================================================================================================
+         * Toolbox.setSqlInterval()
+         *      -Set the interval for checking SQL
+         * =======================================================================================================================================================================================
+         */
+        public void setSqlInterval(string strTime, string strInterval)
+        {
+            intSqlInterval = intervalMath(strTime, strInterval);
         }
 
         /* =======================================================================================================================================================================================
@@ -1337,7 +1370,7 @@ namespace Websdepot
              * 2: Username (eg: SomeUser)
              * 3: Password (eg: SomePassword)
              * 4: Database (eg: SomeDb)
-             * 5: CheckinTime (by minutes?) (eg: 2)
+             * 5: CheckinTime (by minutes?) (eg: 2) //will be stored as a number in intSqlTime
              * =======================================================================================================================================================================================
              */
             sqlInfo[intIndex] = strIn;
@@ -1459,4 +1492,3 @@ namespace Websdepot
             return lines;
         }
     }
-}
