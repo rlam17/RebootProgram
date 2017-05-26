@@ -905,7 +905,7 @@ namespace Websdepot
             if (strIn.Contains(strParse))
             {
                 //if yes, process:
-                StringParse();
+                stringParse();
             }
             else
             {
@@ -914,11 +914,11 @@ namespace Websdepot
         }
 
         /* =======================================================================================================================================================================================
-         * InfoParserChain.StringParse()
+         * InfoParserChain.stringParse()
          *   - Splits the line
          * =======================================================================================================================================================================================
          */
-        public void StringParse()
+        public void stringParse()
         {
             strRaw = strIn.Split('=');
             try
@@ -965,7 +965,7 @@ namespace Websdepot
             if (strIn.Contains(strParse))
             {
                 //if yes, process:
-                StringParse();
+                stringParse();
             }
             else
             {
@@ -1049,7 +1049,7 @@ namespace Websdepot
             if (strIn.Contains(strParse))
             {
                 //if yes, process:
-                StringParse();
+                stringParse();
             }else
             {
                 nextLink();
@@ -1057,12 +1057,13 @@ namespace Websdepot
         }
 
         /* =======================================================================================================================================================================================
-         * SqlParserChain.StringParse()
+         * SqlParserChain.stringParse()
          *   - Splits the line
          * =======================================================================================================================================================================================
          */
-        public void StringParse()
+        public void stringParse()
         {
+            //TODO figure out why this doesn't run the abstract base version
             strRaw = strIn.Split('=');
             try
             {
