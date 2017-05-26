@@ -18,7 +18,7 @@ namespace Websdepot
     {
         static public string logUrl = "./log/Log.txt";
         static public string confUrl = "./Conf.cfg";
-        static public string todayDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+        static public string todayDate = DateTime.Now.ToString();
         static public string postUrl = "./post/post.csv";
         static List<Chunk> chunks = new List<Chunk>();
 
@@ -599,7 +599,7 @@ namespace Websdepot
                     {
                         System.Console.WriteLine("Now rebooting...");
                         StreamWriter sw = new StreamWriter("./lastreboottime.txt", false);
-
+                        sw.WriteLine("[LastRebootTime]");
 
                         var uptime = new PerformanceCounter("System", "System Up Time");
                         uptime.NextValue();
