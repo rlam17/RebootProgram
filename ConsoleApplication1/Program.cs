@@ -21,6 +21,10 @@ namespace Websdepot
         static public string todayDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
         static public string postUrl = "./post/post.csv";
         static List<Chunk> chunks = new List<Chunk>();
+
+
+        //=============
+        //This function will write to log
         public static void writeLog(string logMessage)
         {
             //This will create a log if it doesn't exist
@@ -44,11 +48,11 @@ namespace Websdepot
                 exit(1);
             }
             else //Conf clears check
-            {
-                writeLog("Conf file is clear");
-                //Do hash configuration here
-                createHash();
-            }
+                {
+                    writeLog("Conf file is clear");
+                    //Do hash configuration here
+                    createHash();
+                }
         }
         private static void createHash()
         {
@@ -97,13 +101,18 @@ namespace Websdepot
             {
                 myConnection.Open();
                 writeLog("Connection to SQL success");
-            } catch(Exception e)
-            {
-                writeLog("Connection to SQL failed " + e);
             }
+            catch (Exception e)
+                {
+                    writeLog("Connection to SQL failed " + e);
+                }
 
         }
-        private static void delayWait(int min) //Input will be in minutes
+
+        //====================================================
+        //This function causes the program to wait min minutes
+        //====================================================
+        private static void delayWait(int min) 
         {
             int minToSec = 1000 * 60 * min;
             System.Threading.Thread.Sleep(minToSec);
@@ -270,7 +279,8 @@ namespace Websdepot
             }
             
             
-            foreach (string x in rebootChunk){
+            foreach (string x in rebootChunk)
+            {
                 System.Console.WriteLine(x);
             }
 
