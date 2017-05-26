@@ -168,6 +168,7 @@ namespace Websdepot
             //createHash();
             //readChunks();
 
+            //run full battery of tests
             readChunks(magicBox);
 
             
