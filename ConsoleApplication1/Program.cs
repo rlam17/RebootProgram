@@ -153,14 +153,7 @@ namespace Websdepot
 
         static void Main(string[] args)
         {
-            StreamReader sr = new StreamReader("./testDate.txt");
-            string test = sr.ReadLine();
-            DateTime dt = Convert.ToDateTime(test);
-            System.Console.WriteLine(dt);
-            sr.Close();
-            writeLog("Starting program");
-
-
+           
             Toolbox magicBox = new Toolbox();
             //Process.Start("shutdown", "/s /t 0");
             //Process.Start("shutdown", "-r -f -t 0");
@@ -828,7 +821,7 @@ namespace Websdepot
         public override void spawnSub()
         {
             //last reboot time configurations go here
-            StreamReader sr = new StreamReader("./testDate.txt");
+            StreamReader sr = new StreamReader("./lastreboottime.txt");
             string test = sr.ReadLine();
             DateTime dt = Convert.ToDateTime(test);
             tools.setLastReboot(dt);
