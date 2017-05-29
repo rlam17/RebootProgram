@@ -1092,7 +1092,17 @@ namespace Websdepot
             Program.writeLog(strIn + "Invalid data");
         }
     }
-     
+
+    //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    //Reboot Configuration parser chain begins
+
+    //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+    /*=======================================================================================================================================================================================
+     * RebConfParserChain
+     *  -This parser chain deals with all the configurations of the [reboot config] tag
+     *=======================================================================================================================================================================================
+     */
     class RebConfParserChain : InfoParserChain
     {
         public RebConfParserChain(string strLine, Toolbox tIn)
@@ -1125,7 +1135,6 @@ namespace Websdepot
         public override void nextLink()
         {
             // TODO: Implement CheckDelayLink
-            //SqlPortLink sqlPort = new SqlPortLink(strIn, tools);
         }
 
         public override void spawnSub()
@@ -1138,11 +1147,61 @@ namespace Websdepot
             {
                 tools.setRebootTimes(new DayRange(x));
             }
-
-
         }
     }
-    
+
+    /*=======================================================================================================================================================================================
+     * RebDelayLink
+     *  -This parser link deals with all the CheckDelay setting
+     *=======================================================================================================================================================================================
+     */
+    class RebDelayLink : InfoParserChain
+    {
+        public RebDelayLink(string strLine, Toolbox tIn)
+        {
+            //toolbox in
+            tools = tIn;
+
+            //System.Console.WriteLine("SqlLink entered");
+            strParse = "CheckDelay=";
+            strIn = strLine.Replace(" ", String.Empty);
+
+            //overriden string parse
+            stringSwitch();
+        }
+
+        public override void stringSwitch()
+        {
+            //Check if the line passed contains the token this link is responsible for...
+            if (strIn.Contains(strParse))
+            {
+                //if yes, process:
+                stringParse();
+            }
+            else
+            {
+                nextLink();
+            }
+        }
+
+        public override void nextLink()
+        {
+            chainEnd();
+        }
+
+        /* =======================================================================================================================================================================================
+         * RebDelayLink.spawnSub()
+         *   - Stores the reboot check delay info
+         * =======================================================================================================================================================================================
+         */
+        public override void spawnSub()
+        {
+            tools.setSql(5, strIn);
+            string[] strSplit = strIn.Split(',');
+            tools.setRebDelay(strSplit[0], strSplit[1]);
+        }
+    }
+
     //SQL info parser chain begins
     /* =======================================================================================================================================================================================
      * SqlParserChain
@@ -1162,8 +1221,8 @@ namespace Websdepot
      */
     class SqlParserChain : InfoParserChain
     {
-        protected string strIn;
-        protected string[] strRaw;
+        //protected string strIn;
+        //protected string[] strRaw;
 
         //default constructor should never be touched
         
@@ -1496,11 +1555,6 @@ namespace Websdepot
     }
 
     //SQL info parser chain ends
-
-//''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-    //Reboot Configuration parser chain begins
-
- //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
     //end of parser family
 
