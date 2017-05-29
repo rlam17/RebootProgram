@@ -862,7 +862,7 @@ namespace Websdepot
         public override void nextLink()
         {
             System.Console.WriteLine("In [reboot config] chain Parser, going to next Parser");
-            ConfRebTimeParser crtParser = new ConfRebTimeParser(lChunk, tools, true);
+            RebTimeParser crtParser = new RebTimeParser(lChunk, tools, true);
             //throw new NotImplementedException();
         }
     }
@@ -918,8 +918,10 @@ namespace Websdepot
          */
         public override void spawnSub()
         {
-            //configured reboot times go here
-            //call configured reboot times
+            foreach (string strIn in lChunk)
+            {
+                RebTimeParserChain rebTimeParse = new RebTimeParserChain(strIn, tools);
+            }
         }
 
         /* =======================================================================================================================================================================================
@@ -1601,15 +1603,7 @@ namespace Websdepot
         public override void spawnSub()
         {
             //ADD DATE LOGIC
-
-            //DateTime dt = new DayRange().getRebootTimeFromConf();
-            DateTime dt = Convert.ToDateTime(strIn);
-            tools.setConfiguredRebootTimes(dt);
-
-            //tools.setSql(5, strIn);
-            //string[] strSplit = strIn.Split(',');
             
-            //tools.setSqlInterval(strSplit[0], strSplit[1]);
         }
 
         /* =======================================================================================================================================================================================
@@ -1640,7 +1634,6 @@ namespace Websdepot
         int intRebDelay, intRebInterval, intSqlInterval;
         List<DayRange> allowedRebootTimes;
         RebootParser rbParse;
-        DateTime configuredRebootTime;
         
 
         /*=======================================================================================================================================================================================
@@ -1786,12 +1779,6 @@ namespace Websdepot
         public void setSqlInterval(string strTime, string strInterval)
         {
             intSqlInterval = intervalMath(strTime, strInterval);
-        }
-
-
-        public void setConfiguredRebootTimes(DateTime i)
-        {
-            configuredRebootTime = i;
         }
 
         /*=======================================================================================================================================================================================
@@ -2097,7 +2084,7 @@ namespace Websdepot
                 return -1;
             }
         }
-        public DateTime getRebootTimeFromConf()
+        public void getRebootTimeFromConf()
         {
             StreamReader sr = new StreamReader(Program.confUrl, System.Text.Encoding.Default);
             string line = "";
@@ -2110,7 +2097,7 @@ namespace Websdepot
             line = sr.ReadLine();
             starSplit = line.Split('=');
             DateTime startTime = Convert.ToDateTime(starSplit[1]);
-            return startTime;
+
         }
     }
 
