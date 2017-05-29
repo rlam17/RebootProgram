@@ -202,7 +202,9 @@ namespace Websdepot
             //run full battery of tests
 
             readChunks(magicBox);
-            magicBox.runReb();
+            //magicBox.runReb();
+            DayRange dr = new DayRange();
+            dr.getRebootTimeFromConf();
             //checkPost();
 
             //PLACE KILLSWITCH HERE
@@ -1849,6 +1851,10 @@ namespace Websdepot
         DateTime timeX;
         DateTime timeY;
 
+        public DayRange()
+        {
+
+        }
         public DayRange(string i)
         {
             string[] splitA = i.Split('|');
@@ -1963,5 +1969,22 @@ namespace Websdepot
                 return -1;
             }
         }
+        public void getRebootTimeFromConf()
+        {
+            StreamReader sr = new StreamReader(Program.confUrl, System.Text.Encoding.Default);
+            string line = "";
+            while(String.Compare(line, "[Configured Reboot Times]") != 0)
+            {
+                line = sr.ReadLine();
+            }
+
+            string[] starSplit;
+            line = sr.ReadLine();
+            starSplit = line.Split('=');
+            DateTime startTime = Convert.ToDateTime(starSplit[1]);
+
+        }
     }
+
+    
 }
