@@ -202,7 +202,7 @@ namespace Websdepot
             //run full battery of tests
 
             readChunks(magicBox);
-
+            magicBox.runReb();
             //checkPost();
 
             //PLACE KILLSWITCH HERE
