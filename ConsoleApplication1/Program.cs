@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Websdepot
 {
-    
+
     class Program
     {
         static public string logUrl = "./log/Log.txt";
@@ -40,13 +40,13 @@ namespace Websdepot
             sw.Close();
 
         }
-        
+
 
         //=======================================================
         //This function creates an MD5 hash of the Conf.cfg file.
         //Then passes it into createHashFile.
         //=======================================================
-        private static void createHash()
+        private static string createHash()
         {
 
 
@@ -54,18 +54,18 @@ namespace Websdepot
             {
                 using (var stream = File.OpenRead(confUrl))
                 {
-                    createHashFile(Encoding.Default.GetString(md5.ComputeHash(stream)));
+
+                    string fileHash = Encoding.Default.GetString(md5.ComputeHash(stream));
+                    return fileHash;
                 }
             }
-
-            
         }
 
         //================================================
         //Creates hash file of the Conf.cfg file.
         //Should be repurposed to store hash in resgistry.
         //================================================
-        private static void createHashFile(string hash)
+        private static string createHashFile(string hash)
         {
             /*
             string root = "HKEY_LOCAL_MACHINE\\Software\\Websdepot Reboot\\";
@@ -78,51 +78,53 @@ namespace Websdepot
             StreamWriter sw = new StreamWriter("./md5", false);
             sw.WriteLine(hash);
             sw.Close();
-
+            return hash;
         }
-       
+
         //====================================================
         //This function causes the program to wait min minutes
         //====================================================
-        private static void delayWait(int min) 
+        private static void delayWait(int min)
         {
             int minToSec = 1000 * 60 * min;
             System.Threading.Thread.Sleep(minToSec);
         }
 
-        //=====================================================
-        //Check if Post.csv exists.  If yes, delete.
-        //Then create a new one
-        //=====================================================
-        private static void checkPost()
-        {
-            if (File.Exists(postUrl))
-            {
-                File.Delete(postUrl);
-                File.Create(postUrl);
-            }
-        }
-
         static void Main(string[] args)
         {
-           
+            writeLog("Starting program");
             Toolbox magicBox = new Toolbox();
             magicBox.clearCsv();
             readConf(magicBox);
-            
-            magicBox.connectSql();           
+
+            magicBox.connectSql();
             magicBox.checkCsv();
 
             //PLACE KILLSWITCH HERE
             //Process.Start("shutdown", "-r -f -t 0");
 
-            while (true)
+            TimeSpan sqlInterval = TimeSpan.FromMilliseconds(magicBox.getSqlInterval());
+            TimeSpan rebootInterval = TimeSpan.FromMilliseconds(magicBox.getSqlInterval());
+            //magicBox.runReb();
+            var sqlTimer = new System.Threading.Timer((e) =>
             {
+                magicBox.updateLastCheckin();
+                //TODO: Compare [Configured Reboot Times] with the SQL server, if they are different update the config file and write to the log file.
+                string hash = createHash();
                 magicBox.checkPostQueue();
-                //TODO: Perform x minute tasks.
-                break;
-            }
+            }, null, TimeSpan.Zero, sqlInterval);
 
+
+
+            var rebootTimer = new System.Threading.Timer((f) =>
+            {
+                if (magicBox.checkRebootTime())
+                {
+                    magicBox.runReb();
+                }
+            }, null, TimeSpan.Zero, rebootInterval);
+
+            
         }
 
         //=========================================================
@@ -137,7 +139,7 @@ namespace Websdepot
         //=========================================================
         public static void exit(int code)
         {
-            if(code > 0)
+            if (code > 0)
             {
                 writeLog("Exitting program with error " + code);
             }
@@ -145,7 +147,7 @@ namespace Websdepot
             {
                 writeLog("Exitting program");
             }
-            
+
             System.Environment.Exit(code);
         }
 
@@ -160,11 +162,11 @@ namespace Websdepot
             string line = "";
             List<string> currentList = new List<string>();
             int currentChunk = 0;
-            while((line = sr.ReadLine()) != null) //until EOF
+            while ((line = sr.ReadLine()) != null) //until EOF
             {
 
-                if (currentChunk < 6) 
-                    //If still working on a chunk, added to the list
+                if (currentChunk < 6)
+                //If still working on a chunk, added to the list
                 {
                     if (line != "")
                     {
@@ -172,9 +174,9 @@ namespace Websdepot
                         //System.Console.WriteLine(line);
                     }
                     else
-                        {
+                    {
                         //System.Console.WriteLine("This is a blank line!");
-                        
+
 
                         switch (currentChunk) //Check which chunk it is on
                         {
@@ -193,7 +195,7 @@ namespace Websdepot
                             case 3:
                                 //rebootChunk = currentList;
                                 chunks.Add(new Chunk(currentList));
-                                break;                         
+                                break;
                             case 4:
                                 //configuredRebootChunk = currentList;
                                 chunks.Add(new Chunk(currentList));
@@ -203,37 +205,49 @@ namespace Websdepot
                                 break;
                             default:
                                 currentList = null;
-                                break; 
-                            /*
-                            case 4:
-                                //lastRebootChunk = currentList;
-                                chunks.Add(new Chunk(currentList));
                                 break;
-                            */
+                                /*
+                                case 4:
+                                    //lastRebootChunk = currentList;
+                                    chunks.Add(new Chunk(currentList));
+                                    break;
+                                */
                         }
                         currentList = new List<string>();
                         currentChunk++;
-                        }
+                    }
                 }
-                
+
             }
 
             sr.Close();
             chunks.Add(new Chunk(currentList));
             List<string> external = new List<string>();
-            if (File.Exists("./lastreboottime.txt"))
+            if (!File.Exists("./lastreboottime.txt"))
             {
-                StreamReader sr_b = new StreamReader("./lastreboottime.txt", System.Text.Encoding.Default);                
-                external.Add(sr_b.ReadLine());
-                external.Add(sr_b.ReadLine());
+                StreamWriter writer = new StreamWriter("./lastreboottime.txt", false);
+                writer.WriteLine("[Last Reboot Time]");
 
-                sr_b.Close();
+                PerformanceCounter uptime = new PerformanceCounter("System", "System Up Time");
+                uptime.NextValue();
+                TimeSpan t = TimeSpan.FromSeconds(uptime.NextValue());
+                DateTime final = DateTime.Now.Subtract(t);
+                System.Console.WriteLine(final);
+                //tools.setLastReboot(final);
+                writer.WriteLine(final);
+                writer.Close();
+
+                
             }
+            StreamReader sr_b = new StreamReader("./lastreboottime.txt", System.Text.Encoding.Default);
+            external.Add(sr_b.ReadLine());
+            external.Add(sr_b.ReadLine());
 
+            sr_b.Close();
             //Send chunks to functions here
 
             Toolbox tb = tIn;
-            
+
             foreach (Chunk c in chunks)
             {
                 ParserChain ts = new ParserChain(c.getChunk(), tb);
@@ -248,6 +262,7 @@ namespace Websdepot
             //ParserChain ts = new ParserChain(chunks[0].getChunk(), new Toolbox());
 
         }
+
     }
 
     /* =======================================================================================================================================================================================
@@ -325,11 +340,11 @@ namespace Websdepot
         protected string strIn;
 
         //Raw chunk storage for when the tag isn't found
-        protected List<string>rChunk;
+        protected List<string> rChunk;
 
         //Chunk storage
         protected List<string> lChunk;
-        
+
 
         /* =======================================================================================================================================================================================
          * cleanIn(List<string> strInput)
@@ -363,7 +378,7 @@ namespace Websdepot
                 //spawn specific subprocess parser
                 spawnSub();
             }
-            
+
         }
 
         //abstract function for performing settings actions
@@ -432,7 +447,7 @@ namespace Websdepot
                         strSplit[0] = strSplit[0] + ".exe";
                     }
                     strPath = strSplit[0];
-                    
+
                     //Grabs the command line arguments
                     // - try/catch block used because command line arguments might not be there and the strSplit[1] index might not exist
                     // - it is normal for the code to continue even after the exception is caught (cmd args not found)
@@ -442,38 +457,39 @@ namespace Websdepot
                     }
                     catch (Exception e) { }
 
-                    
+
                     System.Console.WriteLine("Executing: " + strPath + " | " + strArgs);
 
                     //launch process with path and command line arguments
                     var process = Process.Start(strPath, strArgs);
-                    
+
                     //wait for process to end
                     process.WaitForExit();
                 }
                 catch (Win32Exception e)
-                    {
-                        Program.writeLog("Failed to open " + strChunk);
-                    }
+                {
+                    Program.writeLog("Failed to open " + strChunk);
+                }
 
             }
         }
 
-        
+
 
         /* =======================================================================================================================================================================================
          * Parser.chainEnd()
          *   - Run by the last parser in the chain to log that an unknown setting has not been processed by the script as it has not been implemented or incorrectly named
          * =======================================================================================================================================================================================
          */
-        public virtual void chainEnd() {
+        public virtual void chainEnd()
+        {
             Program.writeLog(strIn + "Command not found, check configuration file formatting or check if specific command has been implemented.");
         }
     }
 
-//********************************************************************************************************************************************************************************************
-//settings tag parser chain begins
-    
+    //********************************************************************************************************************************************************************************************
+    //settings tag parser chain begins
+
     class StartupParser : Parser
     {
         /* =======================================================================================================================================================================================
@@ -563,7 +579,7 @@ namespace Websdepot
             strParse = "[reboot]";
             cleanIn(inChunk, false);
         }
-        
+
         /* =======================================================================================================================================================================================
          * RebootParser.RebootParser(List<string>, Toolbox)
          *   - Constructor for chain link
@@ -733,7 +749,7 @@ namespace Websdepot
             strParse = "[reboot config]";
             cleanIn(inChunk, false);
         }
-        
+
         /* =======================================================================================================================================================================================
          * RebConfParser.RebConfParser(List<string>, Toolbox)
          *   - Constructor for chain link
@@ -875,7 +891,7 @@ namespace Websdepot
             strParse = "[last reboot time]";
             cleanIn(inChunk, false);
         }
-        
+
         /* =======================================================================================================================================================================================
          * LastRebootParser.LastRebootParser(List<string>, Toolbox)
          *   - Constructor for chain link
@@ -902,14 +918,14 @@ namespace Websdepot
         public override void spawnSub()
         {
             //last reboot time configurations go here
-            foreach(string x in lChunk)
+            foreach (string x in lChunk)
             {
                 DateTime dt = Convert.ToDateTime(x);
                 tools.setLastReboot(dt);
                 System.Console.WriteLine(dt);
             }
-            
-            
+
+
         }
 
         /* =======================================================================================================================================================================================
@@ -1063,7 +1079,7 @@ namespace Websdepot
 
             string[] splitA = strIn.Split(',');
 
-            foreach(string x in splitA)
+            foreach (string x in splitA)
             {
                 tools.setRebootTimes(new DayRange(x));
             }
@@ -1145,7 +1161,7 @@ namespace Websdepot
         //protected string[] strRaw;
 
         //default constructor should never be touched
-        
+
 
         /* =======================================================================================================================================================================================
          * SqlParserChain.SqlParserChain(string, Toolbox)
@@ -1178,7 +1194,8 @@ namespace Websdepot
             {
                 //if yes, process:
                 stringParse();
-            }else
+            }
+            else
             {
                 nextLink();
             }
@@ -1594,7 +1611,7 @@ namespace Websdepot
     {
         string[] sqlInfo;
         DateTime dtLastReb;
-        long intRebDelay, intRebInterval, intSqlInterval;
+        long rebootDelay, rebootInterval, sqlInterval;
         List<DayRange> allowedRebootTimes;
         RebootParser rbParse;
         DateTime configuredRebootTime;
@@ -1645,6 +1662,24 @@ namespace Websdepot
 
         }
 
+        public bool checkRebootTime()
+        {
+            foreach (DayRange period in allowedRebootTimes)
+            {
+                if (period.inDayRange() && period.inTimeRange())
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void updateLastCheckin()
+        {
+            //TODO: Update SQL for last check in date
+            sqlQuery("");
+        }
+
         public void sqlQuery(string query)
         {
             //TODO: SQL querying
@@ -1657,7 +1692,7 @@ namespace Websdepot
          */
         public void setRebootTimes(DayRange i)
         {
-            
+
             allowedRebootTimes.Add(i);
         }
 
@@ -1708,13 +1743,16 @@ namespace Websdepot
             //if tree for intervals
 
             //convert from seconds
-            intMs = intT*1000;
+            intMs = intT * 1000;
             strInterval = strInterval.ToLower();
             //check if seconds is needed conversion
-            if (strInterval.Equals("s") || strInterval.Equals("second")) {
+            if (strInterval.Equals("s") || strInterval.Equals("second"))
+            {
                 //if yes return
                 return intMs;
-            } else {
+            }
+            else
+            {
                 //convert to minutes
                 intMs = intMs * 60;
             }
@@ -1754,13 +1792,16 @@ namespace Websdepot
                 //if yes return
                 return intMs;
             }
-            else {
+            else
+            {
                 intMs = intMs * 30;
             }
-            if (strInterval.Equals("month") || strInterval.Equals("mon")) {
+            if (strInterval.Equals("month") || strInterval.Equals("mon"))
+            {
                 //month is the largest
                 return intMs;
-            }else
+            }
+            else
             {
                 //conversion tag invalid
                 System.Console.WriteLine("Conversion unit does not exist");
@@ -1775,7 +1816,7 @@ namespace Websdepot
          */
         public void setRebInterval(string strTime, string strInterval)
         {
-            intRebInterval = intervalMath(strTime, strInterval);
+            rebootInterval = intervalMath(strTime, strInterval);
         }
 
         /*=======================================================================================================================================================================================
@@ -1785,7 +1826,7 @@ namespace Websdepot
          */
         public void setSqlInterval(string strTime, string strInterval)
         {
-            intSqlInterval = intervalMath(strTime, strInterval);
+            sqlInterval = intervalMath(strTime, strInterval);
         }
 
 
@@ -1796,7 +1837,7 @@ namespace Websdepot
          */
         public void setRebDelay(string strTime, string strInterval)
         {
-            intRebDelay = intervalMath(strTime, strInterval);
+            rebootDelay = intervalMath(strTime, strInterval);
         }
 
         /* =======================================================================================================================================================================================
@@ -1833,6 +1874,10 @@ namespace Websdepot
         {
             return sqlInfo;
         }
+        public long getSqlInterval()
+        {
+            return sqlInterval;
+        }
 
         /* =======================================================================================================================================================================================
          * Toolbox.setLastReboot()
@@ -1856,13 +1901,14 @@ namespace Websdepot
             //attempt to loop through the entire sqlInfo array, if successful, return true
             try
             {
-                for(int i = 0; i<6; i++)
+                for (int i = 0; i < 6; i++)
                 {
                     //dummy code to iterate through the array
                     sqlInfo[i].Contains("");
                 }
                 return true;
-            }catch(Exception e)
+            }
+            catch (Exception e)
             {
                 //TODO: Exit and write log
                 return false;
@@ -1890,7 +1936,7 @@ namespace Websdepot
         //=====================
         private void uploadCsv()
         {
-            if(connect == null)
+            if (connect == null)
             {
                 //Queue the CSV for next available upload
                 string postStamp = "./post/topost/" + Program.todayDate + "_Post.csv";
@@ -1903,8 +1949,8 @@ namespace Websdepot
                 string postStamp = "./post/posted/" + Program.todayDate + " _Post.csv";
                 Program.writeLog("Post has been uploaded");
             }
-           
-            
+
+
         }
 
         //===================================
@@ -1912,9 +1958,18 @@ namespace Websdepot
         //===================================
         public void checkPostQueue()
         {
-            if (File.Exists("./post/posted/Post.csv"))
+            var files = Directory.GetFiles("./post/topost/*.csv");
+            if (files.Length > 0)
             {
-                //TODO: CSV upload to SQL here
+
+                foreach (string file in files)
+                {
+                    //TODO: CSV upload to SQL here, then move them to posted after rename
+                    string[] firstAttempt = file.Split('_');
+
+                    Program.writeLog("Uploaded old log: " + Path.GetFileName(file));
+                    File.Move(file, "./post/posted/" + firstAttempt[0] + "_" + Program.todayDate + "_Post.csv");
+                }
             }
         }
 
@@ -1934,28 +1989,28 @@ namespace Websdepot
             subject = sr.ReadLine(); //skips first line
             string pattern = "^\"(.+)\" ?,\"(\\w+)\",\"(.+)\",\"([A-Z]+)\",\"(.+)\",\"(.*)\"$";
             Regex rgx = new Regex(@pattern);
-            
+
             while (!error && subject != null)
             {
                 subject = sr.ReadLine();
-                if(subject != null)
+                if (subject != null)
                 {
                     if (rgx.IsMatch(subject))
                     {
                         uploadCsv();
                     }
                     else
-                        {
-                            Program.writeLog("Error in the CSV file");
-                            Program.exit(3);
-                        }
-                }                
+                    {
+                        Program.writeLog("Error in the CSV file");
+                        Program.exit(3);
+                    }
+                }
             }
             sr.Close();
             //return result;
         }
 
-        
+
 
     }
 
@@ -1983,8 +2038,8 @@ namespace Websdepot
     {
         int dayX;
         int dayY;
-        DateTime timeX;
-        DateTime timeY;
+        TimeSpan timeX;
+        TimeSpan timeY;
 
         public DayRange()
         {
@@ -2006,8 +2061,8 @@ namespace Websdepot
                 dayY = twoLetterDay(splitDay[1]);
             }
             string[] splitTime = splitA[1].Split('-');
-            timeX = Convert.ToDateTime(splitTime[0]);
-            timeY = Convert.ToDateTime(splitTime[1]);
+            timeX = Convert.ToDateTime(splitTime[0]).TimeOfDay;
+            timeY = Convert.ToDateTime(splitTime[1]).TimeOfDay;
         }
 
         //=====================================================
@@ -2061,8 +2116,35 @@ namespace Websdepot
         //=============================================================
         public bool inTimeRange()
         {
-            return (DateTime.Now >= timeX && DateTime.Now <= timeY);
-            
+            TimeSpan i = DateTime.Now.TimeOfDay;
+
+            if (timeY > timeX)
+            {
+                if (i >= timeX && i <= timeY)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (i >= timeX && i > timeY)
+                {
+                    return true;
+                }
+                else if (i < timeX && i <= timeY)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
         }
 
         //=================================================
@@ -2071,7 +2153,7 @@ namespace Websdepot
         //=================================================
         public int twoLetterDay(string i)
         {
-            if (String.Compare("su",i) == 0)
+            if (String.Compare("su", i) == 0)
             {
                 return 0;
             }
@@ -2108,7 +2190,7 @@ namespace Websdepot
         {
             StreamReader sr = new StreamReader(Program.confUrl, System.Text.Encoding.Default);
             string line = "";
-            while(String.Compare(line, "[Configured Reboot Times]") != 0)
+            while (String.Compare(line, "[Configured Reboot Times]") != 0)
             {
                 line = sr.ReadLine();
             }
@@ -2121,5 +2203,5 @@ namespace Websdepot
         }
     }
 
-    
+
 }
