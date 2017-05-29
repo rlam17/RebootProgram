@@ -1597,9 +1597,15 @@ namespace Websdepot
         public override void spawnSub()
         {
             //ADD DATE LOGIC
-            tools.setSql(5, strIn);
-            string[] strSplit = strIn.Split(',');
-            tools.setSqlInterval(strSplit[0], strSplit[1]);
+
+            //DateTime dt = new DayRange().getRebootTimeFromConf();
+            DateTime dt = Convert.ToDateTime(strIn);
+            tools.setConfiguredRebootTimes(dt);
+
+            //tools.setSql(5, strIn);
+            //string[] strSplit = strIn.Split(',');
+            
+            //tools.setSqlInterval(strSplit[0], strSplit[1]);
         }
 
         /* =======================================================================================================================================================================================
@@ -1630,6 +1636,7 @@ namespace Websdepot
         int intRebDelay, intRebInterval, intSqlInterval;
         List<DayRange> allowedRebootTimes;
         RebootParser rbParse;
+        DateTime configuredRebootTime;
         
 
         /*=======================================================================================================================================================================================
@@ -1775,6 +1782,12 @@ namespace Websdepot
         public void setSqlInterval(string strTime, string strInterval)
         {
             intSqlInterval = intervalMath(strTime, strInterval);
+        }
+
+
+        public void setConfiguredRebootTimes(DateTime i)
+        {
+            configuredRebootTime = i;
         }
 
         /*=======================================================================================================================================================================================
@@ -2080,7 +2093,7 @@ namespace Websdepot
                 return -1;
             }
         }
-        public void getRebootTimeFromConf()
+        public DateTime getRebootTimeFromConf()
         {
             StreamReader sr = new StreamReader(Program.confUrl, System.Text.Encoding.Default);
             string line = "";
@@ -2093,7 +2106,7 @@ namespace Websdepot
             line = sr.ReadLine();
             starSplit = line.Split('=');
             DateTime startTime = Convert.ToDateTime(starSplit[1]);
-
+            return startTime;
         }
     }
 
