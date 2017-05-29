@@ -209,7 +209,8 @@ namespace Websdepot
             //checkPost();
 
             DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
-            //builder.Add("Data Source", magicBox.sqlInfo[0]);
+            
+            builder.Add("Data Source", magicBox.sqlInfo[0]);
 
 
             //PLACE KILLSWITCH HERE
@@ -1604,7 +1605,8 @@ namespace Websdepot
         public override void spawnSub()
         {
             //ADD DATE LOGIC
-            
+            DateTime dt = Convert.ToDateTime(strIn);
+            tools.setConfiguredRebootTime(dt);
         }
 
         /* =======================================================================================================================================================================================
@@ -1635,7 +1637,7 @@ namespace Websdepot
         int intRebDelay, intRebInterval, intSqlInterval;
         List<DayRange> allowedRebootTimes;
         RebootParser rbParse;
-        
+        DateTime configuredRebootTime;
 
         /*=======================================================================================================================================================================================
          * Toolbox.Toolbox()
@@ -1668,6 +1670,11 @@ namespace Websdepot
         public void setRebootParser(RebootParser rebIn)
         {
             rbParse = rebIn;
+        }
+
+        public void setConfiguredRebootTime(DateTime i)
+        {
+            configuredRebootTime = i;
         }
 
         /*=======================================================================================================================================================================================
@@ -1782,10 +1789,6 @@ namespace Websdepot
             intSqlInterval = intervalMath(strTime, strInterval);
         }
 
-       public string[] getSqlInfo()
-        {
-            return sqlInfo;
-        }
 
         /*=======================================================================================================================================================================================
          * Toolbox.setRebDelay()
