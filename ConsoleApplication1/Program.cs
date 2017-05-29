@@ -1136,7 +1136,7 @@ namespace Websdepot
 
         public override void nextLink()
         {
-            // TODO: Implement CheckDelayLink
+            RebDelayLink rbDelay = new RebDelayLink(strIn, tools);
         }
 
         public override void spawnSub()
@@ -1564,45 +1564,46 @@ namespace Websdepot
     //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     //Start of the Configured Reboot Time settings parsers
     /* =======================================================================================================================================================================================
-     * SqlCInLink
-     *  - SqlCInLink parses and stores the check in time information
+     * RebTimeParserChain
+     *  - RebTimeParserChain parses and stores the check in time information
      *  - Is a Parser in the SQL info parser chain
      * =======================================================================================================================================================================================
      */
-    class SqlCInLink : InfoParserChain
+    class RebTimeParserChain : InfoParserChain
     {
         /* =======================================================================================================================================================================================
-         * SqlCInLink.SqlDbLink(string, Toolbox)
-         *   - The "default" constructor for SqlCInLink as Parsers always need settings line and a toolbox for utilities
+         * RebTimeParserChain.SqlDbLink(string, Toolbox)
+         *   - The "default" constructor for RebTimeParserChain as Parsers always need settings line and a toolbox for utilities
          *      - Stores input and sends it to the decision-making switch
          * =======================================================================================================================================================================================
          */
-        public SqlCInLink(string strLine, Toolbox tIn)
+        public RebTimeParserChain(string strLine, Toolbox tIn)
         {
             //toolbox in
             tools = tIn;
 
             //System.Console.WriteLine("SqlLink entered");
-            strParse = "CheckinTime=";
+            strParse = "Start=";
             strIn = strLine.Replace(" ", String.Empty);
             //overriden string parse
             stringSwitch();
         }
 
         /* =======================================================================================================================================================================================
-         * SqlCInLink.spawnSub()
+         * RebTimeParserChain.spawnSub()
          *   - Stores the SQL info in its appropriate spot in the Toolbox object
          * =======================================================================================================================================================================================
          */
         public override void spawnSub()
         {
+            //ADD DATE LOGIC
             tools.setSql(5, strIn);
             string[] strSplit = strIn.Split(',');
             tools.setSqlInterval(strSplit[0], strSplit[1]);
         }
 
         /* =======================================================================================================================================================================================
-         * SqlCInLink.nextLink()
+         * RebTimeParserChain.nextLink()
          *   - Redirects the line to the next parser in the parser chain
          * =======================================================================================================================================================================================
          */
