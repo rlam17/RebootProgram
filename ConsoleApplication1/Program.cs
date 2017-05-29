@@ -124,7 +124,7 @@ namespace Websdepot
                 }
             }, null, TimeSpan.Zero, rebootInterval);
 
-            while (true)
+            while (true) //Prevents timer thread death
             {
 
             }
@@ -138,7 +138,7 @@ namespace Websdepot
         // Exit codes:
         //              0: Exit without problems
         //              1. Exit with error in conf file
-        //              2. Exit with SQL connection error
+        //              2. Exit with file open error
         //              3. Exit with CSV error
         //=========================================================
         public static void exit(int code)
@@ -472,7 +472,9 @@ namespace Websdepot
                 }
                 catch (Win32Exception e)
                 {
-                    Program.writeLog("Failed to open " + strChunk);
+                    Program.writeLog("Failed to open " + strChunk + ": " + e.Message);
+                    Program.exit(2);
+
                 }
 
             }
@@ -1016,7 +1018,9 @@ namespace Websdepot
             }
             catch (Exception e)
             {
-                System.Console.WriteLine("Setting data missing");
+                //System.Console.WriteLine("Setting data missing");
+                Program.writeLog("Something wrong with the conf file: " + e.Message);
+                Program.exit(1);
             }
 
             spawnSub();
@@ -1220,7 +1224,10 @@ namespace Websdepot
             }
             catch (Exception e)
             {
-                System.Console.WriteLine("SQL data setting data missing.");
+                //System.Console.WriteLine("SQL data setting data missing.");
+                Program.writeLog("Conf file error: " + e);
+                Program.writeLog("SQL data error");
+                Program.exit(1);
             }
 
             spawnSub();
@@ -1914,7 +1921,9 @@ namespace Websdepot
             }
             catch (Exception e)
             {
-                //TODO: Exit and write log
+                Program.writeLog("Conf File error: " + e.Message);
+                Program.writeLog("SQL data error");
+                Program.exit(1);
                 return false;
             }
         }
@@ -1985,8 +1994,7 @@ namespace Websdepot
         public void checkCsv()
         {
             //The regex pattern is: ^"(.+)" ?,"(\w+)","(.+)","([A-Z]+)","(.+)","(.*)"$
-            StreamReader sr;
-            bool result = true;
+            StreamReader sr;            
             bool error = false;
             string subject;
             sr = new StreamReader(Program.postUrl, System.Text.Encoding.Default);
