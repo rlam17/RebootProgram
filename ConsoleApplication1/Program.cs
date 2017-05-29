@@ -1568,7 +1568,7 @@ namespace Websdepot
     /* =======================================================================================================================================================================================
      * RebTimeParserChain
      *  - RebTimeParserChain parses and stores the check in time information
-     *  - Is a Parser in the SQL info parser chain
+     *  - Is a Parser in the Reboot Time parser chain
      * =======================================================================================================================================================================================
      */
     class RebTimeParserChain : InfoParserChain
