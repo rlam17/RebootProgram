@@ -325,6 +325,37 @@ namespace Websdepot
 
         }
     }
+    /* =======================================================================================================================================================================================
+     * ParserChain
+     *  - Does a full, rule-less execution of the settings file
+     *  - ParserChain parses and handles the settings tags in the config file
+     *      - This initial chain handles the [startup] tag
+     *  - ParserChain is the first in a chain of tag parsers which allows the script to handle settings tags regardless of order
+     *  
+     *  - Parser chain workflow:
+     *     - Upon creation preprocess settings tag
+     *     - Check if tag is handled by this particular parser
+     *          -If yes:
+     *              - execute code based on settings
+     *          -If no:
+     *              - Pass the settings chunk onto the next parser in the chain
+     * =======================================================================================================================================================================================
+     */
+    class ParserChain
+    {
+        /* =======================================================================================================================================================================================
+         * ParserChain.ParserChain(List<string>, Toolbox)
+         *   - The "default" constructor for ParserChain as Parsers always need a list of strings for commands and a toolbox for utilities
+         *      - Stores input and sends it to preprocessing
+         * =======================================================================================================================================================================================
+         */
+        public ParserChain(List<string> inChunk, Toolbox tIn)
+        {
+            //Execute startup parser to initiate the chain
+            StartupParser sP = new StartupParser(inChunk, tIn, true);
+        }
+    }
+
 
     /* =======================================================================================================================================================================================
      * Template method for 
@@ -340,6 +371,8 @@ namespace Websdepot
      * 3) Process the chunk
      *      - Follow specific rules on a chunk specific basis
      *
+     *      -By default, the ParserChain object parses the entire configuration file and executes it's functionality.
+     *          -Mostly exists for testing purposes
      *  ***NOTE TO PEOPLE ADDING LINKS***
      *      - New end links should run the end of chain function which provides feedback if the code runs through the chain without finding the specific tag
      *        - Last chain in parser chain always calls chainEnd()
@@ -347,13 +380,13 @@ namespace Websdepot
      * =======================================================================================================================================================================================
      */
 
-     /*
-      * 2 types of parsers will need to be made:
-      *   1) settings tags parsers
-      *         - these will deal with main settings tags and redirect action requests ex. [startup]\
-      *   2) settings info parsers
-      *         - these grab information from the config file and store it in the Toolbox object
-      */
+    /*
+     * 2 types of parsers will need to be made:
+     *   1) settings tags parsers
+     *         - these will deal with main settings tags and redirect action requests ex. [startup]\
+     *   2) settings info parsers
+     *         - these grab information from the config file and store it in the Toolbox object
+     */
 
     abstract class Parser
     {
@@ -381,7 +414,7 @@ namespace Websdepot
          * 
          * =======================================================================================================================================================================================
          */
-        public void cleanIn(List<string> inChunk)
+        public void cleanIn(List<string> inChunk, bool blnChain)
         {
             //preprocess the settings tag
             string strUnIn;
@@ -392,8 +425,20 @@ namespace Websdepot
             //store chunk
             lChunk = inChunk;
 
-            //call switch function
-            stringSwitch();
+            if (blnChain)
+            {
+                //call switch function
+                stringSwitch();
+            }
+            else
+            {
+                //pop off the options tag from the rest of the chunk
+                lChunk.RemoveAt(0);
+
+                //spawn specific subprocess parser
+                spawnSub();
+            }
+            
         }
 
         //abstract function for performing settings actions
@@ -490,7 +535,7 @@ namespace Websdepot
         }
 
         /* =======================================================================================================================================================================================
-         * SqlParserChain.chainEnd()
+         * Parser.chainEnd()
          *   - Run by the last parser in the chain to log that an unknown setting has not been processed by the script as it has not been implemented or incorrectly named
          * =======================================================================================================================================================================================
          */
@@ -501,46 +546,49 @@ namespace Websdepot
 
 //********************************************************************************************************************************************************************************************
 //settings tag parser chain begins
-    /* =======================================================================================================================================================================================
-     * ParserChain
-     *  - Concrete implementation of Parser abstract class
-     *  - ParserChain parses and handles the settings tags in the config file
-     *      - This initial chain handles the [startup] tag
-     *  - ParserChain is the first in a chain of tag parsers which allows the script to handle settings tags regardless of order
-     *  
-     *  - Parser chain workflow:
-     *     - Upon creation preprocess settings tag
-     *     - Check if tag is handled by this particular parser
-     *          -If yes:
-     *              - execute code based on settings
-     *          -If no:
-     *              - Pass the settings chunk onto the next parser in the chain
-     * =======================================================================================================================================================================================
-     */
-    class ParserChain : Parser
+    
+    class StartupParser : Parser
     {
         /* =======================================================================================================================================================================================
-         * ParserChain.ParserChain(List<string>, Toolbox)
-         *   - The "default" constructor for ParserChain as Parsers always need a list of strings for commands and a toolbox for utilities
+         * StartupParser.StartupParser(List<string>, Toolbox)
+         *   - The "default" constructor for StartupParser as Parsers always need a list of strings for commands and a toolbox for utilities
          *      - Stores input and sends it to preprocessing
          * =======================================================================================================================================================================================
          */
-        public ParserChain(List<string> inChunk, Toolbox tIn)
+        public StartupParser(List<string> inChunk, Toolbox tIn)
         {
             //Toolbox to use if the parser needs utilites implemented within it
             tools = tIn;
 
-            //System.Console.WriteLine("ParserChain entered");
+            //System.Console.WriteLine("StartupParser entered");
 
             //set parser keyword/tag
             strParse = "[startup]";
 
             //start tag preprocessing
-            cleanIn(inChunk);
+            cleanIn(inChunk, false);
+        }
+        /* =======================================================================================================================================================================================
+         * StartupParser.StartupParser(List<string>, Toolbox, bool)
+         *   - Constructor for chain link
+         * =======================================================================================================================================================================================
+         */
+        public StartupParser(List<string> inChunk, Toolbox tIn, bool blnChain)
+        {
+            //Toolbox to use if the parser needs utilites implemented within it
+            tools = tIn;
+
+            //System.Console.WriteLine("StartupParser entered");
+
+            //set parser keyword/tag
+            strParse = "[startup]";
+
+            //start tag preprocessing
+            cleanIn(inChunk, blnChain);
         }
 
         /* =======================================================================================================================================================================================
-         * ParserChain.spawnSub()
+         * StartupParser.spawnSub()
          *   - Run [startup] tag options
          *     - execute programs on startup (run execute())
          * =======================================================================================================================================================================================
@@ -552,17 +600,16 @@ namespace Websdepot
         }
 
         /* =======================================================================================================================================================================================
-         * ParserChain.nextLink()
+         * StartupParser.nextLink()
          *   - Pass chunk onto the next parser in the chain
          * =======================================================================================================================================================================================
          */
         public override void nextLink()
         {
             System.Console.WriteLine("In [startup] chain link, going to next link");
-            RebootLink rlLink = new RebootLink(lChunk, tools);
+            RebootParser rlLink = new RebootParser(lChunk, tools, true);
         }
     }
-
     /* =======================================================================================================================================================================================
      * RebootLink
      *  - Concrete implementation of Parser abstract class
@@ -570,28 +617,45 @@ namespace Websdepot
      *  - Is a Parser in the settings tag parser chain
      * =======================================================================================================================================================================================
      */
-    class RebootLink : Parser
+    class RebootParser : Parser
     {
         /* =======================================================================================================================================================================================
-         * RebootLink.RebootLink(List<string>, Toolbox)
-         *   - The "default" constructor for RebootLink as Parsers always need a list of strings for commands and a toolbox for utilities
+         * RebootParser.RebootParser(List<string>, Toolbox)
+         *   - The "default" constructor for RebootParser as Parsers always need a list of strings for commands and a toolbox for utilities
          *      - Stores input and sends it to preprocessing
          * =======================================================================================================================================================================================
          */
-        public RebootLink(List<string> inChunk, Toolbox tIn)
+        public RebootParser(List<string> inChunk, Toolbox tIn)
         {
             //toolbox in
             tools = tIn;
 
-            //System.Console.WriteLine("RebootLink entered");
+            //System.Console.WriteLine("RebootParser entered");
 
             //set parser keyword/tag
             strParse = "[reboot]";
-            cleanIn(inChunk);
+            cleanIn(inChunk, false);
+        }
+        
+        /* =======================================================================================================================================================================================
+         * RebootParser.RebootParser(List<string>, Toolbox)
+         *   - Constructor for chain link
+         * =======================================================================================================================================================================================
+         */
+        public RebootParser(List<string> inChunk, Toolbox tIn, bool blnChain)
+        {
+            //toolbox in
+            tools = tIn;
+
+            //System.Console.WriteLine("RebootParser entered");
+
+            //set parser keyword/tag
+            strParse = "[reboot]";
+            cleanIn(inChunk, blnChain);
         }
 
         /* =======================================================================================================================================================================================
-         * RebootLink.spawnSub()
+         * RebootParser.spawnSub()
          *   - Run [reboot] tag options
          *     - execute programs on reboot (run execute())
          * =======================================================================================================================================================================================
@@ -625,45 +689,61 @@ namespace Websdepot
         }
 
         /* =======================================================================================================================================================================================
-         * RebootLink.nextLink()
+         * RebootParser.nextParser()
          *   - Pass chunk onto the next parser in the chain
          * =======================================================================================================================================================================================
          */
         public override void nextLink()
         {
-            System.Console.WriteLine("In [reboot] chain link, going to next link");
-            SqlLink sqlLink = new SqlLink(lChunk, tools);
+            System.Console.WriteLine("In [reboot] chain Parser, going to next Parser");
+            SqlParser sqlParser = new SqlParser(lChunk, tools, true);
             //throw new NotImplementedException();
         }
     }
 
     /* =======================================================================================================================================================================================
-     * SqlLink
+     * SqlParser
      *  - Concrete implementation of Parser abstract class
-     *  - SqlLink parses and handles the [sql config] tag in the config file
+     *  - SqlParser parses and handles the [sql config] tag in the config file
      *  - Is a Parser in the settings tag parser chain
      * =======================================================================================================================================================================================
      */
-    class SqlLink : Parser
+    class SqlParser : Parser
     {
         /* =======================================================================================================================================================================================
-         * SqlLink.SqlLink(List<string>, Toolbox)
-         *   - The "default" constructor for SqlLink as Parsers always need a list of strings for commands and a toolbox for utilities
+         * SqlParser.SqlParser(List<string>, Toolbox)
+         *   - The "default" constructor for SqlParser as Parsers always need a list of strings for commands and a toolbox for utilities
          *      - Stores input and sends it to preprocessing
          * =======================================================================================================================================================================================
          */
-        public SqlLink(List<string> inChunk, Toolbox tIn)
+        public SqlParser(List<string> inChunk, Toolbox tIn)
         {
             //toolbox in
             tools = tIn;
 
-            //System.Console.WriteLine("SqlLink entered");
+            //System.Console.WriteLine("SqlParser entered");
             strParse = "[sql config]";
-            cleanIn(inChunk);
+            cleanIn(inChunk, false);
         }
 
         /* =======================================================================================================================================================================================
-         * SqlLink.spawnSub()
+         * SqlParser.SqlParser(List<string>, Toolbox)
+         *   - The "default" constructor for SqlParser as Parsers always need a list of strings for commands and a toolbox for utilities
+         *      - Stores input and sends it to preprocessing
+         * =======================================================================================================================================================================================
+         */
+        public SqlParser(List<string> inChunk, Toolbox tIn, bool blnChain)
+        {
+            //toolbox in
+            tools = tIn;
+
+            //System.Console.WriteLine("SqlParser entered");
+            strParse = "[sql config]";
+            cleanIn(inChunk, blnChain);
+        }
+
+        /* =======================================================================================================================================================================================
+         * SqlParser.spawnSub()
          *   - Run [sql config] tag options
          *     - Grabs all sql connection settings
          *          - Achieve this by passing each settings line into a parser chain which parses the information and stores it into the passed in toolbox
@@ -679,46 +759,63 @@ namespace Websdepot
         }
 
         /* =======================================================================================================================================================================================
-         * SqlLink.nextLink()
+         * SqlParser.nextParser()
          *   - Pass chunk onto the next parser in the chain
          * =======================================================================================================================================================================================
          */
         public override void nextLink()
         {
-            System.Console.WriteLine("In [sql config] chain link");
-            RebConfLink rcLink = new RebConfLink(lChunk, tools);
+            System.Console.WriteLine("In [sql config] chain Parser");
+            RebConfParser rcParser = new RebConfParser(lChunk, tools, true);
         }
     }
 
     /* =======================================================================================================================================================================================
-     * RebConfLink
+     * RebConfParser
      *  - Concrete implementation of Parser abstract class
-     *  - RebConfLink parses and handles the [reboot config] tag in the config file
+     *  - RebConfParser parses and handles the [reboot config] tag in the config file
      *  - Is a Parser in the settings tag parser chain
      * =======================================================================================================================================================================================
      */
-    class RebConfLink : Parser
+    class RebConfParser : Parser
     {
         /* =======================================================================================================================================================================================
-         * RebConfLink.RebConfLink(List<string>, Toolbox)
-         *   - The "default" constructor for RebConfLink as Parsers always need a list of strings for commands and a toolbox for utilities
+         * RebConfParser.RebConfParser(List<string>, Toolbox)
+         *   - The "default" constructor for RebConfParser as Parsers always need a list of strings for commands and a toolbox for utilities
          *      - Stores input and sends it to preprocessing
          * =======================================================================================================================================================================================
          */
-        public RebConfLink(List<string> inChunk, Toolbox tIn)
+        public RebConfParser(List<string> inChunk, Toolbox tIn)
         {
             //toolbox in
             tools = tIn;
 
-            //System.Console.WriteLine("RebConfLink entered");
+            //System.Console.WriteLine("RebConfParser entered");
 
             //set parser keyword/tag
             strParse = "[reboot config]";
-            cleanIn(inChunk);
+            cleanIn(inChunk, false);
+        }
+        
+        /* =======================================================================================================================================================================================
+         * RebConfParser.RebConfParser(List<string>, Toolbox)
+         *   - Constructor for chain link
+         * =======================================================================================================================================================================================
+         */
+        public RebConfParser(List<string> inChunk, Toolbox tIn, bool blnChain)
+        {
+            //toolbox in
+            tools = tIn;
+
+            //System.Console.WriteLine("RebConfParser entered");
+
+            //set parser keyword/tag
+            strParse = "[reboot config]";
+            cleanIn(inChunk, blnChain);
         }
 
         /* =======================================================================================================================================================================================
-         * RebConfLink.spawnSub()
+         * RebConfParser.spawnSub()
          *   - Run [reboot] tag options
          *     - Process reboot configurations
          * =======================================================================================================================================================================================
@@ -733,47 +830,63 @@ namespace Websdepot
         }
 
         /* =======================================================================================================================================================================================
-         * RebConfLink.nextLink()
+         * RebConfParser.nextParser()
          *   - Pass chunk onto the next parser in the chain
          * =======================================================================================================================================================================================
          */
         public override void nextLink()
         {
-            System.Console.WriteLine("In [reboot config] chain link, going to next link");
-            ConfRebTimeLink crtLink = new ConfRebTimeLink(lChunk, tools);
+            System.Console.WriteLine("In [reboot config] chain Parser, going to next Parser");
+            ConfRebTimeParser crtParser = new ConfRebTimeParser(lChunk, tools, true);
             //throw new NotImplementedException();
         }
     }
 
     /* =======================================================================================================================================================================================
-     * ConfRebTimeLink
+     * ConfRebTimeParser
      *  - Concrete implementation of Parser abstract class
-     *  - ConfRebTimeLink parses and handles the [configured reboot time] tag in the config file
+     *  - ConfRebTimeParser parses and handles the [configured reboot time] tag in the config file
      *  - Is a Parser in the settings tag parser chain
      * =======================================================================================================================================================================================
      */
-    class ConfRebTimeLink : Parser
+    class ConfRebTimeParser : Parser
     {
         /* =======================================================================================================================================================================================
-         * ConfRebTimeLink.ConfRebTimeLink(List<string>, Toolbox)
-         *   - The "default" constructor for ConfRebTimeLink as Parsers always need a list of strings for commands and a toolbox for utilities
+         * ConfRebTimeParser.ConfRebTimeParser(List<string>, Toolbox)
+         *   - The "default" constructor for ConfRebTimeParser as Parsers always need a list of strings for commands and a toolbox for utilities
          *      - Stores input and sends it to preprocessing
          * =======================================================================================================================================================================================
          */
-        public ConfRebTimeLink(List<string> inChunk, Toolbox tIn)
+        public ConfRebTimeParser(List<string> inChunk, Toolbox tIn)
         {
             //toolbox in
             tools = tIn;
 
-            //System.Console.WriteLine("ConfRebTimeLink entered");
+            //System.Console.WriteLine("ConfRebTimeParser entered");
 
             //set parser keyword/tag
             strParse = "[configured reboot times]";
-            cleanIn(inChunk);
+            cleanIn(inChunk, false);
+        }
+        /* =======================================================================================================================================================================================
+         * ConfRebTimeParser.ConfRebTimeParser(List<string>, Toolbox)
+         *   - Constructor for chain link
+         * =======================================================================================================================================================================================
+         */
+        public ConfRebTimeParser(List<string> inChunk, Toolbox tIn, bool blnChain)
+        {
+            //toolbox in
+            tools = tIn;
+
+            //System.Console.WriteLine("ConfRebTimeParser entered");
+
+            //set parser keyword/tag
+            strParse = "[configured reboot times]";
+            cleanIn(inChunk, blnChain);
         }
 
         /* =======================================================================================================================================================================================
-         * ConfRebTimeLink.spawnSub()
+         * ConfRebTimeParser.spawnSub()
          *   - Run [reboot] tag options
          *     - Process reboot configurations
          * =======================================================================================================================================================================================
@@ -785,47 +898,64 @@ namespace Websdepot
         }
 
         /* =======================================================================================================================================================================================
-         * ConfRebTimeLink.nextLink()
+         * ConfRebTimeParser.nextParser()
          *   - Pass chunk onto the next parser in the chain
          * =======================================================================================================================================================================================
          */
         public override void nextLink()
         {
-            System.Console.WriteLine("In configured reboot times chain link, going to next link");
-            LastRebootLink lrLink = new LastRebootLink(lChunk, tools);
+            System.Console.WriteLine("In configured reboot times chain Parser, going to next Parser");
+            LastRebootParser lrParser = new LastRebootParser(lChunk, tools, true);
             //throw new NotImplementedException();
         }
     }
 
     /* =======================================================================================================================================================================================
-     * LastRebootLink
+     * LastRebootParser
      *  - Concrete implementation of Parser abstract class
-     *  - LastRebootLink parses and handles the [last reboot time] tag in the config file
+     *  - LastRebootParser parses and handles the [last reboot time] tag in the config file
      *  - Is a Parser in the settings tag parser chain
      * =======================================================================================================================================================================================
      */
-    class LastRebootLink : Parser
+    class LastRebootParser : Parser
     {
         /* =======================================================================================================================================================================================
-         * LastRebootLink.LastRebootLink(List<string>, Toolbox)
-         *   - The "default" constructor for LastRebootLink as Parsers always need a list of strings for commands and a toolbox for utilities
+         * LastRebootParser.LastRebootParser(List<string>, Toolbox)
+         *   - The "default" constructor for LastRebootParser as Parsers always need a list of strings for commands and a toolbox for utilities
          *      - Stores input and sends it to preprocessing
          * =======================================================================================================================================================================================
          */
-        public LastRebootLink(List<string> inChunk, Toolbox tIn)
+        public LastRebootParser(List<string> inChunk, Toolbox tIn)
         {
             //toolbox in
             tools = tIn;
 
-            //System.Console.WriteLine("LastRebootLink entered");
+            //System.Console.WriteLine("LastRebootParser entered");
 
             //set parser keyword/tag
             strParse = "[last reboot time]";
-            cleanIn(inChunk);
+            cleanIn(inChunk, false);
+        }
+        
+        /* =======================================================================================================================================================================================
+         * LastRebootParser.LastRebootParser(List<string>, Toolbox)
+         *   - Constructor for chain link
+         * =======================================================================================================================================================================================
+         */
+        public LastRebootParser(List<string> inChunk, Toolbox tIn, bool blnChain)
+        {
+            //toolbox in
+            tools = tIn;
+
+            //System.Console.WriteLine("LastRebootParser entered");
+
+            //set parser keyword/tag
+            strParse = "[last reboot time]";
+            cleanIn(inChunk, blnChain);
         }
 
         /* =======================================================================================================================================================================================
-         * LastRebootLink.spawnSub()
+         * LastRebootParser.spawnSub()
          *   - Run [reboot] tag options
          *     - Process last reboot time and store it
          * =======================================================================================================================================================================================
@@ -844,13 +974,13 @@ namespace Websdepot
         }
 
         /* =======================================================================================================================================================================================
-         * LastRebootLink.nextLink()
+         * LastRebootParser.nextParser()
          *   - Pass chunk onto the next parser in the chain
          * =======================================================================================================================================================================================
          */
         public override void nextLink()
         {
-            System.Console.WriteLine("In [last reboot time] config chain link, going to next link");
+            System.Console.WriteLine("In [last reboot time] config chain Parser, going to next Parser");
             chainEnd();
         }
     }
