@@ -687,7 +687,8 @@ namespace Websdepot
                 }
                 
             }
-            execute();
+            //execute();
+            tools.setRebootParser(this);
 
         }
 
