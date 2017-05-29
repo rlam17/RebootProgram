@@ -263,14 +263,14 @@ namespace Websdepot
         {
             StreamReader sr = new StreamReader(confUrl, System.Text.Encoding.Default);
 
-            string line;
+            string line = "";
             List<string> currentList = new List<string>();
             int currentChunk = 0;
             while((line = sr.ReadLine()) != null) //until EOF
             {
-                if (currentChunk < 5) 
+
+                if (currentChunk < 6) 
                     //If still working on a chunk, added to the list
-                    //currentChunk == 4 means all chunks are done
                 {
                     if (line != "")
                     {
@@ -299,20 +299,23 @@ namespace Websdepot
                             case 3:
                                 //rebootChunk = currentList;
                                 chunks.Add(new Chunk(currentList));
+                                break;                         
+                            case 4:
+                                //configuredRebootChunk = currentList;
+                                chunks.Add(new Chunk(currentList));
                                 break;
+                            case 5:
+                                chunks.Add(new Chunk(currentList));
+                                break;
+                            default:
+                                currentList = null;
+                                break; 
                             /*
                             case 4:
                                 //lastRebootChunk = currentList;
                                 chunks.Add(new Chunk(currentList));
                                 break;
                             */
-                            case 4:
-                                //configuredRebootChunk = currentList;
-                                chunks.Add(new Chunk(currentList));
-                                break;
-                            default:
-                                currentList = null;
-                                break;
                         }
                         currentList = new List<string>();
                         currentChunk++;
@@ -322,6 +325,7 @@ namespace Websdepot
             }
 
             sr.Close();
+            chunks.Add(new Chunk(currentList));
             List<string> external = new List<string>();
             if (File.Exists("./lastreboottime.txt"))
             {
@@ -1605,7 +1609,8 @@ namespace Websdepot
 
             //System.Console.WriteLine("SqlLink entered");
             strParse = "Start=";
-            strIn = strLine.Replace(" ", String.Empty);
+            //strIn = strLine.Replace(" ", String.Empty);
+            strIn = strLine;
             //overriden string parse
             stringSwitch();
         }
@@ -1667,7 +1672,7 @@ namespace Websdepot
          */
         public override void spawnSub()
         {
-            tools.setSql(5, strIn);
+            //tools.setSql(5, strIn);            
             string[] strSplit = strIn.Split(',');
             tools.setRebInterval(strSplit[0], strSplit[1]);
         }
@@ -1696,7 +1701,7 @@ namespace Websdepot
     {
         string[] sqlInfo;
         DateTime dtLastReb;
-        int intRebDelay, intRebInterval, intSqlInterval;
+        long intRebDelay, intRebInterval, intSqlInterval;
         List<DayRange> allowedRebootTimes;
         RebootParser rbParse;
         DateTime configuredRebootTime;
@@ -1758,9 +1763,9 @@ namespace Websdepot
          *      
          * =======================================================================================================================================================================================
          */
-        public int intervalMath(string strTime, string strInterval)
+        public long intervalMath(string strTime, string strInterval)
         {
-            int intMs = 0;
+            long intMs = 0;
             //string[] strInterval;
             int intT;
 
@@ -1772,7 +1777,7 @@ namespace Websdepot
 
             //convert from seconds
             intMs = intT*1000;
-
+            strInterval = strInterval.ToLower();
             //check if seconds is needed conversion
             if (strInterval.Equals("s") || strInterval.Equals("second")) {
                 //if yes return
