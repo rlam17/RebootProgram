@@ -209,6 +209,7 @@ namespace Websdepot
             //checkPost();
 
             DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
+            //builder.Add("Data Source", magicBox.sqlInfo[0]);
 
 
             //PLACE KILLSWITCH HERE
@@ -1779,6 +1780,11 @@ namespace Websdepot
         public void setSqlInterval(string strTime, string strInterval)
         {
             intSqlInterval = intervalMath(strTime, strInterval);
+        }
+
+       public string[] getSqlInfo()
+        {
+            return sqlInfo;
         }
 
         /*=======================================================================================================================================================================================
