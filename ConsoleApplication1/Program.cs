@@ -858,7 +858,7 @@ namespace Websdepot
         public override void nextLink()
         {
             System.Console.WriteLine("In [reboot config] chain Parser, going to next Parser");
-            ConfRebTimeParser crtParser = new ConfRebTimeParser(lChunk, tools, true);
+            RebTimeParser crtParser = new RebTimeParser(lChunk, tools, true);
             //throw new NotImplementedException();
         }
     }
@@ -914,8 +914,10 @@ namespace Websdepot
          */
         public override void spawnSub()
         {
-            //configured reboot times go here
-            //call configured reboot times
+            foreach (string strIn in lChunk)
+            {
+                RebTimeParserChain rebTimeParse = new RebTimeParserChain(strIn, tools);
+            }
         }
 
         /* =======================================================================================================================================================================================
@@ -1597,9 +1599,7 @@ namespace Websdepot
         public override void spawnSub()
         {
             //ADD DATE LOGIC
-            tools.setSql(5, strIn);
-            string[] strSplit = strIn.Split(',');
-            tools.setSqlInterval(strSplit[0], strSplit[1]);
+            
         }
 
         /* =======================================================================================================================================================================================
