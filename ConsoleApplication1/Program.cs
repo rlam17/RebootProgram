@@ -209,10 +209,23 @@ namespace Websdepot
             //checkPost();
 
             DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
-            
-            builder.Add("Data Source", magicBox.sqlInfo[0]);
 
+            string[] sqlInfo = magicBox.getSql();
+            builder.Add("Data Source", sqlInfo[0]);
+            builder.Add("Port", sqlInfo[1]);
+            builder.Add("User Id", sqlInfo[2]);
+            builder.Add("Password", sqlInfo[3]);
+            builder.Add("Database", sqlInfo[4]);
+            Console.WriteLine(builder.ConnectionString);
 
+            try
+            {
+                SqlConnection connection = new SqlConnection(builder.ConnectionString);
+                connection.Open();
+            } catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
             //PLACE KILLSWITCH HERE
             //Process.Start("shutdown", "-r -f -t 0");
 
