@@ -862,42 +862,42 @@ namespace Websdepot
     }
 
     /* =======================================================================================================================================================================================
-     * ConfRebTimeParser
+     * RebTimeParser
      *  - Concrete implementation of Parser abstract class
-     *  - ConfRebTimeParser parses and handles the [configured reboot time] tag in the config file
+     *  - RebTimeParser parses and handles the [configured reboot time] tag in the config file
      *  - Is a Parser in the settings tag parser chain
      * =======================================================================================================================================================================================
      */
-    class ConfRebTimeParser : Parser
+    class RebTimeParser : Parser
     {
         /* =======================================================================================================================================================================================
-         * ConfRebTimeParser.ConfRebTimeParser(List<string>, Toolbox)
-         *   - The "default" constructor for ConfRebTimeParser as Parsers always need a list of strings for commands and a toolbox for utilities
+         * RebTimeParser.RebTimeParser(List<string>, Toolbox)
+         *   - The "default" constructor for RebTimeParser as Parsers always need a list of strings for commands and a toolbox for utilities
          *      - Stores input and sends it to preprocessing
          * =======================================================================================================================================================================================
          */
-        public ConfRebTimeParser(List<string> inChunk, Toolbox tIn)
+        public RebTimeParser(List<string> inChunk, Toolbox tIn)
         {
             //toolbox in
             tools = tIn;
 
-            //System.Console.WriteLine("ConfRebTimeParser entered");
+            //System.Console.WriteLine("RebTimeParser entered");
 
             //set parser keyword/tag
             strParse = "[configured reboot times]";
             cleanIn(inChunk, false);
         }
         /* =======================================================================================================================================================================================
-         * ConfRebTimeParser.ConfRebTimeParser(List<string>, Toolbox)
+         * RebTimeParser.RebTimeParser(List<string>, Toolbox)
          *   - Constructor for chain link
          * =======================================================================================================================================================================================
          */
-        public ConfRebTimeParser(List<string> inChunk, Toolbox tIn, bool blnChain)
+        public RebTimeParser(List<string> inChunk, Toolbox tIn, bool blnChain)
         {
             //toolbox in
             tools = tIn;
 
-            //System.Console.WriteLine("ConfRebTimeParser entered");
+            //System.Console.WriteLine("RebTimeParser entered");
 
             //set parser keyword/tag
             strParse = "[configured reboot times]";
@@ -905,7 +905,7 @@ namespace Websdepot
         }
 
         /* =======================================================================================================================================================================================
-         * ConfRebTimeParser.spawnSub()
+         * RebTimeParser.spawnSub()
          *   - Run [reboot] tag options
          *     - Process reboot configurations
          * =======================================================================================================================================================================================
@@ -917,7 +917,7 @@ namespace Websdepot
         }
 
         /* =======================================================================================================================================================================================
-         * ConfRebTimeParser.nextParser()
+         * RebTimeParser.nextParser()
          *   - Pass chunk onto the next parser in the chain
          * =======================================================================================================================================================================================
          */
@@ -1555,6 +1555,62 @@ namespace Websdepot
     }
 
     //SQL info parser chain ends
+
+    //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    //Reboot Configuration parser chain begins
+
+    //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    //Start of the Configured Reboot Time settings parsers
+    /* =======================================================================================================================================================================================
+     * SqlCInLink
+     *  - SqlCInLink parses and stores the check in time information
+     *  - Is a Parser in the SQL info parser chain
+     * =======================================================================================================================================================================================
+     */
+    class SqlCInLink : InfoParserChain
+    {
+        /* =======================================================================================================================================================================================
+         * SqlCInLink.SqlDbLink(string, Toolbox)
+         *   - The "default" constructor for SqlCInLink as Parsers always need settings line and a toolbox for utilities
+         *      - Stores input and sends it to the decision-making switch
+         * =======================================================================================================================================================================================
+         */
+        public SqlCInLink(string strLine, Toolbox tIn)
+        {
+            //toolbox in
+            tools = tIn;
+
+            //System.Console.WriteLine("SqlLink entered");
+            strParse = "CheckinTime=";
+            strIn = strLine.Replace(" ", String.Empty);
+            //overriden string parse
+            stringSwitch();
+        }
+
+        /* =======================================================================================================================================================================================
+         * SqlCInLink.spawnSub()
+         *   - Stores the SQL info in its appropriate spot in the Toolbox object
+         * =======================================================================================================================================================================================
+         */
+        public override void spawnSub()
+        {
+            tools.setSql(5, strIn);
+            string[] strSplit = strIn.Split(',');
+            tools.setSqlInterval(strSplit[0], strSplit[1]);
+        }
+
+        /* =======================================================================================================================================================================================
+         * SqlCInLink.nextLink()
+         *   - Redirects the line to the next parser in the parser chain
+         * =======================================================================================================================================================================================
+         */
+        public override void nextLink()
+        {
+            //currently the last chain in the link so this runs chainEnd()
+            chainEnd();
+        }
+    }
+
 
     //end of parser family
 
