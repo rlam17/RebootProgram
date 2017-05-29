@@ -1744,6 +1744,27 @@ namespace Websdepot
             sw.Close();
         }
 
+        //=====================
+        //Attempt to upload CSV
+        //=====================
+        private void uploadCsv()
+        {
+            //TODO: Upload CSV to SQL
+            string postStamp = "./post/posted/" + Program.todayDate;
+            File.Move(Program.postUrl, postStamp);
+        }
+
+        //===================================
+        //Upload CSVs that are not posted yet
+        //===================================
+        private void uploadCsv(string toPost)
+        {
+            if (File.Exists("./post/posted/Post.csv"))
+            {
+                //perform upload here
+            }
+        }
+
         /* =======================================================================================================================================================================================
          * Toolbox.clearCsv()
          *   - Vreifies the integrity of the CSV file
