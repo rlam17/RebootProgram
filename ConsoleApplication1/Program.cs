@@ -1617,10 +1617,59 @@ namespace Websdepot
         public override void nextLink()
         {
             //currently the last chain in the link so this runs chainEnd()
-            chainEnd();
+            RebTimeIntLink rbtLink = new RebTimeIntLink(strIn, tools);
         }
     }
 
+    /* =======================================================================================================================================================================================
+     * RebTimeIntLink
+     *  - RebTimeIntLink parses and stores the check in time information
+     *  - Is a Parser in the Reboot Time parser chain
+     * =======================================================================================================================================================================================
+     */
+    class RebTimeIntLink : InfoParserChain
+    {
+        /* =======================================================================================================================================================================================
+         * RebTimeIntLink.SqlDbLink(string, Toolbox)
+         *   - The "default" constructor for RebTimeIntLink as Parsers always need settings line and a toolbox for utilities
+         *      - Stores input and sends it to the decision-making switch
+         * =======================================================================================================================================================================================
+         */
+        public RebTimeIntLink(string strLine, Toolbox tIn)
+        {
+            //toolbox in
+            tools = tIn;
+
+            //System.Console.WriteLine("SqlLink entered");
+            strParse = "Interval=";
+            strIn = strLine.Replace(" ", String.Empty);
+            //overriden string parse
+            stringSwitch();
+        }
+
+        /* =======================================================================================================================================================================================
+         * RebTimeIntLink.spawnSub()
+         *   - Stores the SQL info in its appropriate spot in the Toolbox object
+         * =======================================================================================================================================================================================
+         */
+        public override void spawnSub()
+        {
+            tools.setSql(5, strIn);
+            string[] strSplit = strIn.Split(',');
+            tools.setRebInterval(strSplit[0], strSplit[1]);
+        }
+
+        /* =======================================================================================================================================================================================
+         * RebTimeIntLink.nextLink()
+         *   - Redirects the line to the next parser in the parser chain
+         * =======================================================================================================================================================================================
+         */
+        public override void nextLink()
+        {
+            //currently the last chain in the link so this runs chainEnd()
+            chainEnd();
+        }
+    }
 
     //end of parser family
 
