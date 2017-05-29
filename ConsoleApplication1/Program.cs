@@ -40,28 +40,7 @@ namespace Websdepot
             sw.Close();
 
         }
-
-        //==============================================================
-        //This function reads and checks the Conf.cfg file for validity.
-        //==============================================================
-        private static void readConf()
-        {
-            //Check goes here
-
-
-            if (!false) //Conf does not clear check
-            {
-
-                writeLog("There is something wrong with the conf file");
-                exit(1);
-            }
-            else //Conf clears check
-                {
-                    writeLog("Conf file is clear");
-                    //Do hash configuration here
-                    createHash();
-                }
-        }
+        
 
         //=======================================================
         //This function creates an MD5 hash of the Conf.cfg file.
@@ -101,35 +80,7 @@ namespace Websdepot
             sw.Close();
 
         }
-
-        //===========================================
-        //Connect to SQL server as per Conf.cfg file.
-        //===========================================
-        private static void connectSql()
-        {
-            //attempt connection here
-            writeLog("Attempting to connect to SQL");
-
-
-            // TODO: find a way to get SQL connection credentials
-            SqlConnection myConnection = new SqlConnection("user id=username;" +
-                                       "password=password;server=serverurl;" +
-                                       "Trusted_Connection=yes;" +
-                                       "database=database; " +
-                                       "connection timeout=30");
-
-            try
-            {
-                myConnection.Open();
-                writeLog("Connection to SQL success");
-            }
-            catch (Exception e)
-                {
-                    writeLog("Connection to SQL failed " + e);
-                }
-
-        }
-
+       
         //====================================================
         //This function causes the program to wait min minutes
         //====================================================
@@ -156,81 +107,18 @@ namespace Websdepot
         {
            
             Toolbox magicBox = new Toolbox();
-            //Process.Start("shutdown", "/s /t 0");
-            //Process.Start("shutdown", "-r -f -t 0");
-            //Process.Start("C:\\Program Files (x86)\\Notepad++\\notepad++.exe");
+            magicBox.clearCsv();
+            readConf(magicBox);
+            
+            magicBox.connectSql();           
+            magicBox.checkCsv();
 
-            //readConf();
-
-            //connectSql();
-            //delayWait(5);
-
-
-            //test replacement code
-            /*
-            string strChunk = "C:\\Program Files (x86)\\Notepad++\\notepad++.exe";
-            string strReplace = "C:\\Program Files (x86)\\Notepad++\\notepad++.exe";
-            strReplace = strChunk.Replace("\\", "\\\\");
-            System.Console.WriteLine("strReplace " + strReplace);
-            System.Console.WriteLine("strChunk: " + strChunk);
-            */
-
-            /*
-            Process.Start("C:\\Program Files (x86)\\Notepad++\\notepad++.exe");
-            System.Console.WriteLine("Notepad++ launch test");
-            Process.Start("C:\\Windows\\System32\\taskkill.exe","-F -IM notepad++.exe");
-            System.Console.WriteLine("Notepad++ is dead");
-            Process.Start("C:\\Program Files (x86)\\Notepad++\\notepad++.exe", " ");
-            System.Console.WriteLine("Notepad++ launch test");
-            */
-
-            //testing argument parse logic
-            /*
-            string strTest;
-            string[] strRegEx = new string[] { ".exe " };
-            string[] strSplit;
-            strTest = "C:\\Windows\\System32\\taskkill.exe -F -IM notepad++.exe";
-            System.Console.WriteLine("strTest control: " + strTest);
-            strSplit = strTest.Split(strRegEx, StringSplitOptions.None);
-            strSplit[0] = strSplit[0] + ".exe";
-            System.Console.WriteLine("Split output test: " + strSplit[0]);
-            System.Console.WriteLine("Split output test: " + strSplit[1]);
-            System.Console.WriteLine("Test end ");
-            */
-            //createHash();
-            //readChunks();
-
-            //run full battery of tests
-
-            readChunks(magicBox);
-            //magicBox.runReb();
-            DayRange dr = new DayRange();
-            dr.getRebootTimeFromConf();
-            //checkPost();
-
-            DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
-
-            string[] sqlInfo = magicBox.getSql();
-            builder.Add("Data Source", sqlInfo[0]);
-            builder.Add("Port", sqlInfo[1]);
-            builder.Add("User Id", sqlInfo[2]);
-            builder.Add("Password", sqlInfo[3]);
-            builder.Add("Database", sqlInfo[4]);
-            Console.WriteLine(builder.ConnectionString);
-
-            try
-            {
-                SqlConnection connection = new SqlConnection(builder.ConnectionString);
-                connection.Open();
-            } catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
             //PLACE KILLSWITCH HERE
             //Process.Start("shutdown", "-r -f -t 0");
 
             while (true)
             {
+                magicBox.checkPostQueue();
                 //TODO: Perform x minute tasks.
                 break;
             }
@@ -240,6 +128,12 @@ namespace Websdepot
         //=========================================================
         //Exits the program.
         //This should only occur if a problem has been encountered.
+        //
+        // Exit codes:
+        //              0: Exit without problems
+        //              1. Exit with error in conf file
+        //              2. Exit with SQL connection error
+        //              3. Exit with CSV error
         //=========================================================
         public static void exit(int code)
         {
@@ -259,7 +153,7 @@ namespace Websdepot
         //Read the Conf.cfg file
         //Chunks refers to each field in the file.
         //=========================================
-        private static void readChunks(Toolbox tIn)
+        private static void readConf(Toolbox tIn)
         {
             StreamReader sr = new StreamReader(confUrl, System.Text.Encoding.Default);
 
@@ -339,16 +233,15 @@ namespace Websdepot
             //Send chunks to functions here
 
             Toolbox tb = tIn;
-
-            ParserChain tc = new ParserChain(chunks[1].getChunk(), tb);
+            
             foreach (Chunk c in chunks)
             {
                 ParserChain ts = new ParserChain(c.getChunk(), tb);
             }
 
-            tc = new ParserChain(external, tb);
-            string strTest = tb.ToString();
-            System.Console.WriteLine(tb.checkSql());
+            ParserChain tc = new ParserChain(external, tb);
+            //string strTest = tb.ToString();
+            //System.Console.WriteLine(tb.checkSql());
             //System.Console.WriteLine(startupChunk[1]);
             //Process.Start(startupChunk[1]);
 
@@ -1705,6 +1598,7 @@ namespace Websdepot
         List<DayRange> allowedRebootTimes;
         RebootParser rbParse;
         DateTime configuredRebootTime;
+        SqlConnection connect;
 
         /*=======================================================================================================================================================================================
          * Toolbox.Toolbox()
@@ -1716,6 +1610,44 @@ namespace Websdepot
         {
             sqlInfo = new string[6];
             allowedRebootTimes = new List<DayRange>();
+        }
+
+        //===========================================
+        //Connect to SQL server as per Conf.cfg file.
+        //===========================================
+        public void connectSql()
+        {
+            //attempt connection here
+            Program.writeLog("Attempting to connect to SQL");
+
+            DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
+
+            string[] sqlInfo = getSql();
+            string sqlPort = sqlInfo[0] + "," + sqlInfo[1];
+            builder.Add("Data Source", sqlPort);
+            builder.Add("User Id", sqlInfo[2]);
+            builder.Add("Password", sqlInfo[3]);
+            builder.Add("Database", sqlInfo[4]);
+            Console.WriteLine(builder.ConnectionString);
+
+            connect = new SqlConnection(builder.ConnectionString);
+
+            try
+            {
+                connect.Open();
+                Program.writeLog("Connection to SQL success");
+            }
+            catch (Exception e)
+            {
+                Program.writeLog("Connection to SQL failed: " + e.Message);
+                //Program.exit(2);
+            }
+
+        }
+
+        public void sqlQuery(string query)
+        {
+            //TODO: SQL querying
         }
 
         /*=======================================================================================================================================================================================
@@ -1942,7 +1874,7 @@ namespace Websdepot
          *   - Resets the CSV file
          * =======================================================================================================================================================================================
          */
-        private void clearCsv()
+        public void clearCsv()
         {
             if (File.Exists(Program.postUrl))
             {
@@ -1958,19 +1890,31 @@ namespace Websdepot
         //=====================
         private void uploadCsv()
         {
-            //TODO: Upload CSV to SQL
-            string postStamp = "./post/posted/" + Program.todayDate;
-            File.Move(Program.postUrl, postStamp);
+            if(connect == null)
+            {
+                //Queue the CSV for next available upload
+                string postStamp = "./post/topost/" + Program.todayDate + "_Post.csv";
+                File.Move(Program.postUrl, postStamp);
+                Program.writeLog("Can not upload to SQL yet, Post has been queued");
+            }
+            else
+            {
+                //TODO: Upload CSV to SQL               
+                string postStamp = "./post/posted/" + Program.todayDate + " _Post.csv";
+                Program.writeLog("Post has been uploaded");
+            }
+           
+            
         }
 
         //===================================
         //Upload CSVs that are not posted yet
         //===================================
-        private void uploadCsv(string toPost)
+        public void checkPostQueue()
         {
             if (File.Exists("./post/posted/Post.csv"))
             {
-                //perform upload here
+                //TODO: CSV upload to SQL here
             }
         }
 
@@ -1979,7 +1923,7 @@ namespace Websdepot
          *   - Vreifies the integrity of the CSV file
          * =======================================================================================================================================================================================
          */
-        public bool checkCsv()
+        public void checkCsv()
         {
             //The regex pattern is: ^"(.+)" ?,"(\w+)","(.+)","([A-Z]+)","(.+)","(.*)"$
             StreamReader sr;
@@ -1998,17 +1942,17 @@ namespace Websdepot
                 {
                     if (rgx.IsMatch(subject))
                     {
-                        //do nothing
+                        uploadCsv();
                     }
                     else
                         {
                             Program.writeLog("Error in the CSV file");
-                            Program.exit(2);
+                            Program.exit(3);
                         }
                 }                
             }
             sr.Close();
-            return result;
+            //return result;
         }
 
         
