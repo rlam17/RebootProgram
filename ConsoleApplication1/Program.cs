@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data.Common;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
@@ -206,6 +207,9 @@ namespace Websdepot
             DayRange dr = new DayRange();
             dr.getRebootTimeFromConf();
             //checkPost();
+
+            DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
+
 
             //PLACE KILLSWITCH HERE
             //Process.Start("shutdown", "-r -f -t 0");
