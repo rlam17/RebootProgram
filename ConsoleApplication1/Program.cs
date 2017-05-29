@@ -108,10 +108,10 @@ namespace Websdepot
             //magicBox.runReb();
             var sqlTimer = new System.Threading.Timer((e) =>
             {
-                magicBox.updateLastCheckin();
+                //magicBox.updateLastCheckin();
                 //TODO: Compare [Configured Reboot Times] with the SQL server, if they are different update the config file and write to the log file.
-                string hash = createHash();
-                magicBox.checkPostQueue();
+                //string hash = createHash();
+                //magicBox.checkPostQueue();
             }, null, TimeSpan.Zero, sqlInterval);
 
 
@@ -124,6 +124,10 @@ namespace Websdepot
                 }
             }, null, TimeSpan.Zero, rebootInterval);
 
+            while (true)
+            {
+
+            }
             
         }
 
