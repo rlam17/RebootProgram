@@ -95,16 +95,17 @@ namespace Websdepot
         {
             writeLog("Starting program");
             Toolbox magicBox = new Toolbox();
+            ConfStore cStore = new ConfStore();
             magicBox.clearCsv();
-            readConf(magicBox);
+            readConf(cStore, magicBox);
             magicBox.checkCsv();
 
 
             magicBox.connectSql();
 
-            string[] test = { DateTime.Now.ToString(), "Dev4", "OK", "test service", "test program" };
+            magicBox.uploadCsv();
 
-            magicBox.sqlQuery(test);
+            
 
             exit(0);
             TimeSpan sqlInterval = TimeSpan.FromMilliseconds(magicBox.getSqlInterval());
@@ -171,7 +172,7 @@ namespace Websdepot
         //Read the Conf.cfg file
         //Chunks refers to each field in the file.
         //=========================================
-        private static void readConf(Toolbox tIn)
+        private static void readConf(ConfStore i_cs, Toolbox tIn)
         {
             StreamReader sr = new StreamReader(confUrl, System.Text.Encoding.Default);
 
@@ -263,7 +264,7 @@ namespace Websdepot
             //Send chunks to functions here
 
             Toolbox tb = tIn;
-            ConfStore cStore = new ConfStore();
+            ConfStore cStore = i_cs;
 
             foreach (Chunk c in chunks)
             {
@@ -1715,7 +1716,7 @@ namespace Websdepot
             builder.Add("Uid", sqlInfo[2]);
             builder.Add("Pwd", sqlInfo[3]);
             builder.Add("Database", sqlInfo[4]);
-            Console.WriteLine(builder.ConnectionString);
+            //Console.WriteLine(builder.ConnectionString);
 
             connect = new MySqlConnection();
             connect.ConnectionString = builder.ConnectionString;
@@ -1756,31 +1757,7 @@ namespace Websdepot
             //sqlQuery("");
         }
 
-        public void sqlQuery(string[] query)
-        {
-            //TODO: SQL querying
-            try
-            {
-                MySqlCommand cmd = new MySqlCommand();
-                cmd.Connection = connect;
-                cmd.CommandText = "INSERT INTO csvfile_info(csv_id, csv_startup, csv_server, csv_status, csv_service, csv_progname, csv_timestmp) " +
-                "VALUES(@csv_id, @csv_startup, @csv_server, @csv_status, @csv_service, @csv_progname, @csv_timestmp)";
-                cmd.Prepare();
-                cmd.Parameters.AddWithValue("@csv_id", null);
-                cmd.Parameters.AddWithValue("@csv_startup", Convert.ToDateTime(query[0]));
-                cmd.Parameters.AddWithValue("@csv_server", query[1]);
-                cmd.Parameters.AddWithValue("@csv_status", query[2]);
-                cmd.Parameters.AddWithValue("@csv_service", query[3]);
-                cmd.Parameters.AddWithValue("@csv_progname", query[4]);
-                cmd.Parameters.AddWithValue("@csv_timestmp", DateTime.Now);
-                cmd.ExecuteNonQuery();
-            }catch (Exception e)
-            {
-                Program.writeLog("SQL query went wrong:" + e.Message);
-                Program.exit(4);
-            }
-            
-        }
+       
 
         /*=======================================================================================================================================================================================
          * Toolbox.setRebootTimes()
@@ -2026,29 +2003,77 @@ namespace Websdepot
                 File.Delete(Program.postUrl);
             }
             StreamWriter sw = new StreamWriter(Program.postUrl);
-            sw.WriteLine("StartupTime,ServerName,Subcategory,Status,Service,Error,");
+            sw.WriteLine("StartupTime,ServerName,Status,Service,SubService,Error,");
             sw.Close();
         }
 
         //=====================
         //Attempt to upload CSV
         //=====================
-        private void uploadCsv()
+        public void uploadCsv()
         {
-            if (connect == null)
+            if (!checkConnection())
             {
                 //Queue the CSV for next available upload
-                string postStamp = "./post/topost/" + Program.todayDate + "_Post.csv";
+                string postStamp = "./post/topost/" + Program.todayDate.ToString() + "_Post.csv";
                 File.Move(Program.postUrl, postStamp);
                 Program.writeLog("Can not upload to SQL yet, Post has been queued");
             }
             else
             {
-                //TODO: Upload CSV to SQL               
-                string postStamp = "./post/posted/" + Program.todayDate + " _Post.csv";
+                //TODO: Upload CSV to SQL
+                readCsvForUpload();
+
+                string postStamp = "./post/posted/" + DateTime.Now.ToString("yyyyMMdd HHmm") +  "_Post.csv";
+                File.Move(Program.postUrl, postStamp);
                 Program.writeLog("Post has been uploaded");
             }
+        }
+        
+        public void readCsvForUpload()
+        {
+            
+            DateTime lastModified = File.GetLastWriteTime(Program.postUrl);
+            StreamReader sr = new StreamReader(Program.postUrl, System.Text.Encoding.Default);
+            sr.ReadLine();
+            string line;
+            while (!string.IsNullOrEmpty(line = sr.ReadLine()))
+            {
+                List<string> csvLine = new List<string>();                
+                string[] splitLine = line.Split(',');
+                csvLine.AddRange(splitLine);
+                csvLine.Add(lastModified.ToString());
+                csvSqlInsert(csvLine);
+            }
+            sr.Close();
+        }
 
+        public void csvSqlInsert(List<string> query)
+        {
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand();
+                cmd.Connection = connect;
+                cmd.CommandText = "INSERT INTO " +
+                    "csv_service(csv_id, csv_startup, csv_server, csv_status, csv_service, csv_subservice, csv_error,  csv_timestmp) " +
+                    "VALUES(@csv_id, @csv_startup, @csv_server, @csv_status, @csv_service, @csv_subservice, @csv_error, @csv_timestmp)";
+                cmd.Prepare();
+
+                cmd.Parameters.AddWithValue("@csv_id", null);
+                cmd.Parameters.AddWithValue("@csv_startup", Convert.ToDateTime(query[0].Trim('"')));
+                cmd.Parameters.AddWithValue("@csv_server", query[1].Trim('"'));
+                cmd.Parameters.AddWithValue("@csv_status", query[2].Trim('"'));
+                cmd.Parameters.AddWithValue("@csv_service", query[3].Trim('"'));
+                cmd.Parameters.AddWithValue("@csv_subservice", query[4].Trim('"'));
+                cmd.Parameters.AddWithValue("@csv_error", query[5].Trim('"'));                
+                cmd.Parameters.AddWithValue("@csv_timestmp", DateTime.Now);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception e)
+            {
+                Program.writeLog("SQL query went wrong:" + e.Message);
+                Program.exit(4);
+            }
 
         }
 
@@ -2095,7 +2120,7 @@ namespace Websdepot
                 {
                     if (rgx.IsMatch(subject))
                     {
-                        uploadCsv();
+                        //uploadCsv();
                     }
                     else
                     {
@@ -2146,6 +2171,12 @@ namespace Websdepot
 
         //MD5 String
         string strMd5;
+
+        public ConfStore()
+        {
+            lTag = new List<string>();
+            lChunk = new List<Chunk>();
+        }
 
         public void addTag(string strIn)
         {
