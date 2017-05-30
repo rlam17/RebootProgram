@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -112,12 +113,14 @@ namespace Websdepot
                 //TODO: Compare [Configured Reboot Times] with the SQL server, if they are different update the config file and write to the log file.
                 //string hash = createHash();
                 //magicBox.checkPostQueue();
+                System.Console.WriteLine("2 Minutes has passed");
             }, null, TimeSpan.Zero, sqlInterval);
 
 
 
             var rebootTimer = new System.Threading.Timer((f) =>
             {
+                System.Console.WriteLine("5 minutes has passed");
                 if (magicBox.checkRebootTime())
                 {
                     magicBox.runReb();
@@ -1626,7 +1629,7 @@ namespace Websdepot
         List<DayRange> allowedRebootTimes;
         RebootParser rbParse;
         DateTime configuredRebootTime;
-        SqlConnection connect;
+        MySqlConnection connect;
 
         /*=======================================================================================================================================================================================
          * Toolbox.Toolbox()
@@ -1651,14 +1654,15 @@ namespace Websdepot
             DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
 
             string[] sqlInfo = getSql();
-            string sqlPort = sqlInfo[0] + "," + sqlInfo[1];
-            builder.Add("Data Source", sqlPort);
-            builder.Add("User Id", sqlInfo[2]);
-            builder.Add("Password", sqlInfo[3]);
+            builder.Add("Server", sqlInfo[0]);
+            builder.Add("Port", sqlInfo[1]);
+            builder.Add("Uid", sqlInfo[2]);
+            builder.Add("Pwd", sqlInfo[3]);
             builder.Add("Database", sqlInfo[4]);
             Console.WriteLine(builder.ConnectionString);
 
-            connect = new SqlConnection(builder.ConnectionString);
+            connect = new MySqlConnection();
+            connect.ConnectionString = builder.ConnectionString;
 
             try
             {
