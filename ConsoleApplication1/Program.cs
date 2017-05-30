@@ -263,13 +263,14 @@ namespace Websdepot
             //Send chunks to functions here
 
             Toolbox tb = tIn;
+            ConfStore cStore = new ConfStore();
 
             foreach (Chunk c in chunks)
             {
-                ParserChain ts = new ParserChain(c.getChunk(), tb);
+                ParserChain ts = new ParserChain(c.getChunk(), tb, cStore);
             }
 
-            ParserChain tc = new ParserChain(external, tb);
+            ParserChain tc = new ParserChain(external, tb, cStore);
             //string strTest = tb.ToString();
             //System.Console.WriteLine(tb.checkSql());
             //System.Console.WriteLine(startupChunk[1]);
@@ -305,10 +306,10 @@ namespace Websdepot
          *      - Stores input and sends it to preprocessing
          * =======================================================================================================================================================================================
          */
-        public ParserChain(List<string> inChunk, Toolbox tIn)
+        public ParserChain(List<string> inChunk, Toolbox tIn, ConfStore cIn)
         {
             //Execute startup parser to initiate the chain
-            StartupParser sP = new StartupParser(inChunk, tIn, true);
+            StartupParser sP = new StartupParser(inChunk, tIn, true, cIn);
         }
     }
 
@@ -361,6 +362,9 @@ namespace Websdepot
         //Chunk storage
         protected List<string> lChunk;
 
+        //Store configuration file data
+        protected ConfStore cStore;
+
 
         /* =======================================================================================================================================================================================
          * cleanIn(List<string> strInput)
@@ -380,6 +384,7 @@ namespace Websdepot
 
             //store chunk
             lChunk = inChunk;
+
 
             if (blnChain)
             {
@@ -419,6 +424,12 @@ namespace Websdepot
 
                 //pop off the options tag from the rest of the chunk
                 lChunk.RemoveAt(0);
+
+                //Store settings tag into ConfStore
+                cStore.addTag(strParse);
+
+                //Store Chunk into ConfStore
+                cStore.addChunk(new Chunk(lChunk));
 
                 //spawn specific subprocess parser
                 spawnSub();
@@ -516,8 +527,11 @@ namespace Websdepot
          *      - Stores input and sends it to preprocessing
          * =======================================================================================================================================================================================
          */
-        public StartupParser(List<string> inChunk, Toolbox tIn)
+        public StartupParser(List<string> inChunk, Toolbox tIn, ConfStore cIn)
         {
+            //Configuration store (prep for SQL upload)
+            cStore = cIn;
+
             //Toolbox to use if the parser needs utilites implemented within it
             tools = tIn;
 
@@ -534,8 +548,11 @@ namespace Websdepot
          *   - Constructor for chain link
          * =======================================================================================================================================================================================
          */
-        public StartupParser(List<string> inChunk, Toolbox tIn, bool blnChain)
+        public StartupParser(List<string> inChunk, Toolbox tIn, bool blnChain, ConfStore cIn)
         {
+            //Configuration store (prep for SQL upload)
+            cStore = cIn;
+
             //Toolbox to use if the parser needs utilites implemented within it
             tools = tIn;
 
@@ -568,7 +585,7 @@ namespace Websdepot
         public override void nextLink()
         {
             System.Console.WriteLine("In [startup] chain link, going to next link");
-            RebootParser rlLink = new RebootParser(lChunk, tools, true);
+            RebootParser rlLink = new RebootParser(lChunk, tools, true, cStore);
         }
     }
     /* =======================================================================================================================================================================================
@@ -586,8 +603,11 @@ namespace Websdepot
          *      - Stores input and sends it to preprocessing
          * =======================================================================================================================================================================================
          */
-        public RebootParser(List<string> inChunk, Toolbox tIn)
+        public RebootParser(List<string> inChunk, Toolbox tIn, ConfStore cIn)
         {
+            //Configuration store (prep for SQL upload)
+            cStore = cIn;
+
             //toolbox in
             tools = tIn;
 
@@ -603,8 +623,11 @@ namespace Websdepot
          *   - Constructor for chain link
          * =======================================================================================================================================================================================
          */
-        public RebootParser(List<string> inChunk, Toolbox tIn, bool blnChain)
+        public RebootParser(List<string> inChunk, Toolbox tIn, bool blnChain, ConfStore cIn)
         {
+            //Configuration store (prep for SQL upload)
+            cStore = cIn;
+
             //toolbox in
             tools = tIn;
 
@@ -667,7 +690,7 @@ namespace Websdepot
         public override void nextLink()
         {
             System.Console.WriteLine("In [reboot] chain Parser, going to next Parser");
-            SqlParser sqlParser = new SqlParser(lChunk, tools, true);
+            SqlParser sqlParser = new SqlParser(lChunk, tools, true, cStore);
             //throw new NotImplementedException();
         }
     }
@@ -687,8 +710,11 @@ namespace Websdepot
          *      - Stores input and sends it to preprocessing
          * =======================================================================================================================================================================================
          */
-        public SqlParser(List<string> inChunk, Toolbox tIn)
+        public SqlParser(List<string> inChunk, Toolbox tIn, ConfStore cIn)
         {
+            //Configuration store (prep for SQL upload)
+            cStore = cIn;
+
             //toolbox in
             tools = tIn;
 
@@ -703,8 +729,11 @@ namespace Websdepot
          *      - Stores input and sends it to preprocessing
          * =======================================================================================================================================================================================
          */
-        public SqlParser(List<string> inChunk, Toolbox tIn, bool blnChain)
+        public SqlParser(List<string> inChunk, Toolbox tIn, bool blnChain, ConfStore cIn)
         {
+            //Configuration store (prep for SQL upload)
+            cStore = cIn;
+
             //toolbox in
             tools = tIn;
 
@@ -737,7 +766,7 @@ namespace Websdepot
         public override void nextLink()
         {
             System.Console.WriteLine("In [sql config] chain Parser");
-            RebConfParser rcParser = new RebConfParser(lChunk, tools, true);
+            RebConfParser rcParser = new RebConfParser(lChunk, tools, true, cStore);
         }
     }
 
@@ -756,8 +785,11 @@ namespace Websdepot
          *      - Stores input and sends it to preprocessing
          * =======================================================================================================================================================================================
          */
-        public RebConfParser(List<string> inChunk, Toolbox tIn)
+        public RebConfParser(List<string> inChunk, Toolbox tIn, ConfStore cIn)
         {
+            //Configuration store (prep for SQL upload)
+            cStore = cIn;
+
             //toolbox in
             tools = tIn;
 
@@ -773,8 +805,11 @@ namespace Websdepot
          *   - Constructor for chain link
          * =======================================================================================================================================================================================
          */
-        public RebConfParser(List<string> inChunk, Toolbox tIn, bool blnChain)
+        public RebConfParser(List<string> inChunk, Toolbox tIn, bool blnChain, ConfStore cIn)
         {
+            //Configuration store (prep for SQL upload)
+            cStore = cIn;
+
             //toolbox in
             tools = tIn;
 
@@ -808,7 +843,7 @@ namespace Websdepot
         public override void nextLink()
         {
             System.Console.WriteLine("In [reboot config] chain Parser, going to next Parser");
-            RebTimeParser crtParser = new RebTimeParser(lChunk, tools, true);
+            RebTimeParser crtParser = new RebTimeParser(lChunk, tools, true, cStore);
             //throw new NotImplementedException();
         }
     }
@@ -828,8 +863,11 @@ namespace Websdepot
          *      - Stores input and sends it to preprocessing
          * =======================================================================================================================================================================================
          */
-        public RebTimeParser(List<string> inChunk, Toolbox tIn)
+        public RebTimeParser(List<string> inChunk, Toolbox tIn, ConfStore cIn)
         {
+            //Configuration store (prep for SQL upload)
+            cStore = cIn;
+
             //toolbox in
             tools = tIn;
 
@@ -844,8 +882,11 @@ namespace Websdepot
          *   - Constructor for chain link
          * =======================================================================================================================================================================================
          */
-        public RebTimeParser(List<string> inChunk, Toolbox tIn, bool blnChain)
+        public RebTimeParser(List<string> inChunk, Toolbox tIn, bool blnChain, ConfStore cIn)
         {
+            //Configuration store (prep for SQL upload)
+            cStore = cIn;
+
             //toolbox in
             tools = tIn;
 
@@ -878,7 +919,7 @@ namespace Websdepot
         public override void nextLink()
         {
             System.Console.WriteLine("In configured reboot times chain Parser, going to next Parser");
-            LastRebootParser lrParser = new LastRebootParser(lChunk, tools, true);
+            LastRebootParser lrParser = new LastRebootParser(lChunk, tools, true, cStore);
             //throw new NotImplementedException();
         }
     }
@@ -898,8 +939,11 @@ namespace Websdepot
          *      - Stores input and sends it to preprocessing
          * =======================================================================================================================================================================================
          */
-        public LastRebootParser(List<string> inChunk, Toolbox tIn)
+        public LastRebootParser(List<string> inChunk, Toolbox tIn, ConfStore cIn)
         {
+            //Configuration store (prep for SQL upload)
+            cStore = cIn;
+
             //toolbox in
             tools = tIn;
 
@@ -915,8 +959,11 @@ namespace Websdepot
          *   - Constructor for chain link
          * =======================================================================================================================================================================================
          */
-        public LastRebootParser(List<string> inChunk, Toolbox tIn, bool blnChain)
+        public LastRebootParser(List<string> inChunk, Toolbox tIn, bool blnChain, ConfStore cIn)
         {
+            //Configuration store (prep for SQL upload)
+            cStore = cIn;
+
             //toolbox in
             tools = tIn;
 
@@ -2085,6 +2132,45 @@ namespace Websdepot
             return lines;
         }
     }
+
+    /* =======================================================================================================================================================================================
+     * ConfStore
+     *  - ConfStore stores the data of the config file and uses it for uploading
+     * 
+     * =======================================================================================================================================================================================
+     */
+     class ConfStore {
+        //Parallel string lists which store the tag and associated Chunk lines
+        List<string> lTag;
+        List<Chunk> lChunk;
+
+        //MD5 String
+        string strMd5;
+
+        public void addTag(string strIn)
+        {
+            lTag.Add(strIn);
+        }
+
+        public void addChunk(Chunk cIn)
+        {
+            lChunk.Add(cIn);
+        }
+
+        public string getTag(int intIndex)
+        {
+            return lTag[intIndex];
+        }
+
+        public Chunk getChunk(int intIndex)
+        {
+            return lChunk[intIndex];
+        }
+     }
+
+    /* =======================================================================================================================================================================================
+     * =======================================================================================================================================================================================
+     */
     class DayRange
     {
         int dayX;
