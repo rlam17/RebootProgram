@@ -2009,7 +2009,7 @@ namespace Websdepot
                 File.Delete(Program.postUrl);
             }
             StreamWriter sw = new StreamWriter(Program.postUrl);
-            sw.WriteLine("StartupTime,ServerName,Status,Service,SubService,Error,");
+            sw.WriteLine("StartupTime,ServerName,Status,Service,SubService,SubService,Error,");
             sw.Close();
         }
 
@@ -2124,22 +2124,20 @@ namespace Websdepot
                 subject = sr.ReadLine();
                 if (subject != null)
                 {
-                    if (rgx.IsMatch(subject))
-                    {
-                        //uploadCsv();
-                    }
-                    else
+                    if (!rgx.IsMatch(subject))
                     {
                         Program.writeLog("Error in the CSV file");
                         Program.exit(3);
                     }
                 }
             }
-            sr.Close();
-            //return result;
+            sr.Close();            
         }
 
+        public void getConfFromSql()
+        {
 
+        }
 
     }
 
