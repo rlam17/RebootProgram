@@ -2055,7 +2055,7 @@ namespace Websdepot
             if (!checkConnection())
             {
                 //Queue the CSV for next available upload
-                string postStamp = "./post/topost/" + Program.todayDate.ToString() + "_Post.csv";
+                string postStamp = "./post/topost/" + DateTime.Now.ToString("yyyyMMdd-HHmm") + "_Post.csv";
                 File.Move(Program.postUrl, postStamp);
                 Program.writeLog("Can not upload to SQL yet, Post has been queued");
             }
@@ -2064,7 +2064,7 @@ namespace Websdepot
                 //TODO: Upload CSV to SQL
                 readCsvForUpload();
 
-                string postStamp = "./post/posted/" + DateTime.Now.ToString("yyyyMMdd HHmm") +  "_Post.csv";
+                string postStamp = "./post/posted/" + DateTime.Now.ToString("yyyyMMdd-HHmm") +  "_Post.csv";
                 File.Move(Program.postUrl, postStamp);
                 Program.writeLog("Post has been uploaded");
             }
