@@ -2244,8 +2244,7 @@ namespace Websdepot
 
                 cmd.Parameters.AddWithValue("@conf_id", null);
                 cmd.Parameters.AddWithValue("@conf_uldate", Convert.ToDateTime(input[0]));
-                cmd.Parameters.AddWithValue("@conf_md5hash", input[1]);
-                cmd.Parameters.AddWithValue("@conf_tagline", input[2]);
+                cmd.Parameters.AddWithValue("@conf_md5hash", input[1]);                cmd.Parameters.AddWithValue("@conf_tagline", input[2]);
                 cmd.Parameters.AddWithValue("@conf_settings", input[3]);
                 cmd.Parameters.AddWithValue("@conf_timestmp", DateTime.Now);
                 cmd.ExecuteNonQuery();
@@ -2288,6 +2287,7 @@ namespace Websdepot
             }
             return result;
         }
+
     }
 
     /* =======================================================================================================================================================================================
@@ -2329,6 +2329,7 @@ namespace Websdepot
         {
             return lChunk;
         }
+        
      }
 
     /* =======================================================================================================================================================================================
