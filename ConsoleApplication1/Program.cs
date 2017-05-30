@@ -101,9 +101,12 @@ namespace Websdepot
 
 
             magicBox.connectSql();
-            
 
+            string[] test = { DateTime.Now.ToString(), "Dev4", "OK", "test service", "test program" };
 
+            magicBox.sqlQuery(test);
+
+            exit(0);
             TimeSpan sqlInterval = TimeSpan.FromMilliseconds(magicBox.getSqlInterval());
             TimeSpan rebootInterval = TimeSpan.FromMilliseconds(magicBox.getSqlInterval());
             //magicBox.runReb();
@@ -147,6 +150,7 @@ namespace Websdepot
         //              1. Exit with error in conf file
         //              2. Exit with file open error
         //              3. Exit with CSV error
+        //              4. Exit with SQL query error
         //=========================================================
         public static void exit(int code)
         {
@@ -159,6 +163,7 @@ namespace Websdepot
                 writeLog("Exitting program");
             }
 
+            
             System.Environment.Exit(code);
         }
 
@@ -1701,12 +1706,33 @@ namespace Websdepot
         public void updateLastCheckin()
         {
             //TODO: Update SQL for last check in date
-            sqlQuery("");
+            //sqlQuery("");
         }
 
-        public void sqlQuery(string query)
+        public void sqlQuery(string[] query)
         {
             //TODO: SQL querying
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand();
+                cmd.Connection = connect;
+                cmd.CommandText = "INSERT INTO csv_info(csv_id, csv_startup, csv_server, csv_status, csv_service, csv_progname, csv_timestmp) " +
+                "VALUES(@csv_id, @csv_startup, @csv_server, @csv_status, @csv_service, @csv_progname, @csv_timestmp)";
+                cmd.Prepare();
+                cmd.Parameters.AddWithValue("@csv_id", null);
+                cmd.Parameters.AddWithValue("@csv_startup", Convert.ToDateTime(query[0]));
+                cmd.Parameters.AddWithValue("@csv_server", query[1]);
+                cmd.Parameters.AddWithValue("@csv_status", query[2]);
+                cmd.Parameters.AddWithValue("@csv_service", query[3]);
+                cmd.Parameters.AddWithValue("@csv_progname", query[4]);
+                cmd.Parameters.AddWithValue("@csv_timestmp", DateTime.Now);
+                cmd.ExecuteNonQuery();
+            }catch (Exception e)
+            {
+                Program.writeLog("SQL query went wrong:" + e.Message);
+                Program.exit(4);
+            }
+            
         }
 
         /*=======================================================================================================================================================================================
