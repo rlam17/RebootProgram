@@ -1298,7 +1298,6 @@ namespace Websdepot
          */
         public void stringParse()
         {
-            //TODO figure out why this doesn't run the abstract base version
             strRaw = strIn.Split('=');
             try
             {
@@ -1780,8 +1779,10 @@ namespace Websdepot
 
         public void updateLastCheckin()
         {
-            //TODO: Update SQL for last check in date
+            //TODO: Update SQL for last check in date TALK TO ROY ABOUT ANOTHER TABLE FOR IT
             //sqlQuery("");
+
+
         }
 
         /*=======================================================================================================================================================================================
@@ -2071,7 +2072,7 @@ namespace Websdepot
             }
             else
             {
-                //TODO: Upload CSV to SQL
+                //Upload CSV to SQL
                 readCsvForUpload();
 
                 string postStamp = "./post/posted/" + DateTime.Now.ToString("yyyyMMdd-HHmm") +  "_Post.csv";
@@ -2201,13 +2202,13 @@ namespace Websdepot
 
         }
 
-        public void updateConfInSql(ConfStore i)
+        public void updateConfInSql(ConfStore input)
         {
 
             DateTime uploadDate = File.GetLastWriteTime(Program.confUrl);
 
-            List<string> tags = i.getTag();
-            List<Chunk> chunks = i.getChunk();
+            List<string> tags = input.getTag();
+            List<Chunk> chunks = input.getChunk();
 
             if (tags.Count != chunks.Count)
             {
@@ -2230,7 +2231,7 @@ namespace Websdepot
 
         }
 
-        public void writeConfLinetoSql(List<string> i)
+        public void writeConfLinetoSql(List<string> input)
         {
             try
             {
@@ -2242,10 +2243,10 @@ namespace Websdepot
                 cmd.Prepare();
 
                 cmd.Parameters.AddWithValue("@conf_id", null);
-                cmd.Parameters.AddWithValue("@conf_uldate", Convert.ToDateTime(i[0]));
-                cmd.Parameters.AddWithValue("@conf_md5hash", i[1]);
-                cmd.Parameters.AddWithValue("@conf_tagline", i[2]);
-                cmd.Parameters.AddWithValue("@conf_settings", i[3]);
+                cmd.Parameters.AddWithValue("@conf_uldate", Convert.ToDateTime(input[0]));
+                cmd.Parameters.AddWithValue("@conf_md5hash", input[1]);
+                cmd.Parameters.AddWithValue("@conf_tagline", input[2]);
+                cmd.Parameters.AddWithValue("@conf_settings", input[3]);
                 cmd.Parameters.AddWithValue("@conf_timestmp", DateTime.Now);
                 cmd.ExecuteNonQuery();
             }
