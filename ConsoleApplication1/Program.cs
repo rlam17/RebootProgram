@@ -467,12 +467,18 @@ namespace Websdepot
                     string[] strRegEx = new string[] { ".exe " };
                     string[] strSplit;
                     strArgs = " ";
+                    
+                    //split the line twice using ".exe" as the split point
                     strSplit = strChunk.Split(strRegEx, 2, StringSplitOptions.None);
 
+                    //if the first half of the program does not have ".exe" because of the split process append it to the back of the first half
+                    //this is done so the integrity of the executable path is maintained
                     if (!strSplit[0].Contains(".exe"))
                     {
                         strSplit[0] = strSplit[0] + ".exe";
                     }
+
+                    //store the path in a variable for easy accessibility and to improve 
                     strPath = strSplit[0];
 
                     //Grabs the command line arguments
