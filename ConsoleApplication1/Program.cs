@@ -22,7 +22,7 @@ namespace Websdepot
         static public string confUrl = "./Conf.cfg";
         static public string todayDate = DateTime.Now.ToString();
         static public string postUrl = "./post/post.csv";
-        static List<Chunk> chunks = new List<Chunk>();
+        static List<Chunk> chunks = new List<Chunk>();        
 
 
         //======================================================
@@ -98,10 +98,16 @@ namespace Websdepot
             ConfStore cStore = new ConfStore();
             magicBox.clearCsv();
             readConf(cStore, magicBox);
+
+            createHashFile(createHash());
+            magicBox.connectSql();
+            magicBox.updateConfInSql(cStore);
+            exit(0);
+            magicBox.runStart();
             magicBox.checkCsv();
 
 
-            magicBox.connectSql();
+            
 
             magicBox.uploadCsv();
 
@@ -1704,6 +1710,7 @@ namespace Websdepot
         RebootParser rbParse;
         DateTime configuredRebootTime;
         MySqlConnection connect;
+        string localHash;
 
         /*=======================================================================================================================================================================================
          * Toolbox.Toolbox()
@@ -1715,6 +1722,9 @@ namespace Websdepot
         {
             sqlInfo = new string[6];
             allowedRebootTimes = new List<DayRange>();
+            StreamReader sr = new StreamReader("./md5");
+            localHash = sr.ReadLine();
+            sr.Close();
         }
 
         //===========================================
@@ -2111,7 +2121,7 @@ namespace Websdepot
             }
             catch (Exception e)
             {
-                Program.writeLog("SQL query went wrong:" + e.Message);
+                Program.writeLog("SQL query went wrong when writing to CSV sql:" + e.Message);
                 Program.exit(4);
             }
 
@@ -2168,9 +2178,82 @@ namespace Websdepot
             sr.Close();            
         }
 
-        public void getConfFromSql()
+        public bool compareHashWithSql()
+        {
+            //SELECT conf_md5hash FROM server_programs.configfile_info ORDER BY conf_id DESC LIMIT 1
+
+            string query = "SELECT conf_md5hash FROM server_programs.configfile_info ORDER BY conf_id DESC LIMIT 1";
+            MySqlCommand cmd = new MySqlCommand(query, connect);
+
+            StreamReader sr = new StreamReader("./md5");
+            string local = sr.ReadLine();
+            sr.Close();
+
+            string remote = Convert.ToString(cmd.ExecuteScalar());
+
+            if(String.Compare(local, remote) == 0)
+            {
+                return true;
+            } else
+            {
+                return false;
+            }
+
+        }
+
+        public void updateConfInSql(ConfStore i)
         {
 
+            DateTime uploadDate = File.GetLastWriteTime(Program.confUrl);
+
+            List<string> tags = i.getTag();
+            List<Chunk> chunks = i.getChunk();
+
+            if (tags.Count != chunks.Count)
+            {
+                Program.writeLog("Something is wrong with conf file/conf file parsing");
+                Program.exit(1);
+            }
+            else
+            {
+                for(int x = 0; x < tags.Count; x++)
+                {
+                    List<string> query = new List<string>();
+                    query.Add(uploadDate.ToString());
+                    query.Add(localHash);
+                    query.Add(tags[x]);
+                    query.Add(chunks[x].ToString());
+
+                    writeConfLinetoSql(query);
+                }
+            }
+
+        }
+
+        public void writeConfLinetoSql(List<string> i)
+        {
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand();
+                cmd.Connection = connect;
+                cmd.CommandText = "INSERT INTO " +
+                    "configfile_info(conf_id, conf_uldate, conf_md5hash, conf_tagline, conf_settings, conf_timestmp) " +
+                    "VALUES(@conf_id, @conf_uldate, @conf_md5hash, @conf_tagline, @conf_settings, @conf_timestmp)";
+                cmd.Prepare();
+
+                cmd.Parameters.AddWithValue("@conf_id", null);
+                cmd.Parameters.AddWithValue("@conf_uldate", Convert.ToDateTime(i[0]));
+                cmd.Parameters.AddWithValue("@conf_md5hash", i[1]);
+                cmd.Parameters.AddWithValue("@conf_tagline", i[2]);
+                cmd.Parameters.AddWithValue("@conf_settings", i[3]);
+                cmd.Parameters.AddWithValue("@conf_timestmp", DateTime.Now);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception e)
+            {
+                Program.writeLog("Something went wrong when writing to Conf SQL: " + e.Message);
+                Program.exit(4);
+            }
         }
 
     }
@@ -2193,6 +2276,16 @@ namespace Websdepot
         public List<string> getChunk()
         {
             return lines;
+        }
+        public override string ToString()
+        {
+            string result = "";
+            foreach(string line in lines)
+            {
+                result += line;
+                result += "\n";    
+            }
+            return result;
         }
     }
 
@@ -2226,14 +2319,14 @@ namespace Websdepot
             lChunk.Add(cIn);
         }
 
-        public string getTag(int intIndex)
+        public List<string> getTag()
         {
-            return lTag[intIndex];
+            return lTag;
         }
 
-        public Chunk getChunk(int intIndex)
+        public List<Chunk> getChunk()
         {
-            return lChunk[intIndex];
+            return lChunk;
         }
      }
 
