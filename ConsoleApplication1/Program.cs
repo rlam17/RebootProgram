@@ -57,6 +57,7 @@ namespace Websdepot
                 {
 
                     string fileHash = Encoding.Default.GetString(md5.ComputeHash(stream));
+                    createHashFile(fileHash);
                     return fileHash;
                 }
             }
@@ -66,7 +67,7 @@ namespace Websdepot
         //Creates hash file of the Conf.cfg file.
         //Should be repurposed to store hash in resgistry.
         //================================================
-        private static string createHashFile(string hash)
+        private static void createHashFile(string hash)
         {
             /*
             string root = "HKEY_LOCAL_MACHINE\\Software\\Websdepot Reboot\\";
@@ -79,7 +80,6 @@ namespace Websdepot
             StreamWriter sw = new StreamWriter("./md5", false);
             sw.WriteLine(hash);
             sw.Close();
-            return hash;
         }
 
         //====================================================
@@ -97,12 +97,12 @@ namespace Websdepot
             Toolbox magicBox = new Toolbox();
             magicBox.clearCsv();
             readConf(magicBox);
-
-            magicBox.connectSql();
             magicBox.checkCsv();
 
-            //PLACE KILLSWITCH HERE
-            //Process.Start("shutdown", "-r -f -t 0");
+
+            magicBox.connectSql();
+            
+
 
             TimeSpan sqlInterval = TimeSpan.FromMilliseconds(magicBox.getSqlInterval());
             TimeSpan rebootInterval = TimeSpan.FromMilliseconds(magicBox.getSqlInterval());
@@ -114,6 +114,10 @@ namespace Websdepot
                 //string hash = createHash();
                 //magicBox.checkPostQueue();
                 System.Console.WriteLine("2 Minutes has passed");
+                if (magicBox.checkConnection())
+                {
+
+                }
             }, null, TimeSpan.Zero, sqlInterval);
 
 
@@ -1722,6 +1726,11 @@ namespace Websdepot
                 //Program.exit(2);
             }
 
+        }
+
+        public bool checkConnection()
+        {
+            return connect.Ping();
         }
 
         public bool checkRebootTime()
