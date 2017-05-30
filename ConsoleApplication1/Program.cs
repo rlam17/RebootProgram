@@ -1716,7 +1716,7 @@ namespace Websdepot
             {
                 MySqlCommand cmd = new MySqlCommand();
                 cmd.Connection = connect;
-                cmd.CommandText = "INSERT INTO csv_info(csv_id, csv_startup, csv_server, csv_status, csv_service, csv_progname, csv_timestmp) " +
+                cmd.CommandText = "INSERT INTO csvfile_info(csv_id, csv_startup, csv_server, csv_status, csv_service, csv_progname, csv_timestmp) " +
                 "VALUES(@csv_id, @csv_startup, @csv_server, @csv_status, @csv_service, @csv_progname, @csv_timestmp)";
                 cmd.Prepare();
                 cmd.Parameters.AddWithValue("@csv_id", null);
