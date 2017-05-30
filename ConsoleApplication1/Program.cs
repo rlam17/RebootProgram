@@ -2330,6 +2330,32 @@ namespace Websdepot
             return lChunk;
         }
         
+        public void writeConf()
+        {
+            //This will create a log if it doesn't exist
+            StreamWriter sw = new StreamWriter(Program.confUrl, false);
+
+            int intMax = 0;
+            string strLine;
+            //Verify integrity of chunks
+            if(lChunk.Count == lTag.Count)
+            {
+                intMax = lChunk.Count;
+            }else
+            {
+                //TODO add error code
+                Program.writeLog("BLAH");
+                Program.exit(1);
+            }
+
+            for(int i = 0; i<intMax; i++)
+            {
+
+            }
+
+            sw.WriteLine(strLine);
+            sw.Close();
+        }
      }
 
     /* =======================================================================================================================================================================================
