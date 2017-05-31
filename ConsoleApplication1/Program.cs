@@ -105,62 +105,75 @@ namespace Websdepot
             readConf(cStore, magicBox);
             createHashFile(createHash());
             magicBox.connectSql();
-            //magicBox.updateLastCheckin();
+            magicBox.updateLastCheckin();
             TimeSpan sqlInterval = TimeSpan.FromMilliseconds(magicBox.getSqlInterval());
-            TimeSpan rebootInterval = TimeSpan.FromMilliseconds(magicBox.getRebootInterval());
-            //delayWait(rebootInterval);
-            //magicBox.clearCsv();
-            //magicBox.runStart();
-            //magicBox.checkCsv();
-            //magicBox.uploadCsv();
+            TimeSpan rebootInterval = TimeSpan.FromMilliseconds(magicBox.getRebootDelay());
+            delayWait(rebootInterval);
+            magicBox.clearCsv();
+            magicBox.runStart();
+            magicBox.checkCsv();
+            magicBox.uploadCsv();
 
 
             /* Every x minutes based on config file check in */
             var sqlTimer = new System.Threading.Timer((e) =>
             {
-                //magicBox.updateLastCheckin();
-                //TODO: Compare [Configured Reboot Times] with the SQL server, if they are different update the config file and write to the log file.
-
-                bool blnCheck = true;
-                blnCheck = magicBox.checkRt(cStore);
-                if (!blnCheck)
-                {
-                    //look for [configured reboot times] tag index
-                    int intLength = cStore.getLength();                    
-                    for(int i = 0; i<intLength; i++)
-                    {
-                        //TODO: Fix this
-                        //if(cStore.getTag().Equals("[configured reboot times]"))
-                        if (String.Compare(cStore.getTag()[i], "[configured reboot times]") == 0)
-                        {
-                            
-                            Chunk cTemp = cStore.getTemp();
-                            cStore.setChunk(cTemp, i);
-                            cStore.writeConf();
-                            writeLog("Updated Configured Reboot Time");
-                        }
-                    }
-                    
-                }
-
-                //string hash = createHash();
-                //magicBox.checkPostQueue();
-                System.Console.WriteLine("2 Minutes has passed");
+                //magicBox.updateLastCheckin();                
+                Console.WriteLine(sqlInterval.TotalMinutes.ToString() + " minutes has passed");
                 if (magicBox.checkConnection())
                 {
+                    magicBox.updateLastCheckin();
+                    createHashFile(createHash());
+                    bool blnCheck = true;
+                    blnCheck = magicBox.checkRt(cStore);
+                    if (!blnCheck)
+                    {
+                        //look for [configured reboot times] tag index
+                        int intLength = cStore.getLength();
+                        for (int i = 0; i < intLength; i++)
+                        {
+                            //if(cStore.getTag().Equals("[configured reboot times]"))
+                            if (String.Compare(cStore.getTag()[i], "[configured reboot times]") == 0)
+                            {
 
-                }
+                                Chunk cTemp = cStore.getTemp();
+                                cStore.setChunk(cTemp, i);
+                                cStore.writeConf();
+                                writeLog("Updated Configured Reboot Time");
+                            }
+                        }
+
+                    }
+                    if (!magicBox.compareHashWithSql())
+                    {
+                        readConf(cStore, magicBox);
+                        magicBox.updateConfInSql(cStore);
+                    }
+                    magicBox.checkPostQueue();
+                }else
+                {
+                    writeLog("Connection to SQL lost");
+                }                               
             }, null, TimeSpan.Zero, sqlInterval);
 
 
 
             var rebootTimer = new System.Threading.Timer((f) =>
             {
-                System.Console.WriteLine("5 minutes has passed");
-                if (magicBox.checkRebootTime())
+                Console.WriteLine(rebootInterval.TotalMinutes.ToString() + " minutes has passed");
+
+                DateTime configuredDay = magicBox.getConfiguredRebootTime();
+                long interval = magicBox.getRebootInterval();
+
+                DateTime happening = configuredDay + TimeSpan.FromMilliseconds(interval);
+                if(DateTime.Now >= happening)
                 {
-                    magicBox.runReb();
+                    if (magicBox.checkRebootTime())
+                    {
+                        magicBox.runReb();
+                    }
                 }
+                
             }, null, TimeSpan.Zero, rebootInterval);
 
             while (true) //Prevents timer thread death
@@ -215,63 +228,30 @@ namespace Websdepot
             while ((line = sr.ReadLine()) != null) //until EOF
             {
 
-                if (currentChunk < 6)
-                //If still working on a chunk, added to the list
+                if (line != "")
                 {
-                    if (line != "")
+                    currentList.Add(line);
+                    //System.Console.WriteLine(line);
+                }
+                else
+                {
+                    if(currentList.Count != 0)
                     {
-                        currentList.Add(line);
-                        //System.Console.WriteLine(line);
-                    }
-                    else
-                    {
-                        //System.Console.WriteLine("This is a blank line!");
-
-
-                        switch (currentChunk) //Check which chunk it is on
-                        {
-                            case 0:
-                                //sqlChunk = currentList;
-                                chunks.Add(new Chunk(currentList));
-                                break;
-                            case 1:
-                                //rebootConfigChunk = currentList;
-                                chunks.Add(new Chunk(currentList));
-                                break;
-                            case 2:
-                                //startupChunk = currentList;
-                                chunks.Add(new Chunk(currentList));
-                                break;
-                            case 3:
-                                //rebootChunk = currentList;
-                                chunks.Add(new Chunk(currentList));
-                                break;
-                            case 4:
-                                //configuredRebootChunk = currentList;
-                                chunks.Add(new Chunk(currentList));
-                                break;
-                            case 5:
-                                chunks.Add(new Chunk(currentList));
-                                break;
-                            default:
-                                currentList = null;
-                                break;
-                                /*
-                                case 4:
-                                    //lastRebootChunk = currentList;
-                                    chunks.Add(new Chunk(currentList));
-                                    break;
-                                */
-                        }
+                        chunks.Add(new Chunk(currentList));                        
                         currentList = new List<string>();
                         currentChunk++;
                     }
+                    
                 }
-
+                
             }
 
             sr.Close();
-            chunks.Add(new Chunk(currentList));
+            if (currentList.Count != 0)
+            {
+                chunks.Add(new Chunk(currentList));
+            }
+            
             List<string> external = new List<string>();
             if (!File.Exists("./lastreboottime.txt"))
             {
@@ -282,7 +262,7 @@ namespace Websdepot
                 uptime.NextValue();
                 TimeSpan t = TimeSpan.FromSeconds(uptime.NextValue());
                 DateTime final = DateTime.Now.Subtract(t);
-                System.Console.WriteLine(final);
+                //System.Console.WriteLine(final);
                 //tools.setLastReboot(final);
                 writer.WriteLine(final);
                 writer.Close();
@@ -454,7 +434,7 @@ namespace Websdepot
             if (strIn.Equals(strParse))
             {
                 //if the chunk belongs to this chain link then remove the tag and process it
-                System.Console.WriteLine(strIn + " found option handler link");
+                //System.Console.WriteLine(strIn + " found option handler link");
 
                 //pop off the options tag from the rest of the chunk
                 lChunk.RemoveAt(0);
@@ -472,7 +452,7 @@ namespace Websdepot
             {
                 //Call next in chain
                 //Chain tail should ouput a log
-                System.Console.WriteLine(strIn + " link does not handle this option, going to next");
+                //System.Console.WriteLine(strIn + " link does not handle this option, going to next");
                 nextLink();
             }
         }
@@ -525,7 +505,7 @@ namespace Websdepot
                     catch (Exception e) { }
 
 
-                    System.Console.WriteLine("Executing: " + strPath + " | " + strArgs);
+                    //System.Console.WriteLine("Executing: " + strPath + " | " + strArgs);
 
                     //launch process with path and command line arguments
                     var process = Process.Start(strPath, strArgs);
@@ -634,7 +614,7 @@ namespace Websdepot
          */
         public override void nextLink()
         {
-            System.Console.WriteLine("In [startup] chain link, going to next link");
+            //System.Console.WriteLine("In [startup] chain link, going to next link");
             RebootParser rlLink = new RebootParser(lChunk, tools, true, cStore);
         }
     }
@@ -713,7 +693,7 @@ namespace Websdepot
                 {
                     if (strChunk.Contains("-r") || strChunk.Contains("/r"))
                     {
-                        System.Console.WriteLine("Now rebooting...");
+                        //System.Console.WriteLine("Now rebooting...");
                         StreamWriter sw = new StreamWriter("./lastreboottime.txt", false);
                         sw.WriteLine("[Last Reboot Time]");
 
@@ -721,7 +701,7 @@ namespace Websdepot
                         uptime.NextValue();
                         TimeSpan t = TimeSpan.FromSeconds(uptime.NextValue());
                         DateTime final = DateTime.Now.Subtract(t);
-                        System.Console.WriteLine(final);
+                        //System.Console.WriteLine(final);
                         //tools.setLastReboot(final);
                         sw.WriteLine(final);
                         sw.Close();
@@ -729,6 +709,7 @@ namespace Websdepot
                 }
 
             }
+            Program.writeLog("Now rebooting...");
             execute();
         }
 
@@ -739,7 +720,7 @@ namespace Websdepot
          */
         public override void nextLink()
         {
-            System.Console.WriteLine("In [reboot] chain Parser, going to next Parser");
+            //System.Console.WriteLine("In [reboot] chain Parser, going to next Parser");
             SqlParser sqlParser = new SqlParser(lChunk, tools, true, cStore);
             //throw new NotImplementedException();
         }
@@ -815,7 +796,7 @@ namespace Websdepot
          */
         public override void nextLink()
         {
-            System.Console.WriteLine("In [sql config] chain Parser");
+            //System.Console.WriteLine("In [sql config] chain Parser");
             RebConfParser rcParser = new RebConfParser(lChunk, tools, true, cStore);
         }
     }
@@ -892,7 +873,7 @@ namespace Websdepot
          */
         public override void nextLink()
         {
-            System.Console.WriteLine("In [reboot config] chain Parser, going to next Parser");
+            //System.Console.WriteLine("In [reboot config] chain Parser, going to next Parser");
             RebTimeParser crtParser = new RebTimeParser(lChunk, tools, true, cStore);
             //throw new NotImplementedException();
         }
@@ -969,7 +950,7 @@ namespace Websdepot
          */
         public override void nextLink()
         {
-            System.Console.WriteLine("In configured reboot times chain Parser, going to next Parser");
+            //System.Console.WriteLine("In configured reboot times chain Parser, going to next Parser");
             LastRebootParser lrParser = new LastRebootParser(lChunk, tools, true, cStore);
             //throw new NotImplementedException();
         }
@@ -1038,7 +1019,7 @@ namespace Websdepot
             {
                 DateTime dt = Convert.ToDateTime(x);
                 tools.setLastReboot(dt);
-                System.Console.WriteLine(dt);
+                //System.Console.WriteLine(dt);
             }
 
 
@@ -1051,7 +1032,7 @@ namespace Websdepot
          */
         public override void nextLink()
         {
-            System.Console.WriteLine("In [last reboot time] config chain Parser, going to next Parser");
+            //System.Console.WriteLine("In [last reboot time] config chain Parser, going to next Parser");
             chainEnd();
         }
     }
@@ -1911,6 +1892,11 @@ namespace Websdepot
             rbParse.run();
         }
 
+        public DateTime getConfiguredRebootTime()
+        {
+            return configuredRebootTime;
+        }
+
         /*=======================================================================================================================================================================================
          * Toolbox.intervalMath(string, string)
          *      - Takes in 2 strings
@@ -2403,6 +2389,10 @@ namespace Websdepot
             }
         }
 
+        public long getRebootDelay()
+        {
+            return rebootDelay;
+        }
     }
 
     /* =======================================================================================================================================================================================
@@ -2533,6 +2523,7 @@ namespace Websdepot
                 }
                 
             }
+            
             sw.Close();
         }
      }
