@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Websdepot
 {
-
+    //TODO test this query SELECT conf_settings From server_programs.configfile_info where conf_tagline="[configured reboot times]" order by conf_timestmp DESC
     class Program
     {
         static public string logUrl = "./log/Log.txt";
@@ -1814,6 +1814,7 @@ namespace Websdepot
 
         }
 
+
         /*=======================================================================================================================================================================================
           * Toolbox.setStartupParser()
           *      - Setter for reboot times
@@ -2082,12 +2083,7 @@ namespace Websdepot
             //attempt to loop through the entire sqlInfo array, if successful, return true
             try
             {
-                for (int i = 0; i < 6; i++)
-                {
-                    //dummy code to iterate through the array
-                    sqlInfo[i].Contains("");
-                }
-                //return true;
+                
             }
             catch (Exception e)
             {
@@ -2317,7 +2313,8 @@ namespace Websdepot
 
                 cmd.Parameters.AddWithValue("@conf_id", null);
                 cmd.Parameters.AddWithValue("@conf_uldate", Convert.ToDateTime(input[0]));
-                cmd.Parameters.AddWithValue("@conf_md5hash", input[1]);                cmd.Parameters.AddWithValue("@conf_tagline", input[2]);
+                cmd.Parameters.AddWithValue("@conf_md5hash", input[1]);
+                cmd.Parameters.AddWithValue("@conf_tagline", input[2]);
                 cmd.Parameters.AddWithValue("@conf_settings", input[3]);
                 cmd.Parameters.AddWithValue("@conf_timestmp", DateTime.Now);
                 cmd.ExecuteNonQuery();
