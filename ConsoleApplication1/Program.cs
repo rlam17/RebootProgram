@@ -203,9 +203,11 @@ namespace Websdepot
                 Console.WriteLine(rebootInterval.TotalMinutes.ToString() + " minutes has passed");
 
                 DateTime configuredDay = magicBox.getConfiguredRebootTime();
-                long interval = magicBox.getRebootInterval();
+                TimeSpan interval = TimeSpan.FromMilliseconds(magicBox.getRebootInterval());
 
-                DateTime happening = configuredDay + TimeSpan.FromMilliseconds(interval);
+                DateTime happening = configuredDay + interval;
+
+                
                 if(DateTime.Now >= happening)
                 {
                     if (magicBox.checkRebootTime())
