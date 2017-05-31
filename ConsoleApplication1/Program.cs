@@ -1719,6 +1719,7 @@ namespace Websdepot
         DateTime configuredRebootTime;
         MySqlConnection connect;
         string localHash;
+        string strMachine;
 
         /*=======================================================================================================================================================================================
          * Toolbox.Toolbox()
@@ -1729,6 +1730,7 @@ namespace Websdepot
         public Toolbox()
         {
             sqlInfo = new string[6];
+            strMachine = System.Environment.MachineName;
             allowedRebootTimes = new List<DayRange>();
             StreamReader sr = new StreamReader("./md5");
             localHash = sr.ReadLine();
