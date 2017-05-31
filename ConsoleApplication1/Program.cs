@@ -105,22 +105,18 @@ namespace Websdepot
 
             
             magicBox.connectSql();
+            magicBox.checkPostQueue();
             magicBox.updateConfInSql(cStore);
+            exit(0);
             magicBox.runStart();
             magicBox.checkCsv();
 
 
+            
+
             magicBox.uploadCsv();
 
-
-            List<string> strTest = new List<string>();
-            strTest.Add("C:\\Program Files (x86)\\Notepad++\\notepad++.exe");
-
-            Chunk cTest = new Chunk(strTest);
-
-            cStore.changeChunk(cTest, 3);
-
-            cStore.writeConf();
+            
 
             exit(0);
             TimeSpan sqlInterval = TimeSpan.FromMilliseconds(magicBox.getSqlInterval());
@@ -2154,7 +2150,7 @@ namespace Websdepot
         public void readCsvForUpload(string oldPost)
         {
             DateTime lastModified = File.GetLastWriteTime(oldPost);
-            StreamReader sr = new StreamReader(Program.postUrl, System.Text.Encoding.Default);
+            StreamReader sr = new StreamReader(oldPost, System.Text.Encoding.Default);
             sr.ReadLine();
             string line;
             while (!string.IsNullOrEmpty(line = sr.ReadLine()))
@@ -2202,17 +2198,21 @@ namespace Websdepot
         //===================================
         public void checkPostQueue()
         {
-            var files = Directory.GetFiles("./post/topost/*.csv");
+            var files = Directory.GetFiles("./post/topost", "*.csv");
             if (files.Length > 0)
             {
 
                 foreach (string file in files)
                 {
                     //TODO: CSV upload to SQL here, then move them to posted after rename
-                    string[] firstAttempt = file.Split('_');
+                    string[] trimName = file.Split('_');
+                    string[] firstAttempt = trimName[0].Split('\\');
 
+                    readCsvForUpload(file);
+
+                    string newPath = "./post/posted/" + firstAttempt[1] + "_" + DateTime.Now.ToString("yyyyMMdd-HHmm") + "_Post.csv";
                     Program.writeLog("Uploaded old log: " + Path.GetFileName(file));
-                    File.Move(file, "./post/posted/" + firstAttempt[0] + "_" + Program.todayDate + "_Post.csv");
+                    File.Move(file, newPath);
                 }
             }
         }
@@ -2390,10 +2390,6 @@ namespace Websdepot
             lChunk.Add(cIn);
         }
 
-        public void changeChunk(Chunk cIn, int intIndex)
-        {
-            lChunk[intIndex] = cIn;
-        }
         public List<string> getTag()
         {
             return lTag;
@@ -2425,7 +2421,6 @@ namespace Websdepot
             for(int i = 0; i<intMax; i++)
             {
                 sw.Write(lTag[i]);
-                sw.Write("\n");
                 sw.Write(lChunk[i]);
                 sw.Write("\n");
             }
