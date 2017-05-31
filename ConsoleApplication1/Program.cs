@@ -184,6 +184,11 @@ namespace Websdepot
         //=========================================
         private static void readConf(ConfStore i_cs, Toolbox tIn)
         {
+            if (!File.Exists(confUrl))
+            {
+                writeLog("Conf file is missing");
+                exit(1);
+            }
             StreamReader sr = new StreamReader(confUrl, System.Text.Encoding.Default);
 
             string line = "";
