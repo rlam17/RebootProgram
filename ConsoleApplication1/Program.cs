@@ -202,11 +202,14 @@ namespace Websdepot
             {
                 Console.WriteLine(rebootInterval.TotalMinutes.ToString() + " minutes has passed");
 
-                DateTime configuredDay = magicBox.getConfiguredRebootTime();
+                DateTime happening = magicBox.getConfiguredRebootTime();
                 TimeSpan interval = TimeSpan.FromMilliseconds(magicBox.getRebootInterval());
 
-                DateTime happening = configuredDay + interval;
-
+                while(magicBox.getLastRebootTime() >= happening)
+                {
+                    happening += interval;
+                }
+               
                 
                 if(DateTime.Now >= happening)
                 {
@@ -1882,6 +1885,16 @@ namespace Websdepot
         public long getRebootInterval()
         {
             return rebootInterval;
+        }
+
+        /*=======================================================================================================================================================================================
+         * Toolbox.getLastRebootTime()
+         *  - Retrieve the last reboot time
+         *=======================================================================================================================================================================================
+         */
+        public DateTime getLastRebootTime()
+        {
+            return dtLastReb;
         }
 
         /*=======================================================================================================================================================================================
