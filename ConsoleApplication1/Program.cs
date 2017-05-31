@@ -93,6 +93,9 @@ namespace Websdepot
 
         static void Main(string[] args)
         {
+            Directory.CreateDirectory("./log");
+            Directory.CreateDirectory("./post");
+
             writeLog("Starting program");
             createHashFile(createHash());
             Toolbox magicBox = new Toolbox();
