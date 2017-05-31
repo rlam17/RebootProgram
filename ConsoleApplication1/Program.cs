@@ -128,6 +128,26 @@ namespace Websdepot
             {
                 //magicBox.updateLastCheckin();
                 //TODO: Compare [Configured Reboot Times] with the SQL server, if they are different update the config file and write to the log file.
+
+                bool blnCheck = true;
+                blnCheck = magicBox.checkRt(cStore);
+                if (!blnCheck)
+                {
+                    //look for [configured reboot times] tag index
+                    int intLength = cStore.getLength();
+                    int intIndex;
+                    for(int i = 0; i<intLength; i++)
+                    {
+                        if(cStore.getTag().Equals("[configured reboot times]"))
+                        {
+                            intIndex = i;
+                            Chunk cTemp = cStore.getTemp();
+                            cStore.setChunk(cTemp, intIndex);
+                        }
+                    }
+                    
+                }
+
                 //string hash = createHash();
                 //magicBox.checkPostQueue();
                 System.Console.WriteLine("2 Minutes has passed");
@@ -940,6 +960,7 @@ namespace Websdepot
          */
         public override void spawnSub()
         {
+            tools.setRtChunk(new Chunk(lChunk));
             foreach (string strIn in lChunk)
             {
                 RebTimeParserChain rebTimeParse = new RebTimeParserChain(strIn, tools);
@@ -1724,6 +1745,8 @@ namespace Websdepot
         string localHash;
         string strMachine;
 
+        Chunk rtChunk;
+
         /*=======================================================================================================================================================================================
          * Toolbox.Toolbox()
          *      - Default constructor for Toolbox
@@ -1812,10 +1835,19 @@ namespace Websdepot
 
         }
 
+        /*=======================================================================================================================================================================================
+          * Toolbox.setRtChunk()
+          *      - Setter for configured reboot times chunk
+          * =======================================================================================================================================================================================
+          */
+        public void setRtChunk(Chunk cIn)
+        {
+            rtChunk = cIn;
+        }
 
         /*=======================================================================================================================================================================================
           * Toolbox.setStartupParser()
-          *      - Setter for reboot times
+          *      - Setter for startup parser
           * =======================================================================================================================================================================================
           */
         public void setStartupParser(StartupParser stIn)
@@ -2236,7 +2268,7 @@ namespace Websdepot
         }
 
         /* =======================================================================================================================================================================================
-         * Toolbox.clearCsv()
+         * Toolbox.checkCsv()
          *   - Vreifies the integrity of the CSV file
          * =======================================================================================================================================================================================
          */
@@ -2264,6 +2296,36 @@ namespace Websdepot
                 }
             }
             sr.Close();            
+        }
+
+        /* =======================================================================================================================================================================================
+         * Toolbox.checkRt()
+         *   - Vreifies the integrity of the CSV file
+         * =======================================================================================================================================================================================
+         */
+        public bool checkRt(ConfStore csIn)
+        {
+            MySqlCommand sqlCmd = new MySqlCommand();
+            sqlCmd.Connection = connect;
+            
+            string strQuery = "SELECT conf_settings From server_programs.configfile_info where conf_tagline = \"[configured reboot times]\" order by conf_timestmp DESC";
+            sqlCmd.CommandText = strQuery;
+
+            var vReturn = sqlCmd.ExecuteScalar();
+            string strReturn = vReturn.ToString();
+
+            string strCurrent = rtChunk.ToString();
+            if (!strReturn.Equals(strCurrent))
+            {
+                List<string> lSet = new List<string>();
+                lSet.Add(strReturn);
+
+                csIn.setTemp(new Websdepot.Chunk(lSet));
+                return false;
+            }else
+            {
+                return true;
+            }
         }
 
         public bool compareHashWithSql()
@@ -2388,6 +2450,9 @@ namespace Websdepot
         //Parallel string lists which store the tag and associated Chunk lines
         List<string> lTag;
         List<Chunk> lChunk;
+        int intLength = 0;
+        //Temp chunk for moving things around
+        Chunk cTemp;
 
         //MD5 String
         string strMd5;
@@ -2408,6 +2473,12 @@ namespace Websdepot
             lChunk.Add(cIn);
         }
 
+        public int getLength()
+        {
+            intLength = lTag.Count;
+            return intLength;
+        }
+
         public List<string> getTag()
         {
             return lTag;
@@ -2417,7 +2488,25 @@ namespace Websdepot
         {
             return lChunk;
         }
-        
+        public Chunk getTemp()
+        {
+            return cTemp;
+        }
+
+        public void setTag(string strIn, int intIndex)
+        {
+            lTag[intIndex] = strIn;
+        }
+
+        public void setChunk(Chunk cIn, int intIndex)
+        {
+            lChunk[intIndex] = cIn;
+        }
+
+        public void setTemp(Chunk cIn)
+        {
+            cTemp = cIn;
+        }
         public void writeConf()
         {
             //This will create a log if it doesn't exist
