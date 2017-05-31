@@ -44,18 +44,15 @@ namespace Websdepot
 
 
         //=======================================================
-        //This function creates an MD5 hash of the Conf.cfg file.
-        //Then passes it into createHashFile.
+        // This function creates an MD5 hash of the Conf.cfg file.
+        // Then passes it into createHashFile.
         //=======================================================
         private static string createHash()
         {
-
-
             using (var md5 = MD5.Create())
             {
                 using (var stream = File.OpenRead(confUrl))
                 {
-
                     string fileHash = Encoding.Default.GetString(md5.ComputeHash(stream));
                     createHashFile(fileHash);
                     return fileHash;
@@ -64,8 +61,8 @@ namespace Websdepot
         }
 
         //================================================
-        //Creates hash file of the Conf.cfg file.
-        //Should be repurposed to store hash in resgistry.
+        // Creates hash file of the Conf.cfg file.
+        //  - Creates an MD5 file
         //================================================
         private static void createHashFile(string hash)
         {
@@ -83,49 +80,89 @@ namespace Websdepot
         }
 
         //====================================================
-        //This function causes the program to wait min minutes
+        // This function causes the program to wait min minutes
         //====================================================
         private static void delayWait(TimeSpan interval)
         {            
             System.Threading.Thread.Sleep(interval);
         }
 
+        /*=======================================================================================================================================================================================
+         * Program.Main(string[])
+         *  - Main function of the program
+         *      - Executes and maintains the flow of the program
+         *=======================================================================================================================================================================================
+         */
         static void Main(string[] args)
         {
+            //Create directories if they do not exist
             Directory.CreateDirectory("./log");
             Directory.CreateDirectory("./post/posted");
             Directory.CreateDirectory("./post/topost");
+
+            //Provide feedback
+            //  - Start of script
             writeLog("Starting program");
 
+
+            //Toolbox stores working information for the program as well as utility methods used by the main
             Toolbox magicBox = new Toolbox();
+
+            //ConfStore object stores the configuration file
             ConfStore cStore = new ConfStore();
 
-            /* Program Startup */
-
+            
+            //Read the file and store the data
             readConf(cStore, magicBox);
+
+            //Generate the MD5 and store the MD5
             createHashFile(createHash());
+
+            //Create the inital SQL connection
+            //  -By now the toolbox and configuration settings store is populated with data
             magicBox.connectSql();
+            
+            //update the last checkin time
             magicBox.updateLastCheckin();
+
+            //Set up TimeSpan variables to store intervals the program will use for checking in
             TimeSpan sqlInterval = TimeSpan.FromMilliseconds(magicBox.getSqlInterval());
             TimeSpan rebootInterval = TimeSpan.FromMilliseconds(magicBox.getRebootDelay());
+            //TODO change to a timer
             delayWait(rebootInterval);
+
+            //Clear the CSV file to start with a clean slate
             magicBox.clearCsv();
+
+            //Execute programs to run at startup
             magicBox.runStart();
+
+            //Verify integrity of the CSV files
             magicBox.checkCsv();
+
+            //Upload the CSVs
             magicBox.uploadCsv();
 
 
-            /* Every x minutes based on config file check in */
+            /* Every x minutes based on config file check in to the SQL server */
+            //Spawn a thread for SQL check in timer
             var sqlTimer = new System.Threading.Timer((e) =>
             {
                 //magicBox.updateLastCheckin();                
                 Console.WriteLine(sqlInterval.TotalMinutes.ToString() + " minutes has passed");
+                
+                // Check if a connection exists
                 if (magicBox.checkConnection())
                 {
+                    //Update the last check in time
                     magicBox.updateLastCheckin();
                     createHashFile(createHash());
                     bool blnCheck = true;
+
+                    //Check if Configured Reboot Time is the same between the SQL and the configuration file
                     blnCheck = magicBox.checkRt(cStore);
+
+                    //if it isn't then rewrite the configuration file so it's Configured Reboot Time matches the SQL
                     if (!blnCheck)
                     {
                         //look for [configured reboot times] tag index
@@ -142,22 +179,25 @@ namespace Websdepot
                                 writeLog("Updated Configured Reboot Time");
                             }
                         }
-
                     }
+
+                    //Verify the integrity of the MD5 and update it
                     if (!magicBox.compareHashWithSql())
                     {
                         readConf(cStore, magicBox);
                         magicBox.updateConfInSql(cStore);
                     }
+
+                    //Check for CSVs that haven't been uploaded and upload them
                     magicBox.checkPostQueue();
                 }else
-                {
-                    writeLog("Connection to SQL lost");
-                }                               
+                    {
+                        writeLog("Connection to SQL lost");
+                    }                               
             }, null, TimeSpan.Zero, sqlInterval);
 
 
-
+            //Spawn a thread for checking if it's time to reboot
             var rebootTimer = new System.Threading.Timer((f) =>
             {
                 Console.WriteLine(rebootInterval.TotalMinutes.ToString() + " minutes has passed");
@@ -175,12 +215,9 @@ namespace Websdepot
                 }
                 
             }, null, TimeSpan.Zero, rebootInterval);
-
-            while (true) //Prevents timer thread death
-            {
-
-            }
             
+            //This while loop exists to keep the timer threads from dying prematurely due to the end of the main program
+            while (true) {}
         }
 
         //=========================================================
@@ -215,44 +252,59 @@ namespace Websdepot
         //=========================================
         private static void readConf(ConfStore i_cs, Toolbox tIn)
         {
+            //Check if file exists
             if (!File.Exists(confUrl))
             {
                 writeLog("Conf file is missing");
                 exit(1);
             }
+
             StreamReader sr = new StreamReader(confUrl, System.Text.Encoding.Default);
 
             string line = "";
             List<string> currentList = new List<string>();
             int currentChunk = 0;
-            while ((line = sr.ReadLine()) != null) //until EOF
+            
+            //Read until end of file
+            while ((line = sr.ReadLine()) != null) 
             {
-
+                //Ensure the line is not empty before adding the line int the list that will form part of the settings chunk
                 if (line != "")
                 {
+                    //Add the line to the chunk
                     currentList.Add(line);
+
+
                     //System.Console.WriteLine(line);
                 }
                 else
                 {
+                    //Make sure that the currentList is not empty
                     if(currentList.Count != 0)
                     {
+                        //Add the chunk to the settings chunk
                         chunks.Add(new Chunk(currentList));                        
                         currentList = new List<string>();
                         currentChunk++;
-                    }
-                    
+                    }   
                 }
-                
             }
 
+            //Close the reader
             sr.Close();
+
+            //Grab the final chunk that the loop did not grab
             if (currentList.Count != 0)
             {
                 chunks.Add(new Chunk(currentList));
             }
             
+            //External is a list of strings which will store the [Last Reboot Time] settings tag in a chunk
             List<string> external = new List<string>();
+
+            //The [Last Reboot Time] tag exists in a seperate file 
+            // - Create that file if it does not exist
+            //   - Could be merged into configuration file but that adds more complexity
             if (!File.Exists("./lastreboottime.txt"))
             {
                 StreamWriter writer = new StreamWriter("./lastreboottime.txt", false);
@@ -266,9 +318,9 @@ namespace Websdepot
                 //tools.setLastReboot(final);
                 writer.WriteLine(final);
                 writer.Close();
-
-                
             }
+
+            //
             StreamReader sr_b = new StreamReader("./lastreboottime.txt", System.Text.Encoding.Default);
             external.Add(sr_b.ReadLine());
             external.Add(sr_b.ReadLine());
@@ -285,13 +337,15 @@ namespace Websdepot
             }
 
             ParserChain tc = new ParserChain(external, tb, cStore);
+            
+
+            //Debugging lines
             //string strTest = tb.ToString();
             //System.Console.WriteLine(tb.checkSql());
             //System.Console.WriteLine(startupChunk[1]);
             //Process.Start(startupChunk[1]);
 
             //ParserChain ts = new ParserChain(chunks[0].getChunk(), new Toolbox());
-
         }
 
     }
@@ -523,8 +577,6 @@ namespace Websdepot
             }
         }
 
-
-
         /* =======================================================================================================================================================================================
          * Parser.chainEnd()
          *   - Run by the last parser in the chain to log that an unknown setting has not been processed by the script as it has not been implemented or incorrectly named
@@ -537,6 +589,7 @@ namespace Websdepot
     }
 
     //********************************************************************************************************************************************************************************************
+    
     //settings tag parser chain begins
 
     class StartupParser : Parser
@@ -689,6 +742,7 @@ namespace Websdepot
         {
             foreach (string strChunk in lChunk)
             {
+                //Checks if a reboot is called and stores the current time so the program can refer to it on the next reboot
                 if (strChunk.Contains("shutdown"))
                 {
                     if (strChunk.Contains("-r") || strChunk.Contains("/r"))
@@ -709,6 +763,7 @@ namespace Websdepot
                 }
 
             }
+            //Executes the reboot and executes any program that needs to be run before an execution occurs
             Program.writeLog("Now rebooting...");
             execute();
         }
@@ -722,7 +777,6 @@ namespace Websdepot
         {
             //System.Console.WriteLine("In [reboot] chain Parser, going to next Parser");
             SqlParser sqlParser = new SqlParser(lChunk, tools, true, cStore);
-            //throw new NotImplementedException();
         }
     }
 
@@ -1710,14 +1764,31 @@ namespace Websdepot
      */
     class Toolbox
     {
+        //sqlInfo stores all the information used during SQL connection (Everything under the [SQL Config] tag)
         string[] sqlInfo;
+
+        //Variable for storing the last reboot time
         DateTime dtLastReb;
+
+        //Variable for storing reboot delay, reboot check in interval and SQL check in interval in milliseconds
         long rebootDelay, rebootInterval, sqlInterval;
+
+        //Range of allowed times
         List<DayRange> allowedRebootTimes;
+
+        //Storage for the Startup parser so Toolbox can execute startup functions when needed
         StartupParser stParse;
+
+        //Storage for the Reboot parser so Toolbox can execute reboot functions when needed
         RebootParser rbParse;
+
+        //Variable for storing the configured reboot time's start date
         DateTime configuredRebootTime;
+        
+        //Variable for the MySQL connection
         MySqlConnection connect;
+
+        //Variable for storing the MD5
         string localHash;
         string strMachine;
 
@@ -1773,6 +1844,11 @@ namespace Websdepot
 
         }
 
+        /*=======================================================================================================================================================================================
+         * Toolbox.checkConnection()
+         *  - Verifies if the SQL connection exists 
+         *=======================================================================================================================================================================================
+         */
         public bool checkConnection()
         {
             return connect.Ping();
