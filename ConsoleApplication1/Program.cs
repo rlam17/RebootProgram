@@ -105,6 +105,7 @@ namespace Websdepot
 
             
             magicBox.connectSql();
+            magicBox.checkPostQueue();
             magicBox.updateConfInSql(cStore);
             exit(0);
             magicBox.runStart();
@@ -2209,6 +2210,8 @@ namespace Websdepot
                 {
                     //TODO: CSV upload to SQL here, then move them to posted after rename
                     string[] firstAttempt = file.Split('_');
+
+                    readCsvForUpload(file);
 
                     Program.writeLog("Uploaded old log: " + Path.GetFileName(file));
                     File.Move(file, "./post/posted/" + firstAttempt[0] + "_" + Program.todayDate + "_Post.csv");
