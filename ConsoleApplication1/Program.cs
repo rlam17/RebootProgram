@@ -111,11 +111,15 @@ namespace Websdepot
             magicBox.checkCsv();
 
 
-            
-
             magicBox.uploadCsv();
 
-            
+
+            List<string> strTest = new List<string>();
+            strTest.Add("C:\\Program Files (x86)\\Notepad++\notepad++.exe");
+
+            Chunk cTest = new Chunk(strTest);
+
+            cStore.changeChunk(cTest, 3);
 
             exit(0);
             TimeSpan sqlInterval = TimeSpan.FromMilliseconds(magicBox.getSqlInterval());
@@ -2371,6 +2375,10 @@ namespace Websdepot
             lChunk.Add(cIn);
         }
 
+        public void changeChunk(Chunk cIn, int intIndex)
+        {
+            lChunk[intIndex] = cIn;
+        }
         public List<string> getTag()
         {
             return lTag;
