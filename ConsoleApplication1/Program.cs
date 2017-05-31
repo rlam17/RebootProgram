@@ -238,9 +238,9 @@ namespace Websdepot
                 writeLog("Exitting program with error " + code);
             }
             else
-            {
-                writeLog("Exitting program");
-            }
+                {
+                    writeLog("Exitting program");
+                }
 
             
             System.Environment.Exit(code);
@@ -278,16 +278,16 @@ namespace Websdepot
                     //System.Console.WriteLine(line);
                 }
                 else
-                {
-                    //Make sure that the currentList is not empty
-                    if(currentList.Count != 0)
                     {
-                        //Add the chunk to the settings chunk
-                        chunks.Add(new Chunk(currentList));                        
-                        currentList = new List<string>();
-                        currentChunk++;
-                    }   
-                }
+                        //Make sure that the currentList is not empty
+                        if(currentList.Count != 0)
+                        {
+                            //Add the chunk to the settings chunk
+                            chunks.Add(new Chunk(currentList));                        
+                            currentList = new List<string>();
+                            currentChunk++;
+                        }   
+                    }
             }
 
             //Close the reader
@@ -460,13 +460,13 @@ namespace Websdepot
                 stringSwitch();
             }
             else
-            {
-                //pop off the options tag from the rest of the chunk
-                lChunk.RemoveAt(0);
+                {
+                    //pop off the options tag from the rest of the chunk
+                    lChunk.RemoveAt(0);
 
-                //spawn specific subprocess parser
-                spawnSub();
-            }
+                    //spawn specific subprocess parser
+                    spawnSub();
+                }
 
         }
 
@@ -503,12 +503,12 @@ namespace Websdepot
                 spawnSub();
             }
             else
-            {
-                //Call next in chain
-                //Chain tail should ouput a log
-                //System.Console.WriteLine(strIn + " link does not handle this option, going to next");
-                nextLink();
-            }
+                {
+                    //Call next in chain
+                    //Chain tail should ouput a log
+                    //System.Console.WriteLine(strIn + " link does not handle this option, going to next");
+                    nextLink();
+                }
         }
 
         /* =======================================================================================================================================================================================
@@ -1144,9 +1144,9 @@ namespace Websdepot
                 stringParse();
             }
             else
-            {
-                nextLink();
-            }
+                {
+                    nextLink();
+                }
         }
 
         /* =======================================================================================================================================================================================
@@ -1216,9 +1216,9 @@ namespace Websdepot
                 stringParse();
             }
             else
-            {
-                nextLink();
-            }
+                {
+                    nextLink();
+                }
         }
 
         public override void nextLink()
@@ -1268,9 +1268,9 @@ namespace Websdepot
                 stringParse();
             }
             else
-            {
-                nextLink();
-            }
+                {
+                    nextLink();
+                }
         }
 
         public override void nextLink()
@@ -1349,9 +1349,9 @@ namespace Websdepot
                 stringParse();
             }
             else
-            {
-                nextLink();
-            }
+                {
+                    nextLink();
+                }
         }
 
         /* =======================================================================================================================================================================================
@@ -1854,6 +1854,12 @@ namespace Websdepot
             return connect.Ping();
         }
 
+        /*=======================================================================================================================================================================================
+         * Toolbox.checkRebootTime()
+         *  - Check if the reboot time exists in a certain range
+         *      - Return true or false
+         *=======================================================================================================================================================================================
+         */
         public bool checkRebootTime()
         {
             foreach (DayRange period in allowedRebootTimes)
@@ -1866,15 +1872,24 @@ namespace Websdepot
             return false;
         }
 
+        /*=======================================================================================================================================================================================
+         * Toolbox.getRebootInterval()
+         *  - Retrieve the reboot interval 
+         *=======================================================================================================================================================================================
+         */
         public long getRebootInterval()
         {
             return rebootInterval;
         }
 
+        /*=======================================================================================================================================================================================
+         * Toolbox.updateLastCheckin()
+         *  - Provide an update query to the SQL server so it records that the program has checked in with the SQL server
+         *=======================================================================================================================================================================================
+         */
         public void updateLastCheckin()
         {
-                       
-
+            //Query preperation
             MySqlCommand cmd = new MySqlCommand();
             cmd.Connection = connect;
             cmd.CommandText = "INSERT INTO " +
@@ -1885,7 +1900,7 @@ namespace Websdepot
             cmd.Parameters.AddWithValue("@log_id", null);
             cmd.Parameters.AddWithValue("@log_device", strMachine);
            
-
+            //Try to execute the query
             try
             {
                 cmd.ExecuteNonQuery();
@@ -2004,10 +2019,10 @@ namespace Websdepot
                 return intMs;
             }
             else
-            {
-                //convert to minutes
-                intMs = intMs * 60;
-            }
+                {
+                    //convert to minutes
+                    intMs = intMs * 60;
+                }
 
             if (strInterval.Equals("m") || strInterval.Equals("min") || strInterval.Equals("minute"))
             {
@@ -2015,10 +2030,10 @@ namespace Websdepot
                 return intMs;
             }
             else
-            {
-                //if yes return
-                intMs = intMs * 60;
-            }
+                {
+                    //if yes return
+                    intMs = intMs * 60;
+                }
 
             if (strInterval.Equals("h") || strInterval.Equals("hour"))
             {
@@ -2026,9 +2041,9 @@ namespace Websdepot
                 return intMs;
             }
             else
-            {
-                intMs = intMs * 24;
-            }
+                {
+                    intMs = intMs * 24;
+                }
 
             if (strInterval.Equals("d") || strInterval.Equals("day"))
             {
@@ -2036,29 +2051,29 @@ namespace Websdepot
                 return intMs;
             }
             else
-            {
-                intMs = intMs * 7;
-            }
+                {
+                    intMs = intMs * 7;
+                }
             if (strInterval.Equals("w") || strInterval.Equals("week"))
             {
                 //if yes return
                 return intMs;
             }
             else
-            {
-                intMs = intMs * 30;
-            }
+                {
+                    intMs = intMs * 30;
+                }
             if (strInterval.Equals("month") || strInterval.Equals("mon"))
             {
                 //month is the largest
                 return intMs;
             }
             else
-            {
-                //conversion tag invalid
-                System.Console.WriteLine("Conversion unit does not exist");
-                return -1;
-            }
+                {
+                    //conversion tag invalid
+                    System.Console.WriteLine("Conversion unit does not exist");
+                    return -1;
+                }
         }
 
         /*=======================================================================================================================================================================================
@@ -2236,14 +2251,14 @@ namespace Websdepot
                 Program.writeLog("Can not upload to SQL yet, Post has been queued");
             }
             else
-            {
-                //Upload CSV to SQL
-                readCsvForUpload();
-                Directory.CreateDirectory("./post/posted");
-                string postStamp = "./post/posted/" + DateTime.Now.ToString("yyyyMMdd-HHmm") +  "_Post.csv";
-                File.Move(Program.postUrl, postStamp);
-                Program.writeLog("Post has been uploaded");
-            }
+                {
+                    //Upload CSV to SQL
+                    readCsvForUpload();
+                    Directory.CreateDirectory("./post/posted");
+                    string postStamp = "./post/posted/" + DateTime.Now.ToString("yyyyMMdd-HHmm") +  "_Post.csv";
+                    File.Move(Program.postUrl, postStamp);
+                    Program.writeLog("Post has been uploaded");
+                }
         }
         
         public void readCsvForUpload()
@@ -2388,9 +2403,9 @@ namespace Websdepot
                 csIn.setTemp(new Websdepot.Chunk(lSet));
                 return false;
             }else
-            {
-                return true;
-            }
+                {
+                    return true;
+                }
         }
 
         public bool compareHashWithSql()
@@ -2424,18 +2439,18 @@ namespace Websdepot
                 Program.exit(1);
             }
             else
-            {
-                for(int x = 0; x < tags.Count; x++)
                 {
-                    List<string> query = new List<string>();
-                    query.Add(uploadDate.ToString());
-                    query.Add(localHash);
-                    query.Add(tags[x]);
-                    query.Add(chunks[x].ToString());
+                    for(int x = 0; x < tags.Count; x++)
+                    {
+                        List<string> query = new List<string>();
+                        query.Add(uploadDate.ToString());
+                        query.Add(localHash);
+                        query.Add(tags[x]);
+                        query.Add(chunks[x].ToString());
 
-                    writeConfLinetoSql(query);
+                        writeConfLinetoSql(query);
+                    }
                 }
-            }
 
         }
 
@@ -2582,11 +2597,11 @@ namespace Websdepot
             {
                 intMax = lChunk.Count;
             }else
-            {
-                //TODO add error code
-                Program.writeLog("Could not update new Conf file");
-                Program.exit(1);
-            }
+                {
+                    //TODO add error code
+                    Program.writeLog("Could not update new Conf file");
+                    Program.exit(1);
+                }
 
             for(int i = 0; i<intMax; i++)
             {
@@ -2629,10 +2644,10 @@ namespace Websdepot
                 dayY = dayX;
             }
             else
-            {
-                dayX = twoLetterDay(splitDay[0]);
-                dayY = twoLetterDay(splitDay[1]);
-            }
+                {
+                    dayX = twoLetterDay(splitDay[0]);
+                    dayY = twoLetterDay(splitDay[1]);
+                }
             string[] splitTime = splitA[1].Split('-');
             timeX = Convert.ToDateTime(splitTime[0]).TimeOfDay;
             timeY = Convert.ToDateTime(splitTime[1]).TimeOfDay;
@@ -2651,36 +2666,36 @@ namespace Websdepot
                 {
                     return true;
                 }
-                else
-                {
-                    return false;
-                }
+                    else
+                    {
+                        return false;
+                    }
             }
             else
-            {
-                if (dayX == dayY)
                 {
-                    if (i == dayX)
+                    if (dayX == dayY)
                     {
-                        return true;
+                        if (i == dayX)
+                        {
+                            return true;
+                        }
+                        else
+                            {
+                                return false;
+                            }
                     }
                     else
-                    {
-                        return false;
-                    }
+                        {
+                            if (i >= dayY || i <= dayX)
+                            {
+                                return true;
+                            }
+                            else
+                                {
+                                    return false;
+                                }
+                        }
                 }
-                else
-                {
-                    if (i >= dayY || i <= dayX)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-            }
         }
 
         //=============================================================
@@ -2698,25 +2713,25 @@ namespace Websdepot
                     return true;
                 }
                 else
-                {
-                    return false;
-                }
+                    {
+                        return false;
+                    }
             }
             else
-            {
-                if (i >= timeX && i > timeY)
                 {
-                    return true;
+                    if (i >= timeX && i > timeY)
+                    {
+                        return true;
+                    }
+                    else if (i < timeX && i <= timeY)
+                    {
+                        return true;
+                    }
+                    else
+                        {
+                            return false;
+                        }
                 }
-                else if (i < timeX && i <= timeY)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
 
         }
 
@@ -2755,9 +2770,9 @@ namespace Websdepot
                 return 6;
             }
             else //In case of invalid input
-            {
-                return -1;
-            }
+                {
+                    return -1;
+                }
         }
         public void getRebootTimeFromConf()
         {
