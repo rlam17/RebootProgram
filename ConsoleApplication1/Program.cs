@@ -1781,7 +1781,20 @@ namespace Websdepot
         {
             //TODO: Update SQL for last check in date TALK TO ROY ABOUT ANOTHER TABLE FOR IT
             //sqlQuery("");
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand();
+                cmd.Connection = connect;
+                cmd.CommandText = "test";//TODO change query
+                cmd.Prepare();
 
+                cmd.Parameters.AddWithValue("@test", null);
+                 
+            }catch(Exception e)
+            {
+                Program.writeLog("Something went wrong with updating last check in date: " + e.Message);
+                Program.exit(4);
+            }
 
         }
 
@@ -2039,6 +2052,33 @@ namespace Websdepot
                 Program.writeLog("SQL data error");
                 Program.exit(1);
                 return false;
+            }
+        }
+
+        /* =======================================================================================================================================================================================
+         * Toolbox.sqlRebootTime()
+         *   - Check if the reboot time on the Conf file matches the log file
+         * =======================================================================================================================================================================================
+         */
+        public void sqlRebootTime()
+        {
+            //parser orders info, so if it exists it is in the right spot
+            //attempt to loop through the entire sqlInfo array, if successful, return true
+            try
+            {
+                for (int i = 0; i < 6; i++)
+                {
+                    //dummy code to iterate through the array
+                    sqlInfo[i].Contains("");
+                }
+                //return true;
+            }
+            catch (Exception e)
+            {
+                Program.writeLog("Conf File error: " + e.Message);
+                Program.writeLog("SQL data error");
+                Program.exit(1);
+                //return false;
             }
         }
 
@@ -2344,16 +2384,16 @@ namespace Websdepot
             }else
             {
                 //TODO add error code
-                Program.writeLog("BLAH");
+                Program.writeLog("Could not update new Conf file");
                 Program.exit(1);
             }
 
             for(int i = 0; i<intMax; i++)
             {
-
+                sw.Write(lTag[i]);
+                sw.Write(lChunk[i]);
+                sw.Write("\n");
             }
-
-            sw.WriteLine(strLine);
             sw.Close();
         }
      }
