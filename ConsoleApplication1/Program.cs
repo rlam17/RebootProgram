@@ -107,16 +107,21 @@ namespace Websdepot
             magicBox.connectSql();
             magicBox.checkPostQueue();
             magicBox.updateConfInSql(cStore);
-            exit(0);
             magicBox.runStart();
             magicBox.checkCsv();
 
 
-            
-
             magicBox.uploadCsv();
 
-            
+
+            List<string> strTest = new List<string>();
+            strTest.Add("C:\\Program Files (x86)\\Notepad++\\notepad++.exe");
+
+            Chunk cTest = new Chunk(strTest);
+
+            cStore.changeChunk(cTest, 3);
+
+            cStore.writeConf();
 
             exit(0);
             TimeSpan sqlInterval = TimeSpan.FromMilliseconds(magicBox.getSqlInterval());
@@ -2391,6 +2396,10 @@ namespace Websdepot
             lChunk.Add(cIn);
         }
 
+        public void changeChunk(Chunk cIn, int intIndex)
+        {
+            lChunk[intIndex] = cIn;
+        }
         public List<string> getTag()
         {
             return lTag;
@@ -2422,6 +2431,7 @@ namespace Websdepot
             for(int i = 0; i<intMax; i++)
             {
                 sw.Write(lTag[i]);
+                sw.Write("\n");
                 sw.Write(lChunk[i]);
                 sw.Write("\n");
             }
