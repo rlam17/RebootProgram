@@ -2399,16 +2399,18 @@ namespace Websdepot
          */
         public void checkCsv()
         {
-            //The regex pattern is: ^"(.+)" ?,"(\w+)","(.+)","([A-Z]+)","(.+)","(.*)"$
+            //The regex pattern is: ^['"](.+)['"],['"](.+)['"],['"]([A-Za-z]+)['"],['"]([A-Za-z]+)['"],['"](.*)['"],['"](.*)['"]$
             StreamReader sr;            
             string subject;
             sr = new StreamReader(Program.postUrl, System.Text.Encoding.Default);
             subject = sr.ReadLine(); //skips first line
-            string pattern = "^\"(.+)\" ?,\"(\\w+)\",\"(.+)\",\"([A-Z]+)\",\"(.+)\",\"(.*)\"$";
+            string pattern = "^[\'\"](.+)[\'\"],[\'\"](.+)[\'\"],[\'\"]([A-Za-z]+)[\'\"],[\'\"]([A-Za-z]+)[\'\"],[\'\"](.*)[\'\"],[\'\"](.*)[\'\"]$";
+
             Regex rgx = new Regex(@pattern);
 
             while (subject != null)
             {
+                //TODO: Support empty string lines
                 subject = sr.ReadLine();
                 if (subject != null)
                 {
