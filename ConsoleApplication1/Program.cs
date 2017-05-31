@@ -105,6 +105,8 @@ namespace Websdepot
 
             
             magicBox.connectSql();
+            magicBox.testQuery("SELECT conf_settings From server_programs.configfile_info where conf_tagline = \"[configured reboot times]\" order by conf_timestmp DESC");
+            exit(0);
             magicBox.checkPostQueue();
             magicBox.updateConfInSql(cStore);
             exit(0);
@@ -2038,6 +2040,22 @@ namespace Websdepot
         public void setLastReboot(DateTime dtIn)
         {
             dtLastReb = dtIn;
+        }
+
+        public void testQuery(string q)
+        {
+            //string query = "SELECT conf_md5hash FROM server_programs.configfile_info ORDER BY conf_id DESC LIMIT 1";
+            MySqlCommand cmd = new MySqlCommand(q, connect);
+            try
+            {
+                string remote = Convert.ToString(cmd.ExecuteScalar());
+                Console.Write(remote);
+            }catch(Exception e)
+            {
+                Console.WriteLine("Something blew up");
+                Console.WriteLine(e.Message);
+            }
+            
         }
 
         /* =======================================================================================================================================================================================
