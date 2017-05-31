@@ -2125,7 +2125,7 @@ namespace Websdepot
             {
                 //Upload CSV to SQL
                 readCsvForUpload();
-
+                Directory.CreateDirectory("./post/posted");
                 string postStamp = "./post/posted/" + DateTime.Now.ToString("yyyyMMdd-HHmm") +  "_Post.csv";
                 File.Move(Program.postUrl, postStamp);
                 Program.writeLog("Post has been uploaded");
@@ -2142,6 +2142,23 @@ namespace Websdepot
             while (!string.IsNullOrEmpty(line = sr.ReadLine()))
             {
                 List<string> csvLine = new List<string>();                
+                string[] splitLine = line.Split(',');
+                csvLine.AddRange(splitLine);
+                csvLine.Add(lastModified.ToString());
+                csvSqlInsert(csvLine);
+            }
+            sr.Close();
+        }
+
+        public void readCsvForUpload(string oldPost)
+        {
+            DateTime lastModified = File.GetLastWriteTime(oldPost);
+            StreamReader sr = new StreamReader(Program.postUrl, System.Text.Encoding.Default);
+            sr.ReadLine();
+            string line;
+            while (!string.IsNullOrEmpty(line = sr.ReadLine()))
+            {
+                List<string> csvLine = new List<string>();
                 string[] splitLine = line.Split(',');
                 csvLine.AddRange(splitLine);
                 csvLine.Add(lastModified.ToString());
