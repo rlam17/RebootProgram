@@ -94,12 +94,13 @@ namespace Websdepot
         static void Main(string[] args)
         {
             writeLog("Starting program");
+            createHashFile(createHash());
             Toolbox magicBox = new Toolbox();
             ConfStore cStore = new ConfStore();
             magicBox.clearCsv();
             readConf(cStore, magicBox);
 
-            createHashFile(createHash());
+            
             magicBox.connectSql();
             magicBox.updateConfInSql(cStore);
             exit(0);
