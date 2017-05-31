@@ -106,7 +106,6 @@ namespace Websdepot
             
             magicBox.connectSql();
             magicBox.updateConfInSql(cStore);
-            exit(0);
             magicBox.runStart();
             magicBox.checkCsv();
 
