@@ -85,45 +85,37 @@ namespace Websdepot
         //====================================================
         //This function causes the program to wait min minutes
         //====================================================
-        private static void delayWait(int min)
-        {
-            int minToSec = 1000 * 60 * min;
-            System.Threading.Thread.Sleep(minToSec);
+        private static void delayWait(TimeSpan interval)
+        {            
+            System.Threading.Thread.Sleep(interval);
         }
 
         static void Main(string[] args)
         {
             Directory.CreateDirectory("./log");
-            Directory.CreateDirectory("./post");
-
+            Directory.CreateDirectory("./post/posted");
+            Directory.CreateDirectory("./post/topost");
             writeLog("Starting program");
-            createHashFile(createHash());
+
             Toolbox magicBox = new Toolbox();
             ConfStore cStore = new ConfStore();
-            magicBox.clearCsv();
+
+            /* Program Startup */
+
             readConf(cStore, magicBox);
-
-            
+            createHashFile(createHash());
             magicBox.connectSql();
-            magicBox.updateLastCheckin();
-            exit(0);
-            magicBox.checkPostQueue();
-            magicBox.updateConfInSql(cStore);
-            exit(0);
-            magicBox.runStart();
-            magicBox.checkCsv();
-
-
-            
-
-            magicBox.uploadCsv();
-
-            
-
-            exit(0);
+            //magicBox.updateLastCheckin();
             TimeSpan sqlInterval = TimeSpan.FromMilliseconds(magicBox.getSqlInterval());
-            TimeSpan rebootInterval = TimeSpan.FromMilliseconds(magicBox.getSqlInterval());
-            //magicBox.runReb();
+            TimeSpan rebootInterval = TimeSpan.FromMilliseconds(magicBox.getRebootInterval());
+            //delayWait(rebootInterval);
+            //magicBox.clearCsv();
+            //magicBox.runStart();
+            //magicBox.checkCsv();
+            //magicBox.uploadCsv();
+
+
+            /* Every x minutes based on config file check in */
             var sqlTimer = new System.Threading.Timer((e) =>
             {
                 //magicBox.updateLastCheckin();
@@ -134,15 +126,18 @@ namespace Websdepot
                 if (!blnCheck)
                 {
                     //look for [configured reboot times] tag index
-                    int intLength = cStore.getLength();
-                    int intIndex;
+                    int intLength = cStore.getLength();                    
                     for(int i = 0; i<intLength; i++)
                     {
-                        if(cStore.getTag().Equals("[configured reboot times]"))
+                        //TODO: Fix this
+                        //if(cStore.getTag().Equals("[configured reboot times]"))
+                        if (String.Compare(cStore.getTag()[i], "[configured reboot times]") == 0)
                         {
-                            intIndex = i;
+                            
                             Chunk cTemp = cStore.getTemp();
-                            cStore.setChunk(cTemp, intIndex);
+                            cStore.setChunk(cTemp, i);
+                            cStore.writeConf();
+                            writeLog("Updated Configured Reboot Time");
                         }
                     }
                     
@@ -1814,6 +1809,11 @@ namespace Websdepot
             return false;
         }
 
+        public long getRebootInterval()
+        {
+            return rebootInterval;
+        }
+
         public void updateLastCheckin()
         {
                        
@@ -2311,14 +2311,14 @@ namespace Websdepot
             MySqlCommand sqlCmd = new MySqlCommand();
             sqlCmd.Connection = connect;
             
-            string strQuery = "SELECT conf_settings From server_programs.configfile_info where conf_tagline = \"[configured reboot times]\" order by conf_timestmp DESC";
+            string strQuery = "SELECT conf_settings From server_programs.configfile_info where conf_tagline = \"[configured reboot times]\" order by conf_timestmp DESC LIMIT 1";
             sqlCmd.CommandText = strQuery;
 
             var vReturn = sqlCmd.ExecuteScalar();
             string strReturn = vReturn.ToString();
 
             string strCurrent = rtChunk.ToString();
-            if (!strReturn.Equals(strCurrent))
+            if (!(String.Compare(strReturn, strCurrent) == 0))
             {
                 List<string> lSet = new List<string>();
                 lSet.Add(strReturn);
@@ -2524,9 +2524,14 @@ namespace Websdepot
 
             for(int i = 0; i<intMax; i++)
             {
-                sw.Write(lTag[i]);
-                sw.Write(lChunk[i]);
-                sw.Write("\n");
+                if(!(String.Compare(lTag[i], "[last reboot time]") == 0))
+                {
+                    sw.Write(lTag[i]);
+                    sw.Write("\n");
+                    sw.Write(lChunk[i]);
+                    sw.Write("\n");
+                }
+                
             }
             sw.Close();
         }
