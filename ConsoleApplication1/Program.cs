@@ -105,7 +105,7 @@ namespace Websdepot
 
             
             magicBox.connectSql();
-            magicBox.testQuery("SELECT conf_settings From server_programs.configfile_info where conf_tagline = \"[configured reboot times]\" order by conf_timestmp DESC");
+            magicBox.updateLastCheckin();
             exit(0);
             magicBox.checkPostQueue();
             magicBox.updateConfInSql(cStore);
@@ -1816,17 +1816,22 @@ namespace Websdepot
 
         public void updateLastCheckin()
         {
-            //TODO: Update SQL for last check in date TALK TO ROY ABOUT ANOTHER TABLE FOR IT
-            //sqlQuery("");
+                       
+
+            MySqlCommand cmd = new MySqlCommand();
+            cmd.Connection = connect;
+            cmd.CommandText = "INSERT INTO " +
+                    "config_log(log_id, log_device) " +
+                    "VALUES(@log_id, @log_device)";
+            cmd.Prepare();
+
+            cmd.Parameters.AddWithValue("@log_id", null);
+            cmd.Parameters.AddWithValue("@log_device", strMachine);
+           
+
             try
             {
-                MySqlCommand cmd = new MySqlCommand();
-                cmd.Connection = connect;
-                cmd.CommandText = "test";//TODO change query
-                cmd.Prepare();
-
-                cmd.Parameters.AddWithValue("@test", null);
-                 
+                cmd.ExecuteNonQuery();
             }catch(Exception e)
             {
                 Program.writeLog("Something went wrong with updating last check in date: " + e.Message);
@@ -2254,7 +2259,6 @@ namespace Websdepot
 
                 foreach (string file in files)
                 {
-                    //TODO: CSV upload to SQL here, then move them to posted after rename
                     string[] trimName = file.Split('_');
                     string[] firstAttempt = trimName[0].Split('\\');
 
@@ -2276,14 +2280,13 @@ namespace Websdepot
         {
             //The regex pattern is: ^"(.+)" ?,"(\w+)","(.+)","([A-Z]+)","(.+)","(.*)"$
             StreamReader sr;            
-            bool error = false;
             string subject;
             sr = new StreamReader(Program.postUrl, System.Text.Encoding.Default);
             subject = sr.ReadLine(); //skips first line
             string pattern = "^\"(.+)\" ?,\"(\\w+)\",\"(.+)\",\"([A-Z]+)\",\"(.+)\",\"(.*)\"$";
             Regex rgx = new Regex(@pattern);
 
-            while (!error && subject != null)
+            while (subject != null)
             {
                 subject = sr.ReadLine();
                 if (subject != null)
@@ -2341,13 +2344,7 @@ namespace Websdepot
 
             string remote = Convert.ToString(cmd.ExecuteScalar());
 
-            if(String.Compare(local, remote) == 0)
-            {
-                return true;
-            } else
-            {
-                return false;
-            }
+            return String.Compare(local, remote) == 0;
 
         }
 
@@ -2706,6 +2703,4 @@ namespace Websdepot
 
         }
     }
-
-
 }
