@@ -316,20 +316,17 @@ namespace Websdepot
             //The [Last Reboot Time] tag exists in a seperate file 
             // - Create that file if it does not exist
             //   - Could be merged into configuration file but that adds more complexity
-            if (!File.Exists("./lastreboottime.txt"))
-            {
-                StreamWriter writer = new StreamWriter("./lastreboottime.txt", false);
-                writer.WriteLine("[Last Reboot Time]");
+            StreamWriter writer = new StreamWriter("./lastreboottime.txt", false);
+            writer.WriteLine("[Last Reboot Time]");
 
-                PerformanceCounter uptime = new PerformanceCounter("System", "System Up Time");
-                uptime.NextValue();
-                TimeSpan t = TimeSpan.FromSeconds(uptime.NextValue());
-                DateTime final = DateTime.Now.Subtract(t);
-                //System.Console.WriteLine(final);
-                //tools.setLastReboot(final);
-                writer.WriteLine(final);
-                writer.Close();
-            }
+            PerformanceCounter uptime = new PerformanceCounter("System", "System Up Time");
+            uptime.NextValue();
+            TimeSpan t = TimeSpan.FromSeconds(uptime.NextValue());
+            DateTime final = DateTime.Now.Subtract(t);
+            //System.Console.WriteLine(final);
+            //tools.setLastReboot(final);
+            writer.WriteLine(final);
+            writer.Close();
 
             //
             StreamReader sr_b = new StreamReader("./lastreboottime.txt", System.Text.Encoding.Unicode);
