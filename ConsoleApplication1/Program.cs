@@ -12,6 +12,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Management.Automation;
+using System.Collections.ObjectModel;
 
 namespace Websdepot
 {
@@ -145,7 +147,6 @@ namespace Websdepot
 
             //Upload the CSVs
             magicBox.uploadCsv();
-
 
             /* Every x minutes based on config file check in to the SQL server */
             //Spawn a thread for SQL check in timer
