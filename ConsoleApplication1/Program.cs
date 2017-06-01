@@ -103,6 +103,8 @@ namespace Websdepot
             //Provide feedback
             //  - Start of script
             writeLog("Starting program");
+            //Generate the MD5 and store the MD5
+            createHashFile(createHash());
 
 
             //Toolbox stores working information for the program as well as utility methods used by the main
@@ -115,8 +117,7 @@ namespace Websdepot
             //Read the file and store the data
             readConf(cStore, magicBox);
 
-            //Generate the MD5 and store the MD5
-            createHashFile(createHash());
+            
 
             //Create the inital SQL connection
             //  -By now the toolbox and configuration settings store is populated with data
@@ -2412,7 +2413,7 @@ namespace Websdepot
             {
                 //TODO: Support empty string lines
                 subject = sr.ReadLine();
-                if (subject != null)
+                if (!String.IsNullOrEmpty(subject))
                 {
                     if (!rgx.IsMatch(subject))
                     {
