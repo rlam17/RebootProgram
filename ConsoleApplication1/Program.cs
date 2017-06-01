@@ -102,6 +102,8 @@ namespace Websdepot
             Directory.CreateDirectory("./post/posted");
             Directory.CreateDirectory("./post/topost");
 
+            
+
             //Provide feedback
             //  - Start of script
             writeLog("Starting program");
@@ -2278,19 +2280,21 @@ namespace Websdepot
         //=====================
         public void uploadCsv()
         {
+            string postStamp = "./post/posted/" + DateTime.Now.ToString("yyyyMMdd-HHmm") + "_Post.csv";
+            if (File.Exists(postStamp))
+            {
+                File.Delete(postStamp);
+            }
             if (!checkConnection())
             {
-                //Queue the CSV for next available upload
-                string postStamp = "./post/topost/" + DateTime.Now.ToString("yyyyMMdd-HHmm") + "_Post.csv";
+                //Queue the CSV for next available upload                
                 File.Move(Program.postUrl, postStamp);
                 Program.writeLog("Can not upload to SQL yet, Post has been queued");
             }
             else
                 {
                     //Upload CSV to SQL
-                    readCsvForUpload();
-                    Directory.CreateDirectory("./post/posted");
-                    string postStamp = "./post/posted/" + DateTime.Now.ToString("yyyyMMdd-HHmm") +  "_Post.csv";
+                    readCsvForUpload();                                        
                     File.Move(Program.postUrl, postStamp);
                     Program.writeLog("Post has been uploaded");
                 }
