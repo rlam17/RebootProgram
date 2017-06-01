@@ -103,8 +103,7 @@ namespace Websdepot
             //Provide feedback
             //  - Start of script
             writeLog("Starting program");
-            //Generate the MD5 and store the MD5
-            createHashFile(createHash());
+            
 
 
             //Toolbox stores working information for the program as well as utility methods used by the main
@@ -117,7 +116,10 @@ namespace Websdepot
             //Read the file and store the data
             readConf(cStore, magicBox);
 
-            
+            //Generate the MD5 and store the MD5
+            createHashFile(createHash());
+
+            magicBox.setHash();
 
             //Create the inital SQL connection
             //  -By now the toolbox and configuration settings store is populated with data
@@ -1811,9 +1813,8 @@ namespace Websdepot
             sqlInfo = new string[6];
             strMachine = System.Environment.MachineName;
             allowedRebootTimes = new List<DayRange>();
-            StreamReader sr = new StreamReader("./md5");
-            localHash = sr.ReadLine();
-            sr.Close();
+            
+            
         }
 
         //===========================================
@@ -1848,6 +1849,13 @@ namespace Websdepot
                 //Program.exit(2);
             }
 
+        }
+
+        public void setHash()
+        {
+            StreamReader sr = new StreamReader("./md5");
+            localHash = sr.ReadLine();
+            sr.Close();
         }
 
         /*=======================================================================================================================================================================================
