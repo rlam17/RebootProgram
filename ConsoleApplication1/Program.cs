@@ -17,7 +17,7 @@ using System.Collections.ObjectModel;
 
 namespace Websdepot
 {
-    //TODO test this query SELECT conf_settings From server_programs.configfile_info where conf_tagline="[configured reboot times]" order by conf_timestmp DESC
+    
     class Program
     {
         static public string logUrl = "./log/Log.txt";
@@ -133,7 +133,7 @@ namespace Websdepot
             //Set up TimeSpan variables to store intervals the program will use for checking in
             TimeSpan sqlInterval = TimeSpan.FromMilliseconds(magicBox.getSqlInterval());
             TimeSpan rebootInterval = TimeSpan.FromMilliseconds(magicBox.getRebootDelay());
-            //TODO change to a timer
+            
             delayWait(rebootInterval);
 
             //Clear the CSV file to start with a clean slate
@@ -330,7 +330,7 @@ namespace Websdepot
             }
 
             //
-            StreamReader sr_b = new StreamReader("./lastreboottime.txt", System.Text.Encoding.Default);
+            StreamReader sr_b = new StreamReader("./lastreboottime.txt", System.Text.Encoding.Unicode);
             external.Add(sr_b.ReadLine());
             external.Add(sr_b.ReadLine());
 
@@ -2267,12 +2267,8 @@ namespace Websdepot
          * =======================================================================================================================================================================================
          */
         public void clearCsv()
-        {
-            if (File.Exists(Program.postUrl))
-            {
-                File.Delete(Program.postUrl);
-            }
-            StreamWriter sw = new StreamWriter(Program.postUrl);
+        {            
+            StreamWriter sw = new StreamWriter(Program.postUrl,false, System.Text.Encoding.Unicode);
             sw.WriteLine("StartupTime,ServerName,Status,Service,SubService,SubService,Error,");
             sw.Close();
         }
@@ -2309,16 +2305,22 @@ namespace Websdepot
         {
             
             DateTime lastModified = File.GetLastWriteTime(Program.postUrl);
-            StreamReader sr = new StreamReader(Program.postUrl, System.Text.Encoding.Default);
-            sr.ReadLine();
-            string line;
-            while (!string.IsNullOrEmpty(line = sr.ReadLine()))
+            StreamReader sr = new StreamReader(Program.postUrl, System.Text.Encoding.Unicode);
+            string line = sr.ReadLine();            
+
+            while (line != null)
             {
-                List<string> csvLine = new List<string>();                
-                string[] splitLine = line.Split(',');
-                csvLine.AddRange(splitLine);
-                csvLine.Add(lastModified.ToString());
-                csvSqlInsert(csvLine);
+                
+                line = sr.ReadLine();
+                if (!String.IsNullOrEmpty(line))
+                {
+                    List<string> csvLine = new List<string>();                
+                    string[] splitLine = line.Split(',');
+                    csvLine.AddRange(splitLine);
+                    csvLine.Add(lastModified.ToString());
+                    csvSqlInsert(csvLine);
+                }
+                    
             }
             sr.Close();
         }
@@ -2331,16 +2333,22 @@ namespace Websdepot
         public void readCsvForUpload(string oldPost)
         {
             DateTime lastModified = File.GetLastWriteTime(oldPost);
-            StreamReader sr = new StreamReader(oldPost, System.Text.Encoding.Default);
-            sr.ReadLine();
-            string line;
-            while (!string.IsNullOrEmpty(line = sr.ReadLine()))
+            StreamReader sr = new StreamReader(oldPost, System.Text.Encoding.Unicode);
+            string line = sr.ReadLine();
+
+            while (line != null)
             {
-                List<string> csvLine = new List<string>();
-                string[] splitLine = line.Split(',');
-                csvLine.AddRange(splitLine);
-                csvLine.Add(lastModified.ToString());
-                csvSqlInsert(csvLine);
+
+                line = sr.ReadLine();
+                if (!String.IsNullOrEmpty(line))
+                {
+                    List<string> csvLine = new List<string>();
+                    string[] splitLine = line.Split(',');
+                    csvLine.AddRange(splitLine);
+                    csvLine.Add(lastModified.ToString());
+                    csvSqlInsert(csvLine);
+                }
+
             }
             sr.Close();
         }
@@ -2352,6 +2360,7 @@ namespace Websdepot
          */
         public void csvSqlInsert(List<string> query)
         {
+            char[] characters = { '"', '\'' };
             try
             {
                 MySqlCommand cmd = new MySqlCommand();
@@ -2362,18 +2371,18 @@ namespace Websdepot
                 cmd.Prepare();
 
                 cmd.Parameters.AddWithValue("@csv_id", null);
-                cmd.Parameters.AddWithValue("@csv_startup", Convert.ToDateTime(query[0].Trim('"')));
-                cmd.Parameters.AddWithValue("@csv_server", query[1].Trim('"'));
-                cmd.Parameters.AddWithValue("@csv_status", query[2].Trim('"'));
-                cmd.Parameters.AddWithValue("@csv_service", query[3].Trim('"'));
-                cmd.Parameters.AddWithValue("@csv_subservice", query[4].Trim('"'));
-                cmd.Parameters.AddWithValue("@csv_error", query[5].Trim('"'));                
+                cmd.Parameters.AddWithValue("@csv_startup", Convert.ToDateTime(query[0].Trim(characters)));
+                cmd.Parameters.AddWithValue("@csv_server", query[1].Trim(characters));
+                cmd.Parameters.AddWithValue("@csv_status", query[2].Trim(characters));
+                cmd.Parameters.AddWithValue("@csv_service", query[3].Trim(characters));
+                cmd.Parameters.AddWithValue("@csv_subservice", query[4].Trim(characters));
+                cmd.Parameters.AddWithValue("@csv_error", query[5].Trim(characters));                
                 cmd.Parameters.AddWithValue("@csv_timestmp", DateTime.Now);
                 cmd.ExecuteNonQuery();
             }
             catch (Exception e)
             {
-                Program.writeLog("SQL query went wrong when writing to CSV sql:" + e.Message);
+                Program.writeLog("SQL query went wrong when writing to CSV sql: " + e.Message);
                 Program.exit(4);
             }
 
@@ -2409,18 +2418,19 @@ namespace Websdepot
          */
         public void checkCsv()
         {
-            //The regex pattern is: ^['"](.+)['"],['"](.+)['"],['"]([A-Za-z]+)['"],['"]([A-Za-z]+)['"],['"](.*)['"],['"](.*)['"]$
+            //The regex pattern is: ^['"](.+)['"],['"](.+)['"],['"]([A-Za-z]+)['"],['"](.+)['"],['"](.*)['"],['"](.*)['"]$
             StreamReader sr;            
             string subject;
-            sr = new StreamReader(Program.postUrl, System.Text.Encoding.Default);
+            sr = new StreamReader(Program.postUrl, System.Text.Encoding.Unicode);
             subject = sr.ReadLine(); //skips first line
-            string pattern = "^[\'\"](.+)[\'\"],[\'\"](.+)[\'\"],[\'\"]([A-Za-z]+)[\'\"],[\'\"]([A-Za-z]+)[\'\"],[\'\"](.*)[\'\"],[\'\"](.*)[\'\"]$";
+            string pattern = "^[\'\"](.+)[\'\"],[\'\"](.+)[\'\"],[\'\"]([A-Za-z]+)[\'\"],[\'\"](.+)[\'\"],[\'\"](.*)[\'\"],[\'\"](.*)[\'\"]$";
+
 
             Regex rgx = new Regex(@pattern);
 
             while (subject != null)
             {
-                //TODO: Support empty string lines
+                
                 subject = sr.ReadLine();
                 if (!String.IsNullOrEmpty(subject))
                 {
@@ -2737,7 +2747,7 @@ namespace Websdepot
                 intMax = lChunk.Count;
             }else
                 {
-                    //TODO add error code
+                    
                     Program.writeLog("Could not update new Conf file");
                     Program.exit(1);
                 }
