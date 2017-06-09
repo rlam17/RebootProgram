@@ -165,27 +165,37 @@ namespace Websdepot
                     createHashFile(createHash());
                     bool blnCheck = true;
 
-                    //Check if Configured Reboot Time is the same between the SQL and the configuration file
-                    blnCheck = magicBox.checkRt(cStore);
-
-                    //if it isn't then rewrite the configuration file so it's Configured Reboot Time matches the SQL
-                    if (!blnCheck)
+                    try
                     {
-                        //look for [configured reboot times] tag index
-                        int intLength = cStore.getLength();
-                        for (int i = 0; i < intLength; i++)
-                        {
-                            //if(cStore.getTag().Equals("[configured reboot times]"))
-                            if (String.Compare(cStore.getTag()[i], "[configured reboot times]") == 0)
-                            {
+                        //Check if Configured Reboot Time is the same between the SQL and the configuration file
+                        blnCheck = magicBox.checkRt(cStore);
 
-                                Chunk cTemp = cStore.getTemp();
-                                cStore.setChunk(cTemp, i);
-                                cStore.writeConf();
-                                writeLog("Updated Configured Reboot Time");
+                        //if it isn't then rewrite the configuration file so it's Configured Reboot Time matches the SQL
+                        if (!blnCheck)
+                        {
+                            //look for [configured reboot times] tag index
+                            int intLength = cStore.getLength();
+                            for (int i = 0; i < intLength; i++)
+                            {
+                                //if(cStore.getTag().Equals("[configured reboot times]"))
+                                if (String.Compare(cStore.getTag()[i], "[configured reboot times]") == 0)
+                                {
+
+                                    Chunk cTemp = cStore.getTemp();
+                                    cStore.setChunk(cTemp, i);
+                                    cStore.writeConf();
+                                    writeLog("Updated Configured Reboot Time");
+                                }
                             }
                         }
                     }
+                    catch(Exception)
+                    {
+
+                    }
+                    
+
+                    
 
                     //Verify the integrity of the MD5 and update it
                     if (!magicBox.compareHashWithSql())
@@ -2459,8 +2469,7 @@ namespace Websdepot
             sqlCmd.CommandText = strQuery;
            
                 var vReturn = sqlCmd.ExecuteScalar();
-            try
-            {
+           
                 string strReturn = vReturn.ToString();
 
                 string strCurrent = rtChunk.ToString();
@@ -2476,11 +2485,8 @@ namespace Websdepot
                 {
                     return true;
                 }
-            }
-            catch (NullReferenceException nrf)
-            {
-                return false;
-            }
+            
+            
             
         }
 
