@@ -2457,22 +2457,31 @@ namespace Websdepot
             
             string strQuery = "SELECT conf_settings From server_programs.configfile_info where conf_tagline = \"[configured reboot times]\" order by conf_timestmp DESC LIMIT 1";
             sqlCmd.CommandText = strQuery;
-
-            var vReturn = sqlCmd.ExecuteScalar();
-            string strReturn = vReturn.ToString();
-
-            string strCurrent = rtChunk.ToString();
-            if (!(String.Compare(strReturn, strCurrent) == 0))
+           
+                var vReturn = sqlCmd.ExecuteScalar();
+            try
             {
-                List<string> lSet = new List<string>();
-                lSet.Add(strReturn);
+                string strReturn = vReturn.ToString();
 
-                csIn.setTemp(new Websdepot.Chunk(lSet));
-                return false;
-            }else
+                string strCurrent = rtChunk.ToString();
+                if (!(String.Compare(strReturn, strCurrent) == 0))
+                {
+                    List<string> lSet = new List<string>();
+                    lSet.Add(strReturn);
+
+                    csIn.setTemp(new Websdepot.Chunk(lSet));
+                    return false;
+                }
+                else
                 {
                     return true;
                 }
+            }
+            catch (NullReferenceException nrf)
+            {
+                return false;
+            }
+            
         }
 
         /*=======================================================================================================================================================================================
@@ -2543,12 +2552,13 @@ namespace Websdepot
                 MySqlCommand cmd = new MySqlCommand();
                 cmd.Connection = connect;
                 cmd.CommandText = "INSERT INTO " +
-                    "configfile_info(conf_id, conf_uldate, conf_md5hash, conf_tagline, conf_settings, conf_timestmp) " +
-                    "VALUES(@conf_id, @conf_uldate, @conf_md5hash, @conf_tagline, @conf_settings, @conf_timestmp)";
+                    "configfile_info(conf_id, conf_uldate, conf_server, conf_md5hash, conf_tagline, conf_settings, conf_timestmp) " +
+                    "VALUES(@conf_id, @conf_uldate, @conf_server, @conf_md5hash, @conf_tagline, @conf_settings, @conf_timestmp)";
                 cmd.Prepare();
 
                 cmd.Parameters.AddWithValue("@conf_id", null);
                 cmd.Parameters.AddWithValue("@conf_uldate", Convert.ToDateTime(input[0]));
+                cmd.Parameters.AddWithValue("@conf_server", Environment.MachineName);
                 cmd.Parameters.AddWithValue("@conf_md5hash", input[1]);
                 cmd.Parameters.AddWithValue("@conf_tagline", input[2]);
                 cmd.Parameters.AddWithValue("@conf_settings", input[3]);
