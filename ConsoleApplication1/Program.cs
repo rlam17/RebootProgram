@@ -17,6 +17,8 @@ using System.Collections.ObjectModel;
 
 namespace Websdepot
 {
+
+    
     
     class Program
     {
@@ -97,6 +99,7 @@ namespace Websdepot
          */
         static void Main(string[] args)
         {
+            RebootConfigService.Configure();
             //Create directories if they do not exist
             Directory.CreateDirectory("./log");
             Directory.CreateDirectory("./post/posted");
@@ -165,27 +168,37 @@ namespace Websdepot
                     createHashFile(createHash());
                     bool blnCheck = true;
 
-                    //Check if Configured Reboot Time is the same between the SQL and the configuration file
-                    blnCheck = magicBox.checkRt(cStore);
-
-                    //if it isn't then rewrite the configuration file so it's Configured Reboot Time matches the SQL
-                    if (!blnCheck)
+                    try
                     {
-                        //look for [configured reboot times] tag index
-                        int intLength = cStore.getLength();
-                        for (int i = 0; i < intLength; i++)
-                        {
-                            //if(cStore.getTag().Equals("[configured reboot times]"))
-                            if (String.Compare(cStore.getTag()[i], "[configured reboot times]") == 0)
-                            {
+                        //Check if Configured Reboot Time is the same between the SQL and the configuration file
+                        blnCheck = magicBox.checkRt(cStore);
 
-                                Chunk cTemp = cStore.getTemp();
-                                cStore.setChunk(cTemp, i);
-                                cStore.writeConf();
-                                writeLog("Updated Configured Reboot Time");
+                        //if it isn't then rewrite the configuration file so it's Configured Reboot Time matches the SQL
+                        if (!blnCheck)
+                        {
+                            //look for [configured reboot times] tag index
+                            int intLength = cStore.getLength();
+                            for (int i = 0; i < intLength; i++)
+                            {
+                                //if(cStore.getTag().Equals("[configured reboot times]"))
+                                if (String.Compare(cStore.getTag()[i], "[configured reboot times]") == 0)
+                                {
+
+                                    Chunk cTemp = cStore.getTemp();
+                                    cStore.setChunk(cTemp, i);
+                                    cStore.writeConf();
+                                    writeLog("Updated Configured Reboot Time");
+                                }
                             }
                         }
                     }
+                    catch(Exception)
+                    {
+
+                    }
+                    
+
+                    
 
                     //Verify the integrity of the MD5 and update it
                     if (!magicBox.compareHashWithSql())
@@ -2457,22 +2470,27 @@ namespace Websdepot
             
             string strQuery = "SELECT conf_settings From server_programs.configfile_info where conf_tagline = \"[configured reboot times]\" order by conf_timestmp DESC LIMIT 1";
             sqlCmd.CommandText = strQuery;
+           
+                var vReturn = sqlCmd.ExecuteScalar();
+           
+                string strReturn = vReturn.ToString();
 
-            var vReturn = sqlCmd.ExecuteScalar();
-            string strReturn = vReturn.ToString();
+                string strCurrent = rtChunk.ToString();
+                if (!(String.Compare(strReturn, strCurrent) == 0))
+                {
+                    List<string> lSet = new List<string>();
+                    lSet.Add(strReturn);
 
-            string strCurrent = rtChunk.ToString();
-            if (!(String.Compare(strReturn, strCurrent) == 0))
-            {
-                List<string> lSet = new List<string>();
-                lSet.Add(strReturn);
-
-                csIn.setTemp(new Websdepot.Chunk(lSet));
-                return false;
-            }else
+                    csIn.setTemp(new Websdepot.Chunk(lSet));
+                    return false;
+                }
+                else
                 {
                     return true;
                 }
+            
+            
+            
         }
 
         /*=======================================================================================================================================================================================
@@ -2543,12 +2561,13 @@ namespace Websdepot
                 MySqlCommand cmd = new MySqlCommand();
                 cmd.Connection = connect;
                 cmd.CommandText = "INSERT INTO " +
-                    "configfile_info(conf_id, conf_uldate, conf_md5hash, conf_tagline, conf_settings, conf_timestmp) " +
-                    "VALUES(@conf_id, @conf_uldate, @conf_md5hash, @conf_tagline, @conf_settings, @conf_timestmp)";
+                    "configfile_info(conf_id, conf_uldate, conf_server, conf_md5hash, conf_tagline, conf_settings, conf_timestmp) " +
+                    "VALUES(@conf_id, @conf_uldate, @conf_server, @conf_md5hash, @conf_tagline, @conf_settings, @conf_timestmp)";
                 cmd.Prepare();
 
                 cmd.Parameters.AddWithValue("@conf_id", null);
                 cmd.Parameters.AddWithValue("@conf_uldate", Convert.ToDateTime(input[0]));
+                cmd.Parameters.AddWithValue("@conf_server", Environment.MachineName);
                 cmd.Parameters.AddWithValue("@conf_md5hash", input[1]);
                 cmd.Parameters.AddWithValue("@conf_tagline", input[2]);
                 cmd.Parameters.AddWithValue("@conf_settings", input[3]);
