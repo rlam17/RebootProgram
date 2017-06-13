@@ -17,6 +17,8 @@ using System.Collections.ObjectModel;
 
 namespace Websdepot
 {
+
+    
     
     class Program
     {
@@ -97,6 +99,7 @@ namespace Websdepot
          */
         static void Main(string[] args)
         {
+            RebootConfigService.Configure();
             //Create directories if they do not exist
             Directory.CreateDirectory("./log");
             Directory.CreateDirectory("./post/posted");
