@@ -51,7 +51,7 @@ namespace Websdepot
         // This function creates an MD5 hash of the Conf.cfg file.
         // Then passes it into createHashFile.
         //=======================================================
-        private static string createHash()
+        public static string createHash()
         {
             using (var md5 = MD5.Create())
             {
@@ -68,7 +68,7 @@ namespace Websdepot
         // Creates hash file of the Conf.cfg file.
         //  - Creates an MD5 file
         //================================================
-        private static void createHashFile(string hash)
+        public static void createHashFile(string hash)
         {
             /*
             string root = "HKEY_LOCAL_MACHINE\\Software\\Websdepot Reboot\\";
@@ -86,7 +86,7 @@ namespace Websdepot
         //====================================================
         // This function causes the program to wait min minutes
         //====================================================
-        private static void delayWait(TimeSpan interval)
+        public static void delayWait(TimeSpan interval)
         {            
             System.Threading.Thread.Sleep(interval);
         }
@@ -99,6 +99,7 @@ namespace Websdepot
          */
         static void Main(string[] args)
         {
+
             RebootConfigService.Configure();
             //Create directories if they do not exist
             Directory.CreateDirectory("./log");
@@ -241,7 +242,7 @@ namespace Websdepot
             }, null, TimeSpan.Zero, rebootInterval);
             
             //This while loop exists to keep the timer threads from dying prematurely due to the end of the main program
-            while (true) {}
+            //while (true) {}
         }
 
         //=========================================================
@@ -274,7 +275,7 @@ namespace Websdepot
         //Read the Conf.cfg file
         //Chunks refers to each field in the file.
         //=========================================
-        private static void readConf(ConfStore i_cs, Toolbox tIn)
+        public static void readConf(ConfStore i_cs, Toolbox tIn)
         {
             //Check if file exists
             if (!File.Exists(confUrl))
