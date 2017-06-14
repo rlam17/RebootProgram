@@ -143,7 +143,7 @@ namespace Websdepot
             //Spawn a thread for checking if it's time to reboot
             var rebootTimer = new System.Threading.Timer((f) =>
             {
-                Console.WriteLine(rebootInterval.TotalMinutes.ToString() + " minutes has passed");
+                Program.writeLog("Reboot tick on " + DateTime.Now);
 
                 DateTime happening = magicBox.getConfiguredRebootTime();
                 TimeSpan interval = TimeSpan.FromMilliseconds(magicBox.getRebootInterval());
@@ -300,6 +300,7 @@ namespace Websdepot
 
             foreach (Chunk c in chunks)
             {
+
                 ParserChain ts = new ParserChain(c.getChunk(), tb, cStore);
             }
 

@@ -37,7 +37,7 @@ namespace Websdepot
             //This will create a log if it doesn't exist
             StreamWriter sw = new StreamWriter(logUrl, true);
 
-            logMessage = todayDate + "| " + logMessage;
+            logMessage = DateTime.Now + "| " + logMessage;
 
             sw.WriteLine(logMessage);
             sw.Close();
@@ -327,7 +327,7 @@ namespace Websdepot
          */
         public virtual void chainEnd()
         {
-            Program.writeLog(strIn + "Command not found, check configuration file formatting or check if specific command has been implemented.");
+            Program.writeLog(strIn + " Command not found, check configuration file formatting or check if specific command has been implemented.");
         }
     }
 
