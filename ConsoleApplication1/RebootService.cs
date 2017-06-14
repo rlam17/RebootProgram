@@ -18,6 +18,11 @@ namespace Websdepot
         static List<Chunk> chunks = new List<Chunk>();
         public void Start()
         {
+            DoThings();
+        }
+
+        private static void DoThings()
+        {
             //Create directories if they do not exist
             Directory.CreateDirectory("./log");
             Directory.CreateDirectory("./post/posted");
@@ -279,7 +284,7 @@ namespace Websdepot
             writer.Close();
 
             //
-            StreamReader sr_b = new StreamReader("./lastreboottime.txt", System.Text.Encoding.Unicode);
+            StreamReader sr_b = new StreamReader("./lastreboottime.txt");
             external.Add(sr_b.ReadLine());
             external.Add(sr_b.ReadLine());
 

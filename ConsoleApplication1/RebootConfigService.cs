@@ -21,9 +21,9 @@ namespace Websdepot
                 });
                 //Setup Account that window service use to run.  
                 configure.RunAsLocalSystem();
-                configure.SetServiceName("MyWindowServiceWithTopshelf");
-                configure.SetDisplayName("MyWindowServiceWithTopshelf");
-                configure.SetDescription("My .Net windows service with Topshelf");
+                configure.SetServiceName("RebootService");
+                configure.SetDisplayName("RebootService");
+                configure.SetDescription("Reboot service by Raymond Lam and Alex Kong");
             });
         }
     }
