@@ -160,7 +160,7 @@ namespace Websdepot
             }, null, TimeSpan.Zero, rebootInterval);
 
             //This while loop exists to keep the timer threads from dying prematurely due to the end of the main program
-            while (true) { }
+            //while (true) { }
         }
 
         //====================================================
