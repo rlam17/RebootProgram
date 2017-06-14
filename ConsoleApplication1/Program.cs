@@ -497,7 +497,7 @@ namespace Websdepot
                         PerformanceCounter uptime = new PerformanceCounter("System", "System Up Time");
                         uptime.NextValue();
                         TimeSpan t = TimeSpan.FromSeconds(uptime.NextValue());
-                        DateTime final = DateTime.Now.Subtract(t);
+                        DateTime final = DateTime.Now;
                         //System.Console.WriteLine(final);
                         //tools.setLastReboot(final);
                         sw.WriteLine(final);

@@ -268,20 +268,24 @@ namespace Websdepot
             //External is a list of strings which will store the [Last Reboot Time] settings tag in a chunk
             List<string> external = new List<string>();
 
-            //The [Last Reboot Time] tag exists in a seperate file 
-            // - Create that file if it does not exist
-            //   - Could be merged into configuration file but that adds more complexity
-            StreamWriter writer = new StreamWriter("./lastreboottime.txt", false);
-            writer.WriteLine("[Last Reboot Time]");
+            if (!File.Exists("./lastreboottime.txt"))
+            {
+                //The [Last Reboot Time] tag exists in a seperate file 
+                // - Create that file if it does not exist
+                //   - Could be merged into configuration file but that adds more complexity
+                StreamWriter writer = new StreamWriter("./lastreboottime.txt", false);
+                writer.WriteLine("[Last Reboot Time]");
 
-            PerformanceCounter uptime = new PerformanceCounter("System", "System Up Time");
-            uptime.NextValue();
-            TimeSpan t = TimeSpan.FromSeconds(uptime.NextValue());
-            DateTime final = DateTime.Now.Subtract(t);
-            //System.Console.WriteLine(final);
-            //tools.setLastReboot(final);
-            writer.WriteLine(final);
-            writer.Close();
+                PerformanceCounter uptime = new PerformanceCounter("System", "System Up Time");
+                uptime.NextValue();
+                TimeSpan t = TimeSpan.FromSeconds(uptime.NextValue());
+                DateTime final = DateTime.Now.Subtract(t);
+                //System.Console.WriteLine(final);
+                //tools.setLastReboot(final);
+                writer.WriteLine(final);
+                writer.Close();
+            }
+           
 
             //
             StreamReader sr_b = new StreamReader("./lastreboottime.txt");
