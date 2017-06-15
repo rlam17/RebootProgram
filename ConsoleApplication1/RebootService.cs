@@ -127,7 +127,7 @@ namespace Websdepot
                     if (!magicBox.compareHashWithSql())
                     {
                         //TODO: Change this so it just reads based off of chunks
-                        readConf(cStore, magicBox);
+                        //readConf(cStore, magicBox);
                         magicBox.updateConfInSql(cStore);
                     }
 
