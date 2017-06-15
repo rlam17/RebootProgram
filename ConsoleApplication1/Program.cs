@@ -2503,7 +2503,11 @@ namespace Websdepot
                         sw.Write(lTag[i]);
                         sw.Write("\n");
                         sw.Write(lChunk[i]);
-                        sw.Write("\n");
+                        if(i != intMax - 1)
+                        {
+                            sw.Write("\n");
+                        }
+                        
                     }
                 }
                 

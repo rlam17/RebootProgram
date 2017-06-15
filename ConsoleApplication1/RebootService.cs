@@ -11,10 +11,12 @@ namespace Websdepot
 {
     public class RebootService
     {
-        
-        
-        
-        
+
+        private static System.Threading.Timer sqlTimer;
+        private static System.Threading.Timer rebootTimer;
+
+
+
         static List<Chunk> chunks = new List<Chunk>();
         public void Start()
         {
@@ -78,10 +80,10 @@ namespace Websdepot
 
             /* Every x minutes based on config file check in to the SQL server */
             //Spawn a thread for SQL check in timer
-            var sqlTimer = new System.Threading.Timer((e) =>
+            sqlTimer = new System.Threading.Timer((e) =>
             {
                 //magicBox.updateLastCheckin();                
-                Console.WriteLine(sqlInterval.TotalMinutes.ToString() + " minutes has passed");
+                Console.WriteLine("SQL tick on " + DateTime.Now);
 
                 // Check if a connection exists
                 if (magicBox.checkConnection())
@@ -142,7 +144,7 @@ namespace Websdepot
 
 
             //Spawn a thread for checking if it's time to reboot
-            var rebootTimer = new System.Threading.Timer((f) =>
+             rebootTimer = new System.Threading.Timer((f) =>
             {
                 Program.writeLog("Reboot tick on " + DateTime.Now);
 
@@ -159,6 +161,8 @@ namespace Websdepot
                 {
                     if (magicBox.checkRebootTime())
                     {
+                        Program.writeLog("Last reboot time is " + magicBox.getLastRebootTime());
+                        Program.writeLog("Reboot interval is " + magicBox.getRebootInterval());
                         magicBox.runReb();
                     }
                 }
@@ -319,7 +323,7 @@ namespace Websdepot
 
         public void Stop()
         {
-
+            Program.writeLog("Manually stopping service");
         }
     }
     
