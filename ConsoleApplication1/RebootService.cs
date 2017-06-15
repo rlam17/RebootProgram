@@ -126,6 +126,7 @@ namespace Websdepot
                     //Verify the integrity of the MD5 and update it
                     if (!magicBox.compareHashWithSql())
                     {
+                        //TODO: Change this so it just reads based off of chunks
                         readConf(cStore, magicBox);
                         magicBox.updateConfInSql(cStore);
                     }

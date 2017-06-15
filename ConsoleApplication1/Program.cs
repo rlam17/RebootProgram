@@ -2498,10 +2498,13 @@ namespace Websdepot
             {
                 if(!(String.Compare(lTag[i], "[last reboot time]") == 0))
                 {
-                    sw.Write(lTag[i]);
-                    sw.Write("\n");
-                    sw.Write(lChunk[i]);
-                    sw.Write("\n");
+                    if(lTag[i] != "")
+                    {
+                        sw.Write(lTag[i]);
+                        sw.Write("\n");
+                        sw.Write(lChunk[i]);
+                        sw.Write("\n");
+                    }
                 }
                 
             }
