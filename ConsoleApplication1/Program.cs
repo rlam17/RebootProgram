@@ -2190,7 +2190,7 @@ namespace Websdepot
             MySqlCommand sqlCmd = new MySqlCommand();
             sqlCmd.Connection = connect;
             
-            string strQuery = "SELECT conf_settings From server_programs.configfile_info where conf_tagline = \"[configured reboot times]\" order by conf_timestmp DESC LIMIT 1";
+            string strQuery = "SELECT conf_settings From configfile_info where conf_tagline = \"[configured reboot times]\" order by conf_timestmp DESC LIMIT 1";
             sqlCmd.CommandText = strQuery;
            
                 var vReturn = sqlCmd.ExecuteScalar();
