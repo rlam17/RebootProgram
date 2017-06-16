@@ -95,6 +95,8 @@ namespace Websdepot
 
                     try
                     {
+
+                        //TODO: KILL THE NEW LINE
                         //Check if Configured Reboot Time is the same between the SQL and the configuration file
                         blnCheck = magicBox.checkRt(cStore);
 
