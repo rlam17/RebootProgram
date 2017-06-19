@@ -2227,7 +2227,7 @@ namespace Websdepot
         {
             //SELECT conf_md5hash FROM server_programs.configfile_info ORDER BY conf_id DESC LIMIT 1
 
-            string query = "SELECT conf_md5hash FROM server_programs.configfile_info ORDER BY conf_id DESC LIMIT 1";
+            string query = "SELECT conf_md5hash FROM configfile_info ORDER BY conf_id DESC LIMIT 1";
             MySqlCommand cmd = new MySqlCommand(query, connect);
 
             StreamReader sr = new StreamReader("./md5");
