@@ -2193,23 +2193,26 @@ namespace Websdepot
             string strQuery = "SELECT conf_settings From configfile_info where conf_tagline = \"[configured reboot times]\" order by conf_timestmp DESC LIMIT 1";
             sqlCmd.CommandText = strQuery;
            
-                var vReturn = sqlCmd.ExecuteScalar();
+            var vReturn = sqlCmd.ExecuteScalar();
            
-                string strReturn = vReturn.ToString();
+            string strReturn = vReturn.ToString();
 
-                string strCurrent = rtChunk.ToString();
-                if (!(String.Compare(strReturn, strCurrent) == 0))
-                {
-                    List<string> lSet = new List<string>();
-                    lSet.Add(strReturn);
+            string strCurrent = rtChunk.ToString();
 
-                    csIn.setTemp(new Websdepot.Chunk(lSet));
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
+            strReturn.Replace('\r', '\n');
+    
+            if (!(String.Compare(strReturn, strCurrent) == 0))
+            {
+                List<string> lSet = new List<string>();
+                lSet.Add(strReturn);
+
+                csIn.setTemp(new Websdepot.Chunk(lSet));
+                return false;
+            }
+            else
+            {
+                return true;
+            }
             
             
             

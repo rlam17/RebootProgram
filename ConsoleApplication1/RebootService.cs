@@ -191,12 +191,23 @@ namespace Websdepot
         {
             using (var md5 = MD5.Create())
             {
-                using (var stream = File.OpenRead(Program.confUrl))
+                //using (var stream = File.OpenRead(Program.confUrl))
+                //{
+                //    string fileHash = Encoding.Default.GetString(md5.ComputeHash(stream));
+                //    createHashFile(fileHash);
+                //    return fileHash;
+                //}
+                StreamReader sr = new StreamReader(Program.confUrl);
+                string theEntireThing = "";
+                //string theLine = "";
+                while (!sr.EndOfStream)
                 {
-                    string fileHash = Encoding.Default.GetString(md5.ComputeHash(stream));
-                    createHashFile(fileHash);
-                    return fileHash;
+                    theEntireThing += sr.ReadLine();
                 }
+                byte[] encodedString = new UTF8Encoding().GetBytes(theEntireThing);
+                byte[] hash = ((HashAlgorithm)CryptoConfig.CreateFromName("MD5")).ComputeHash(encodedString);
+                string fileHash = BitConverter.ToString(hash).Replace("-", string.Empty);
+                return fileHash;
             }
         }
 
